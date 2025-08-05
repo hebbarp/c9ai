@@ -25,12 +25,12 @@ jobs:
       run: npm run build:exe
       
     - name: Install NSIS
-      run: |
-        choco install nsis -y
-        refreshenv
+      run: choco install nsis -y --force
         
     - name: Build installer
-      run: makensis installer.nsi
+      run: |
+        $env:PATH += ";C:\Program Files (x86)\NSIS"
+        makensis installer.nsi
         
     - name: Upload installer
       uses: actions/upload-artifact@v4

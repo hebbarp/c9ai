@@ -562,9 +562,17 @@ class C9AI {
                 if (await fs.exists(scriptPath)) {
                     // Determine interpreter based on extension
                     if (target.endsWith('.sh')) {
+                        // Use bash on Unix, or suggest .bat files on Windows
+                        if (osType === 'win32') {
+                            throw new Error('Shell scripts (.sh) not supported on Windows. Use .bat files instead.');
+                        }
                         commandToExecute = `bash "${scriptPath}"`;
+                    } else if (target.endsWith('.bat') && osType === 'win32') {
+                        commandToExecute = `"${scriptPath}"`;
                     } else if (target.endsWith('.py')) {
-                        commandToExecute = `python3 "${scriptPath}"`; // Assuming python3
+                        // Use 'python' on Windows, 'python3' on Unix systems
+                        const pythonCmd = osType === 'win32' ? 'python' : 'python3';
+                        commandToExecute = `${pythonCmd} "${scriptPath}"`;
                     } else if (target.endsWith('.js')) {
                         commandToExecute = `node "${scriptPath}"`;
                     } else {
@@ -1185,40 +1193,45 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
         await this.initLocalModel();
         
         const inputLower = input.toLowerCase();
+        const isWindows = process.platform === 'win32';
         
         // Pattern matching for common commands
-        if (inputLower.includes('list') && (inputLower.includes('documents') || inputLower.includes('files'))) {
-            // Extract path - handle "/path/to/folder directory" format
-            let pathMatch = input.match(/\/[^\s]+/);
+        if (inputLower.includes('list') && (inputLower.includes('documents') || inputLower.includes('files') || inputLower.includes('directories') || inputLower.includes('folder'))) {
+            // Extract path - handle both Unix and Windows paths
+            let pathMatch = input.match(/[\/\\][^\s]+/) || input.match(/[A-Za-z]:[\/\\][^\s]*/);
             let path = pathMatch ? pathMatch[0] : process.cwd();
             
             // If path ends with a word like "text" and input contains "directory", just use the path
-            if (inputLower.includes('directory') && pathMatch) {
+            if ((inputLower.includes('directory') || inputLower.includes('folder')) && pathMatch) {
                 path = pathMatch[0];
             }
             
+            const command = isWindows ? `dir "${path}"` : `ls -la "${path}"`;
             return {
                 action: 'list_files',
                 path: path,
-                command: `ls -la "${path}"`
+                command: command
             };
         } else if (inputLower.includes('list') && inputLower.includes('files')) {
-            const pathMatch = input.match(/\/[^\s]+/);
+            const pathMatch = input.match(/[\/\\][^\s]+/) || input.match(/[A-Za-z]:[\/\\][^\s]*/);
             const path = pathMatch ? pathMatch[0] : process.cwd();
+            const command = isWindows ? `dir "${path}"` : `ls -la "${path}"`;
             return {
                 action: 'list_files', 
                 path: path,
-                command: `ls -la "${path}"`
+                command: command
             };
         } else if (inputLower.includes('check') && inputLower.includes('disk')) {
+            const command = isWindows ? 'wmic logicaldisk get size,freespace,caption' : 'df -h';
             return {
                 action: 'disk_usage',
-                command: 'df -h'
+                command: command
             };
         } else if (inputLower.includes('show') && inputLower.includes('process')) {
+            const command = isWindows ? 'tasklist | findstr /v "Image"' : 'ps aux | head -20';
             return {
                 action: 'show_processes',
-                command: 'ps aux | head -20'
+                command: command
             };
         } else {
             throw new Error('Could not interpret command');

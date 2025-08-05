@@ -1304,13 +1304,19 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
                 
                 // Help and guidance
                 else if (taskLower.match(/^(help|what can you do|commands|options)$/)) {
-                    resolve('I can help you with:\n• Opening applications: "open excel", "open browser"\n• File operations: "list files", "show directory"\n• Searching: "search for tutorials"\n• System info: "check disk usage", "show processes"\n• Development: "compile document", "run script"\n\nTry any of these commands!');
+                    resolve('I can help you with:\n• Opening applications: "open excel", "open browser"\n• File operations: "list files", "show directory"\n• Searching: "search for tutorials"\n• System info: "check disk usage", "show processes"\n• Code generation: "create a program to calculate compound interest"\n• Development: "compile document", "run script"\n\nTry any of these commands!');
                 }
                 
-                // Generic intent recognition
-                else if (taskLower.includes('create') || taskLower.includes('make') || taskLower.includes('new')) {
-                    const target = taskLower.includes('document') ? 'document.txt' : 'file.txt';
-                    resolve(`@action: open ${target}`);
+                // Code and content creation
+                else if (taskLower.includes('create') || taskLower.includes('make') || taskLower.includes('write')) {
+                    if (taskLower.includes('program') || taskLower.includes('code') || taskLower.includes('script')) {
+                        // Generate actual code
+                        const codeRequest = this.generateCode(prompt);
+                        resolve(codeRequest);
+                    } else {
+                        const target = taskLower.includes('document') ? 'document.txt' : 'file.txt';
+                        resolve(`@action: open ${target}`);
+                    }
                 } else if (taskLower.includes('close') || taskLower.includes('exit') || taskLower.includes('quit')) {
                     resolve('To exit C9AI, type "exit" or "quit". To close an application, try "close [app name]".');
                 }
@@ -1328,6 +1334,164 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
                 reject(error);
             }
         });
+    }
+
+    generateCode(prompt) {
+        const lowerPrompt = prompt.toLowerCase();
+        
+        // Detect programming language and type
+        let language = 'python';  // Default
+        let filename = 'program.py';
+        
+        if (lowerPrompt.includes('javascript') || lowerPrompt.includes('js')) {
+            language = 'javascript';
+            filename = 'program.js';
+        } else if (lowerPrompt.includes('python') || lowerPrompt.includes('py')) {
+            language = 'python';
+            filename = 'program.py';
+        } else if (lowerPrompt.includes('java')) {
+            language = 'java';
+            filename = 'Program.java';
+        } else if (lowerPrompt.includes('c++') || lowerPrompt.includes('cpp')) {
+            language = 'cpp';
+            filename = 'program.cpp';
+        }
+        
+        // Generate code based on request
+        let code = '';
+        
+        if (lowerPrompt.includes('compound interest')) {
+            code = this.generateCompoundInterestCode(language);
+        } else if (lowerPrompt.includes('calculator')) {
+            code = this.generateCalculatorCode(language);
+        } else if (lowerPrompt.includes('fibonacci')) {
+            code = this.generateFibonacciCode(language);
+        } else if (lowerPrompt.includes('sort') || lowerPrompt.includes('array')) {
+            code = this.generateSortingCode(language);
+        } else {
+            // Generic template
+            code = this.generateGenericTemplate(language, prompt);
+        }
+        
+        return `@create: ${filename}\n${code}`;
+    }
+    
+    generateCompoundInterestCode(language) {
+        switch (language) {
+            case 'python':
+                return `# Compound Interest Calculator
+def calculate_compound_interest(principal, rate, time, compounds_per_year=1):
+    """
+    Calculate compound interest
+    Formula: A = P(1 + r/n)^(nt)
+    """
+    amount = principal * (1 + rate/100/compounds_per_year) ** (compounds_per_year * time)
+    compound_interest = amount - principal
+    return amount, compound_interest
+
+def main():
+    print("=== Compound Interest Calculator ===")
+    
+    try:
+        principal = float(input("Enter principal amount: $"))
+        rate = float(input("Enter annual interest rate (%): "))
+        time = float(input("Enter time period (years): "))
+        compounds = int(input("Enter compounding frequency per year (default 1): ") or "1")
+        
+        amount, interest = calculate_compound_interest(principal, rate, time, compounds)
+        
+        print(f"\\nResults:")
+        print(f"Principal Amount: $\{principal:,.2f}")
+        print(f"Interest Rate: \{rate}% per year")
+        print(f"Time Period: \{time} years")
+        print(f"Compounding: \{compounds} times per year")
+        print(f"\\nFinal Amount: $\{amount:,.2f}")
+        print(f"Compound Interest: $\{interest:,.2f}")
+        
+    except ValueError:
+        print("Please enter valid numbers!")
+
+if __name__ == "__main__":
+    main()`;
+            
+            case 'javascript':
+                return `// Compound Interest Calculator
+function calculateCompoundInterest(principal, rate, time, compoundsPerYear = 1) {
+    const amount = principal * Math.pow(1 + rate/100/compoundsPerYear, compoundsPerYear * time);
+    const compoundInterest = amount - principal;
+    return { amount, compoundInterest };
+}
+
+function main() {
+    console.log("=== Compound Interest Calculator ===");
+    
+    const principal = parseFloat(prompt("Enter principal amount: $"));
+    const rate = parseFloat(prompt("Enter annual interest rate (%): "));
+    const time = parseFloat(prompt("Enter time period (years): "));
+    const compounds = parseInt(prompt("Enter compounding frequency per year: ") || "1");
+    
+    if (isNaN(principal) || isNaN(rate) || isNaN(time)) {
+        console.log("Please enter valid numbers!");
+        return;
+    }
+    
+    const result = calculateCompoundInterest(principal, rate, time, compounds);
+    
+    console.log(\`
+Results:
+Principal Amount: $\${principal.toFixed(2)}
+Interest Rate: \${rate}% per year
+Time Period: \${time} years
+Compounding: \${compounds} times per year
+
+Final Amount: $\${result.amount.toFixed(2)}
+Compound Interest: $\${result.compoundInterest.toFixed(2)}
+    \`);
+}
+
+main();`;
+            
+            default:
+                return this.generateCompoundInterestCode('python');
+        }
+    }
+    
+    generateGenericTemplate(language, prompt) {
+        const taskDescription = prompt.replace(/create|make|write|program|code|script/gi, '').trim();
+        
+        switch (language) {
+            case 'python':
+                return `# ${taskDescription || 'Generated Program'}
+def main():
+    """
+    TODO: Implement ${taskDescription || 'your functionality here'}
+    """
+    print("Hello! This is a generated program.")
+    print("Task: ${taskDescription || 'Add your implementation'}")
+    
+    # Add your code here
+    pass
+
+if __name__ == "__main__":
+    main()`;
+    
+            case 'javascript':
+                return `// ${taskDescription || 'Generated Program'}
+function main() {
+    /*
+     * TODO: Implement ${taskDescription || 'your functionality here'}
+     */
+    console.log("Hello! This is a generated program.");
+    console.log("Task: ${taskDescription || 'Add your implementation'}");
+    
+    // Add your code here
+}
+
+main();`;
+    
+            default:
+                return this.generateGenericTemplate('python', prompt);
+        }
     }
 
     getSuggestions(input) {
@@ -1378,10 +1542,12 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
                     spinner.succeed('Response generated');
                     spinner = null; // Clear reference
                     
-                    // Check if it's an action or conversational response
+                    // Check if it's an action, creation, or conversational response
                     if (response.startsWith('@action:')) {
                         const action = response.replace('@action:', '').trim();
                         await this.executeAction(action);
+                    } else if (response.startsWith('@create:')) {
+                        await this.executeCreation(response);
                     } else {
                         // It's a conversational response, just display it
                         console.log(chalk.cyan(`🤖 ${response}`));
@@ -1464,6 +1630,36 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
             throw new Error('Use "switch local" or "switch claude" to change models. Type "help" for available commands.');
         } else {
             throw new Error(`Could not understand: "${input}". Try commands like "list files", "open document", or "switch local"`);
+        }
+    }
+
+    async executeCreation(response) {
+        try {
+            const lines = response.split('\n');
+            const firstLine = lines[0];
+            const filename = firstLine.replace('@create:', '').trim();
+            const code = lines.slice(1).join('\n');
+            
+            console.log(chalk.green(`📝 Creating file: ${filename}`));
+            console.log(chalk.cyan(`💡 Generated ${code.split('\n').length} lines of code`));
+            
+            // Write the file
+            await fs.writeFile(filename, code);
+            
+            console.log(chalk.green(`✅ File created successfully: ${filename}`));
+            console.log(chalk.yellow(`🚀 To run: python ${filename}`));
+            
+            // Show a preview of the code
+            const preview = code.split('\n').slice(0, 10).join('\n');
+            console.log(chalk.gray('\n--- Code Preview ---'));
+            console.log(chalk.white(preview));
+            if (code.split('\n').length > 10) {
+                console.log(chalk.gray('... (truncated)'));
+            }
+            console.log(chalk.gray('--- End Preview ---\n'));
+            
+        } catch (error) {
+            console.log(chalk.red(`❌ Failed to create file: ${error.message}`));
         }
     }
 

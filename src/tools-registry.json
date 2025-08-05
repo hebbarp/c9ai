@@ -1,0 +1,118 @@
+{
+  "tools": {
+    "list_files": {
+      "name": "list_files",
+      "description": "List files and directories in the current or specified directory",
+      "command": "ls -la",
+      "windows_command": "dir",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Directory path to list (optional, defaults to current directory)",
+          "required": false
+        }
+      }
+    },
+    "check_disk_usage": {
+      "name": "check_disk_usage", 
+      "description": "Check disk space usage on all drives",
+      "command": "df -h",
+      "windows_command": "wmic logicaldisk get size,freespace,caption",
+      "parameters": {}
+    },
+    "show_processes": {
+      "name": "show_processes",
+      "description": "Show running processes",
+      "command": "ps aux | head -20",
+      "windows_command": "tasklist",
+      "parameters": {}
+    },
+    "github_issues": {
+      "name": "github_issues",
+      "description": "List GitHub issues for a repository",
+      "command": "gh issue list",
+      "windows_command": "gh issue list",
+      "parameters": {
+        "repo": {
+          "type": "string", 
+          "description": "Repository name (e.g., owner/repo)",
+          "required": false,
+          "default": "hebbarp/todo-management"
+        }
+      }
+    },
+    "execute_github_issues": {
+      "name": "execute_github_issues",
+      "description": "Read GitHub issues and execute them as tasks",
+      "command": "gh issue list --json number,title,body,labels",
+      "windows_command": "gh issue list --json number,title,body,labels",
+      "parameters": {
+        "repo": {
+          "type": "string",
+          "description": "Repository name (e.g., owner/repo)",
+          "required": false,
+          "default": "hebbarp/todo-management"
+        }
+      }
+    },
+    "git_status": {
+      "name": "git_status",
+      "description": "Show git repository status",
+      "command": "git status",
+      "windows_command": "git status",
+      "parameters": {}
+    },
+    "search_web": {
+      "name": "search_web",
+      "description": "Open a web search for the given query",
+      "command": "open 'https://www.google.com/search?q={{query}}'",
+      "windows_command": "start \"\" \"https://www.google.com/search?q={{query}}\"",
+      "linux_command": "xdg-open 'https://www.google.com/search?q={{query}}'",
+      "parameters": {
+        "query": {
+          "type": "string",
+          "description": "Search query",
+          "required": true
+        }
+      }
+    },
+    "open_application": {
+      "name": "open_application",
+      "description": "Open an application or file",
+      "command": "open {{target}}",
+      "windows_command": "start \"\" \"{{target}}\"",
+      "linux_command": "xdg-open {{target}}",
+      "parameters": {
+        "target": {
+          "type": "string",
+          "description": "Application name or file path to open",
+          "required": true
+        }
+      }
+    },
+    "create_content": {
+      "name": "create_content",
+      "description": "Create written content like posts, articles, or documents",
+      "command": "echo 'Content creation'",
+      "windows_command": "echo Content creation",
+      "parameters": {
+        "type": {
+          "type": "string",
+          "description": "Type of content (post, article, document, etc.)",
+          "required": true
+        },
+        "topic": {
+          "type": "string",
+          "description": "Topic or subject for the content",
+          "required": true
+        },
+        "filename": {
+          "type": "string",
+          "description": "Optional filename to save content",
+          "required": false
+        }
+      }
+    }
+  },
+  "tool_selection_prompt": "You are a smart tool selector. Match user requests to the best available tool.\n\nAvailable tools:\n{tools}\n\nUser request: \"{user_input}\"\n\nAnalyze the request and select the most appropriate tool. Examples:\n- \"show disk usage\" → check_disk_usage\n- \"list files\" → list_files  \n- \"show processes\" → show_processes\n- \"git status\" → git_status\n- \"search for X\" → search_web\n- \"open X\" → open_application\n\nRespond ONLY in this JSON format:\n{\n  \"tool\": \"exact_tool_name\",\n  \"parameters\": {},\n  \"reasoning\": \"brief explanation\"\n}"
+}

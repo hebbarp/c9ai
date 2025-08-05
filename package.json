@@ -1,7 +1,7 @@
 {
   "name": "c9ai",
-  "version": "2.1.0",
-  "description": "C9 AI - Autonomous AI-Powered Productivity CLI with Local LLM Support",
+  "version": "2.2.0",
+  "description": "C9 AI - Autonomous AI-Powered Productivity CLI with Semi-Learning System",
   "main": "src/index.js",
   "bin": {
     "c9ai": "./src/index.js"

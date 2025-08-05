@@ -1,0 +1,73 @@
+{
+  "applications": {
+    "calculator": {
+      "darwin": "Calculator",
+      "win32": "calc.exe",
+      "linux": "gnome-calculator"
+    },
+    "notepad": {
+      "darwin": "TextEdit",
+      "win32": "notepad.exe",
+      "linux": "gedit"
+    },
+    "terminal": {
+      "darwin": "Terminal",
+      "win32": "cmd.exe",
+      "linux": "gnome-terminal"
+    },
+    "browser": {
+      "darwin": "Safari",
+      "win32": "msedge.exe",
+      "linux": "firefox"
+    },
+    "chrome": {
+      "darwin": "Google Chrome",
+      "win32": "chrome.exe",
+      "linux": "google-chrome"
+    },
+    "firefox": {
+      "darwin": "Firefox",
+      "win32": "firefox.exe",
+      "linux": "firefox"
+    },
+    "code": {
+      "darwin": "Visual Studio Code",
+      "win32": "code.exe",
+      "linux": "code"
+    },
+    "vscode": {
+      "darwin": "Visual Studio Code",
+      "win32": "code.exe",
+      "linux": "code"
+    },
+    "finder": {
+      "darwin": "Finder",
+      "win32": "explorer.exe",
+      "linux": "nautilus"
+    },
+    "excel": {
+      "darwin": "Microsoft Excel",
+      "win32": "excel.exe",
+      "linux": "libreoffice --calc"
+    },
+    "word": {
+      "darwin": "Microsoft Word",
+      "win32": "winword.exe",
+      "linux": "libreoffice --writer"
+    },
+    "powerpoint": {
+      "darwin": "Microsoft PowerPoint",
+      "win32": "powerpnt.exe",
+      "linux": "libreoffice --impress"
+    }
+  },
+  "learning": {
+    "successful_mappings": {
+      "calculator": {
+        "darwin": "Calculator"
+      }
+    },
+    "failed_attempts": {},
+    "user_corrections": {}
+  }
+}

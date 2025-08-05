@@ -1,0 +1,40 @@
+{
+  "topics": {
+    "agentic ai": {
+      "definition": "Agentic AI refers to artificial intelligence systems that can act autonomously, make decisions, and take actions to achieve specific goals without constant human oversight. These systems demonstrate agency by planning, reasoning, and executing tasks independently.",
+      "trends": "Key trends include autonomous agents in business workflows, AI-powered decision making systems, integration with existing tools and platforms, emphasis on safety and controllability, and growing adoption in customer service and data analysis.",
+      "perspectives": "Supporters see agentic AI as revolutionary for productivity and problem-solving. Skeptics worry about job displacement and loss of human control. Researchers emphasize the need for safety measures and ethical guidelines. Business leaders focus on ROI and competitive advantages.",
+      "examples": "Examples include AI assistants that can book meetings across calendars, customer service bots that resolve complex queries, AI systems that optimize supply chains automatically, and research assistants that gather and synthesize information from multiple sources."
+    },
+    "machine learning": {
+      "definition": "Machine learning is a subset of artificial intelligence that enables computers to learn and improve from experience without being explicitly programmed for every task.",
+      "trends": "Current trends focus on large language models, automated machine learning (AutoML), edge computing deployment, ethical AI practices, and integration with business applications.",
+      "perspectives": "Technologists view it as transformative for innovation. Privacy advocates raise concerns about data usage. Educators see opportunities for personalized learning. Economists debate its impact on employment and economic structures.",
+      "examples": "Common examples are recommendation systems on streaming platforms, fraud detection in banking, image recognition in healthcare, predictive maintenance in manufacturing, and natural language processing in search engines."
+    },
+    "productivity automation": {
+      "definition": "Productivity automation involves using technology and AI systems to streamline repetitive tasks, optimize workflows, and enhance human efficiency in work environments.",
+      "trends": "Trends include AI-powered workflow optimization, natural language interfaces for task management, integration across multiple platforms, and focus on human-AI collaboration rather than replacement.",
+      "perspectives": "Managers appreciate efficiency gains and cost reduction. Workers have mixed feelings about job security versus easier workflows. IT professionals focus on implementation challenges and security. Customers generally benefit from improved service quality.",
+      "examples": "Examples include automated email sorting and responses, calendar scheduling assistants, document generation systems, workflow orchestration tools, and AI-powered project management platforms."
+    },
+    "blockchain technology": {
+      "definition": "Blockchain is a distributed ledger technology that maintains a continuously growing list of records, called blocks, which are linked and secured using cryptography.",
+      "trends": "Current trends include decentralized finance (DeFi), non-fungible tokens (NFTs), enterprise blockchain adoption, sustainability concerns around energy usage, and integration with IoT and supply chain management.",
+      "perspectives": "Cryptocurrency enthusiasts see it as revolutionary for financial freedom. Traditional banks are cautious but exploring adoption. Environmentalists worry about energy consumption. Governments are developing regulatory frameworks.",
+      "examples": "Bitcoin and Ethereum cryptocurrencies, smart contracts for automated agreements, supply chain tracking for food safety, digital identity verification systems, and decentralized autonomous organizations (DAOs)."
+    },
+    "quantum computing": {
+      "definition": "Quantum computing harnesses quantum mechanical phenomena like superposition and entanglement to process information in fundamentally new ways, potentially solving certain problems exponentially faster than classical computers.",
+      "trends": "Key developments include Google's quantum supremacy claims, IBM's quantum cloud services, advances in error correction, growing investment from tech giants and governments, and exploration of near-term quantum algorithms.",
+      "perspectives": "Researchers are excited about breakthrough potential for cryptography and optimization. Security experts worry about threats to current encryption. Tech companies see competitive advantages. Skeptics question practical timeline and applicability.",
+      "examples": "IBM Quantum Network, Google's Sycamore processor, quantum cryptography for secure communications, drug discovery simulations, financial portfolio optimization, and quantum machine learning experiments."
+    }
+  },
+  "fallbacks": {
+    "definition": "${topic} is an important concept in modern technology and business, involving systematic approaches to solving problems and improving outcomes.",
+    "trends": "Current trends in ${topic} include increased adoption, technological advancement, integration with existing systems, and focus on practical applications.",
+    "perspectives": "Different stakeholders have varying perspectives on ${topic}, ranging from enthusiastic adoption to cautious concern about implications and challenges.",
+    "examples": "Practical examples of ${topic} include various applications across industries, from simple automation tools to complex integrated systems that enhance efficiency and outcomes."
+  }
+}

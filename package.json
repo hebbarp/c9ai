@@ -1,10 +1,10 @@
 {
   "name": "c9ai",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "C9 AI - Autonomous AI-Powered Productivity CLI with Semi-Learning System",
   "main": "src/index.js",
   "bin": {
-    "c9ai": "./src/index.js"
+    "c9ai": "src/index.js"
   },
   "scripts": {
     "start": "node src/index.js",

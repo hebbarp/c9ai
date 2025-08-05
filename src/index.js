@@ -22,6 +22,16 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
 // Core CLI instance
 const c9ai = new C9AI();
 
+// Signal handlers for graceful exit
+process.on('SIGINT', () => {
+    console.log(chalk.yellow('\n🛑 Received Ctrl+C. Type "exit" to quit gracefully or "emergency exit" to force quit.'));
+});
+
+process.on('SIGTERM', () => {
+    console.log(chalk.yellow('\n👋 Shutting down gracefully...'));
+    process.exit(0);
+});
+
 // Interactive mode
 async function interactiveMode() {
     console.log(banner);
@@ -32,7 +42,8 @@ async function interactiveMode() {
     console.log(chalk.white('  gemini <prompt>   - Quick prompt to Gemini'));
     console.log(chalk.white('  todos             - Manage your tasks'));
     console.log(chalk.white('  help              - Show all commands'));
-    console.log(chalk.white('  exit              - Quit c9ai\n'));
+    console.log(chalk.white('  exit/quit/stop    - Quit c9ai'));
+    console.log(chalk.white('  emergency exit    - Force quit if stuck\n'));
 
     while (true) {
         try {
@@ -45,8 +56,14 @@ async function interactiveMode() {
                 }
             ]);
 
-            if (command.trim() === 'exit' || command.trim() === 'quit') {
+            if (command.trim() === 'exit' || command.trim() === 'quit' || command.trim() === 'stop') {
                 console.log(chalk.yellow('\\n👋 Thanks for using C9 AI!'));
+                process.exit(0);
+            }
+            
+            // Emergency exit for Ctrl+C equivalent
+            if (command.trim().toLowerCase() === 'emergency exit') {
+                console.log(chalk.red('\\n🛑 Emergency exit activated!'));
                 process.exit(0);
             }
 

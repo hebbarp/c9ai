@@ -7,12 +7,28 @@ const os = require('os');
 const inquirer = require('inquirer');
 const https = require('https');
 
+// Local LLM support
+let LlamaModel, LlamaContext, LlamaChatSession;
+try {
+    const llamaCpp = require('node-llama-cpp');
+    LlamaModel = llamaCpp.LlamaModel;
+    LlamaContext = llamaCpp.LlamaContext;
+    LlamaChatSession = llamaCpp.LlamaChatSession;
+} catch (error) {
+    // node-llama-cpp not available, will use fallback
+}
+
 class C9AI {
     constructor() {
         this.currentModel = 'claude';
         this.configDir = path.join(os.homedir(), '.c9ai');
         this.scriptsDir = path.join(this.configDir, 'scripts'); // This will now be the general tools directory
         this.modelsDir = path.join(this.configDir, 'models'); // Directory for local AI models
+        
+        // Timeout and retry configuration
+        this.localModelTimeout = 30000; // 30 seconds
+        this.maxRetries = 3;
+        this.retryCount = 0;
         this.toolsRegistry = {}; // This will be for internal tools, not external scripts
         this.running = false;
         this.maxIterations = 20;
@@ -1066,7 +1082,7 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
     }
 
     async initLocalModel() {
-        if (this.localModel) {
+        if (this.localModel && this.localModel.ready) {
             return; // Already initialized
         }
 
@@ -1076,24 +1092,67 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
             const modelFile = files.find(f => f.endsWith('.gguf') || f.endsWith('.bin'));
             
             if (!modelFile) {
-                throw new Error('No model files found');
+                throw new Error('No model files found. Install a model with: c9ai models install phi-3');
             }
 
             const modelPath = path.join(this.modelsDir, modelFile);
             
             console.log(chalk.gray(`🔄 Loading local model: ${modelFile}...`));
             
-            // For workshop demo: simulate local model initialization
-            // In production, we would use proper llama.cpp bindings
-            await this.sleep(1000); // Simulate loading time
-            
-            this.localModel = {
-                modelPath,
-                modelFile,
-                ready: true
-            };
-            
-            console.log(chalk.green(`✅ Local model ready: ${modelFile}`));
+            // Try to initialize real llama.cpp model
+            if (LlamaModel) {
+                try {
+                    const model = new LlamaModel({
+                        modelPath: modelPath
+                    });
+
+                    const context = new LlamaContext({
+                        model: model,
+                        contextSize: 4096
+                    });
+
+                    const session = new LlamaChatSession({
+                        context: context
+                    });
+
+                    this.localModel = {
+                        modelPath,
+                        modelFile,
+                        model,
+                        context,
+                        session,
+                        ready: true
+                    };
+
+                    console.log(chalk.green(`✅ Phi-3 model loaded: ${modelFile}`));
+                    
+                } catch (llamaError) {
+                    console.log(chalk.yellow(`⚠️ Failed to load llama.cpp model: ${llamaError.message}`));
+                    console.log(chalk.yellow('🔄 Falling back to pattern matching mode...'));
+                    
+                    // Fallback to simulation mode
+                    this.localModel = {
+                        modelPath,
+                        modelFile, 
+                        ready: true,
+                        fallbackMode: true
+                    };
+                    
+                    console.log(chalk.green(`✅ Local model ready (fallback mode): ${modelFile}`));
+                }
+            } else {
+                // No llama.cpp available, use simulation mode
+                await this.sleep(1000); // Simulate loading time
+                
+                this.localModel = {
+                    modelPath,
+                    modelFile,
+                    ready: true,
+                    fallbackMode: true
+                };
+                
+                console.log(chalk.green(`✅ Local model ready (pattern matching): ${modelFile}`));
+            }
             
         } catch (error) {
             console.error(chalk.red('❌ Failed to initialize local model:'), error.message);
@@ -1106,40 +1165,117 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
             await this.initLocalModel();
         }
 
+        // Reset retry count for new requests
+        if (this.retryCount === 0) {
+            this.retryCount = 0;
+        }
+
         try {
-            // For workshop demo: simulate intelligent local processing
-            // This would normally call the actual local model
-            await this.sleep(500); // Simulate processing time
-            
-            // Smart pattern matching for demo purposes
-            const taskLower = prompt.toLowerCase();
-            
-            if (taskLower.includes('compile') && taskLower.includes('research')) {
-                return '@action: compile research_paper.tex';
-            } else if (taskLower.includes('open') && taskLower.includes('budget')) {
-                return '@action: open budget.xlsx';
-            } else if (taskLower.includes('check') && taskLower.includes('github')) {
-                return '@action: open https://github.com/user/repo/issues';
-            } else if (taskLower.includes('run') && taskLower.includes('cleanup')) {
-                return '@action: run cleanup-weekly.sh';
-            } else if (taskLower.includes('search')) {
-                const searchTerm = taskLower.match(/search.*?for\s+(.+?)(?:\s|$)/)?.[1] || 'tutorial';
-                return `@action: search ${searchTerm}`;
-            } else if (taskLower.includes('compile')) {
-                return '@action: compile document.tex';
-            } else if (taskLower.includes('open')) {
-                const fileType = taskLower.includes('spreadsheet') ? 'xlsx' : 'txt';
-                return `@action: open file.${fileType}`;
+            // Check if we have real llama.cpp integration
+            if (LlamaModel && this.localModel.session) {
+                return await this.runRealLocalAI(prompt);
             } else {
-                // Generic fallback
-                const words = taskLower.split(' ');
-                const lastWord = words[words.length - 1] || 'file';
-                return `@action: open ${lastWord}.txt`;
+                // Fallback to pattern matching with better error handling
+                return await this.runPatternMatchingAI(prompt);
             }
             
         } catch (error) {
-            throw new Error(`Local AI error: ${error.message}`);
+            this.retryCount++;
+            
+            if (this.retryCount < this.maxRetries) {
+                console.log(chalk.yellow(`⚠️ Local AI retry ${this.retryCount}/${this.maxRetries}: ${error.message}`));
+                await this.sleep(1000); // Wait before retry
+                return await this.runLocalAI(prompt);
+            } else {
+                this.retryCount = 0; // Reset for next request
+                throw new Error(`Local AI failed after ${this.maxRetries} attempts: ${error.message}`);
+            }
         }
+    }
+
+    async runRealLocalAI(prompt) {
+        return new Promise(async (resolve, reject) => {
+            const timeout = setTimeout(() => {
+                reject(new Error('Local AI timeout after 30 seconds'));
+            }, this.localModelTimeout);
+
+            try {
+                // Format prompt for Phi-3
+                const formattedPrompt = this.formatPhi3Prompt(prompt);
+                
+                console.log(chalk.gray('🤖 Querying local Phi-3 model...'));
+                
+                const response = await this.localModel.session.prompt(formattedPrompt, {
+                    maxTokens: 150,
+                    temperature: 0.7,
+                    repeatPenalty: 1.1,
+                    stopSequences: ['<|end|>', '\n\n']
+                });
+
+                clearTimeout(timeout);
+                
+                if (!response || response.trim().length === 0) {
+                    throw new Error('Empty response from local model');
+                }
+
+                resolve(response.trim());
+                
+            } catch (error) {
+                clearTimeout(timeout);
+                reject(error);
+            }
+        });
+    }
+
+    formatPhi3Prompt(userInput) {
+        // Phi-3 optimal prompt format
+        return `<|system|>You are a helpful AI assistant that converts natural language into actionable commands. Always respond with @action: followed by the command.<|end|>
+<|user|>${userInput}<|end|>
+<|assistant|>`;
+    }
+
+    async runPatternMatchingAI(prompt) {
+        return new Promise(async (resolve, reject) => {
+            const timeout = setTimeout(() => {
+                reject(new Error('Pattern matching timeout'));
+            }, 5000); // Shorter timeout for fallback
+
+            try {
+                await this.sleep(500); // Simulate processing time
+                
+                // Smart pattern matching for demo purposes
+                const taskLower = prompt.toLowerCase();
+                
+                if (taskLower.includes('compile') && taskLower.includes('research')) {
+                    resolve('@action: compile research_paper.tex');
+                } else if (taskLower.includes('open') && taskLower.includes('budget')) {
+                    resolve('@action: open budget.xlsx');
+                } else if (taskLower.includes('check') && taskLower.includes('github')) {
+                    resolve('@action: open https://github.com/user/repo/issues');
+                } else if (taskLower.includes('run') && taskLower.includes('cleanup')) {
+                    resolve('@action: run cleanup-weekly.sh');
+                } else if (taskLower.includes('search')) {
+                    const searchTerm = taskLower.match(/search.*?for\s+(.+?)(?:\s|$)/)?.[1] || 'tutorial';
+                    resolve(`@action: search ${searchTerm}`);
+                } else if (taskLower.includes('compile')) {
+                    resolve('@action: compile document.tex');
+                } else if (taskLower.includes('open')) {
+                    const fileType = taskLower.includes('spreadsheet') ? 'xlsx' : 'txt';
+                    resolve(`@action: open file.${fileType}`);
+                } else if (taskLower.includes('list') && (taskLower.includes('files') || taskLower.includes('directories'))) {
+                    resolve('@action: list files');
+                } else {
+                    // If we can't understand, provide helpful feedback
+                    reject(new Error(`Could not understand: "${prompt}". Try commands like "open file", "compile document", or "search for tutorial"`));
+                }
+
+                clearTimeout(timeout);
+                
+            } catch (error) {
+                clearTimeout(timeout);
+                reject(error);
+            }
+        });
     }
 
     async parseNaturalLanguageTodo(todoText) {

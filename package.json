@@ -34,11 +34,11 @@
   "author": "C9 AI Team",
   "repository": {
     "type": "git",
-    "url": "https://github.com/c9ai/c9ai.git"
+    "url": "git+https://github.com/hebbarp/c9ai.git"
   },
-  "homepage": "https://github.com/c9ai/c9ai#readme",
+  "homepage": "https://github.com/hebbarp/c9ai#readme",
   "bugs": {
-    "url": "https://github.com/c9ai/c9ai/issues"
+    "url": "https://github.com/hebbarp/c9ai/issues"
   },
   "license": "MIT",
   "dependencies": {

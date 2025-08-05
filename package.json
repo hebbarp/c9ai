@@ -13,7 +13,7 @@
     "test": "echo \"No tests specified\" && exit 0",
     "build:exe": "pkg . --out-path dist",
     "build:msi": "node build-msi.js",
-    "build:nsis": "makensis installer.nsi",
+    "build:nsis": "makensis installer-simple.nsi",
     "build:all": "npm run build:exe && npm run build:msi",
     "clean": "rm -rf dist"
   },

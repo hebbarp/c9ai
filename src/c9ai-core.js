@@ -1298,8 +1298,15 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
                 else if (taskLower.includes('compile') || taskLower.includes('build')) {
                     const target = taskLower.includes('research') ? 'research_paper.tex' : 'document.tex';
                     resolve(`@action: compile ${target}`);
-                } else if (taskLower.includes('run') && taskLower.includes('script')) {
-                    resolve('@action: run script.sh');
+                } else if (taskLower.includes('run')) {
+                    // Enhanced run command recognition
+                    const runMatch = taskLower.match(/run\s+(.+)/);
+                    if (runMatch) {
+                        const target = runMatch[1].trim();
+                        resolve(`@action: run ${target}`);
+                    } else {
+                        resolve('@action: run script.sh');
+                    }
                 }
                 
                 // Help and guidance
@@ -1362,12 +1369,16 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
         
         if (lowerPrompt.includes('compound interest')) {
             code = this.generateCompoundInterestCode(language);
+        } else if (lowerPrompt.includes('prime')) {
+            code = this.generatePrimeCheckCode(language);
         } else if (lowerPrompt.includes('calculator')) {
             code = this.generateCalculatorCode(language);
         } else if (lowerPrompt.includes('fibonacci')) {
             code = this.generateFibonacciCode(language);
         } else if (lowerPrompt.includes('sort') || lowerPrompt.includes('array')) {
             code = this.generateSortingCode(language);
+        } else if (lowerPrompt.includes('factorial')) {
+            code = this.generateFactorialCode(language);
         } else {
             // Generic template
             code = this.generateGenericTemplate(language, prompt);
@@ -1453,6 +1464,133 @@ main();`;
             
             default:
                 return this.generateCompoundInterestCode('python');
+        }
+    }
+    
+    generatePrimeCheckCode(language) {
+        switch (language) {
+            case 'python':
+                return `# Prime Number Checker
+def is_prime(n):
+    """
+    Check if a number is prime
+    Returns True if prime, False otherwise
+    """
+    if n < 2:
+        return False
+    if n == 2:
+        return True
+    if n % 2 == 0:
+        return False
+    
+    # Check odd divisors up to sqrt(n)
+    for i in range(3, int(n**0.5) + 1, 2):
+        if n % i == 0:
+            return False
+    return True
+
+def get_primes_in_range(start, end):
+    """Get all prime numbers in a given range"""
+    primes = []
+    for num in range(start, end + 1):
+        if is_prime(num):
+            primes.append(num)
+    return primes
+
+def main():
+    print("=== Prime Number Checker ===")
+    
+    while True:
+        try:
+            choice = input("\\n1. Check single number\\n2. Find primes in range\\n3. Exit\\nChoice: ")
+            
+            if choice == '1':
+                num = int(input("Enter a number to check: "))
+                if is_prime(num):
+                    print(f"✅ {num} is a prime number!")
+                else:
+                    print(f"❌ {num} is not a prime number.")
+                    
+            elif choice == '2':
+                start = int(input("Enter start of range: "))
+                end = int(input("Enter end of range: "))
+                primes = get_primes_in_range(start, end)
+                
+                if primes:
+                    print(f"\\nPrime numbers between {start} and {end}:")
+                    print(primes)
+                    print(f"Found {len(primes)} prime numbers.")
+                else:
+                    print(f"No prime numbers found between {start} and {end}.")
+                    
+            elif choice == '3':
+                print("Goodbye!")
+                break
+            else:
+                print("Invalid choice. Please enter 1, 2, or 3.")
+                
+        except ValueError:
+            print("Please enter valid numbers!")
+        except KeyboardInterrupt:
+            print("\\nGoodbye!")
+            break
+
+if __name__ == "__main__":
+    main()`;
+            
+            case 'javascript':
+                return `// Prime Number Checker
+function isPrime(n) {
+    /**
+     * Check if a number is prime
+     * Returns true if prime, false otherwise
+     */
+    if (n < 2) return false;
+    if (n === 2) return true;
+    if (n % 2 === 0) return false;
+    
+    // Check odd divisors up to sqrt(n)
+    for (let i = 3; i <= Math.sqrt(n); i += 2) {
+        if (n % i === 0) return false;
+    }
+    return true;
+}
+
+function getPrimesInRange(start, end) {
+    const primes = [];
+    for (let num = start; num <= end; num++) {
+        if (isPrime(num)) {
+            primes.push(num);
+        }
+    }
+    return primes;
+}
+
+function main() {
+    console.log("=== Prime Number Checker ===");
+    
+    const num = parseInt(prompt("Enter a number to check: "));
+    
+    if (isNaN(num)) {
+        console.log("Please enter a valid number!");
+        return;
+    }
+    
+    if (isPrime(num)) {
+        console.log(\`✅ \${num} is a prime number!\`);
+    } else {
+        console.log(\`❌ \${num} is not a prime number.\`);
+    }
+    
+    // Show some examples
+    console.log("\\nFirst 10 prime numbers:");
+    console.log(getPrimesInRange(2, 30));
+}
+
+main();`;
+            
+            default:
+                return this.generatePrimeCheckCode('python');
         }
     }
     
@@ -1695,7 +1833,25 @@ main();`;
                 await this.runIntent('compile', target);
             } else if (action.startsWith('run ')) {
                 const script = action.replace('run ', '').trim();
-                await this.runIntent('run', script);
+                
+                // Handle different file types
+                if (script.endsWith('.py')) {
+                    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+                    const result = await this.runCommand(`${pythonCmd} ${script}`, true);
+                    console.log(chalk.white(result));
+                } else if (script.endsWith('.js')) {
+                    const result = await this.runCommand(`node ${script}`, true);
+                    console.log(chalk.white(result));
+                } else if (script.endsWith('.sh')) {
+                    const result = await this.runCommand(`bash ${script}`, true);
+                    console.log(chalk.white(result));
+                } else if (script.endsWith('.bat')) {
+                    const result = await this.runCommand(script, true);
+                    console.log(chalk.white(result));
+                } else {
+                    // Fallback to runIntent for other types
+                    await this.runIntent('run', script);
+                }
             } else {
                 // Generic command execution
                 const result = await this.runCommand(action, true);

@@ -1,0 +1,441 @@
+<!-- Documentation Section for C9 AI Website -->
+<!-- Add this section after the features section -->
+
+<section id="documentation" class="documentation-section">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h2 class="section-title">Documentation & Installation</h2>
+        <p class="section-subtitle">Get started with C9 AI in minutes</p>
+      </div>
+    </div>
+
+    <!-- Installation Section -->
+    <div class="row installation-section">
+      <div class="col-lg-8 offset-lg-2">
+        <div class="install-card">
+          <h3><i class="fas fa-download"></i> Quick Installation</h3>
+          <div class="install-step">
+            <h4>Step 1: Install Node.js</h4>
+            <p>Download and install Node.js (version 16.0.0 or higher) from <a href="https://nodejs.org" target="_blank">nodejs.org</a></p>
+          </div>
+          
+          <div class="install-step">
+            <h4>Step 2: Install C9 AI</h4>
+            <div class="code-block">
+              <pre><code>npm install -g c9ai</code></pre>
+              <button class="copy-btn" onclick="copyToClipboard('npm install -g c9ai')">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+          </div>
+          
+          <div class="install-step">
+            <h4>Step 3: Start Using C9 AI</h4>
+            <div class="code-block">
+              <pre><code>c9ai</code></pre>
+              <button class="copy-btn" onclick="copyToClipboard('c9ai')">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Start Guide -->
+    <div class="row quick-start-section">
+      <div class="col-lg-6">
+        <div class="guide-card">
+          <h3><i class="fas fa-rocket"></i> Quick Start</h3>
+          <ul class="quick-start-list">
+            <li><strong>Basic Usage:</strong> Run <code>c9ai</code> to start</li>
+            <li><strong>Manage Todos:</strong> <code>c9ai todos</code></li>
+            <li><strong>Analytics:</strong> <code>c9ai analytics</code></li>
+            <li><strong>Interactive Mode:</strong> <code>c9ai interactive</code></li>
+            <li><strong>Help:</strong> <code>c9ai --help</code></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="col-lg-6">
+        <div class="guide-card">
+          <h3><i class="fas fa-cog"></i> System Requirements</h3>
+          <ul class="requirements-list">
+            <li><i class="fas fa-check"></i> Node.js >= 16.0.0</li>
+            <li><i class="fas fa-check"></i> NPM package manager</li>
+            <li><i class="fas fa-check"></i> Terminal/Command Line</li>
+            <li><i class="fas fa-check"></i> Windows, macOS, or Linux</li>
+            <li><i class="fas fa-check"></i> Internet connection for AI features</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documentation Links -->
+    <div class="row docs-links-section">
+      <div class="col-lg-12">
+        <div class="docs-grid">
+          <div class="doc-item">
+            <div class="doc-icon">
+              <i class="fas fa-book"></i>
+            </div>
+            <h4>Full Manual</h4>
+            <p>Complete guide with all features and commands</p>
+            <a href="#" class="doc-link" onclick="showManual()">View Manual</a>
+          </div>
+          
+          
+          
+          <div class="doc-item">
+            <div class="doc-icon">
+              <i class="fab fa-github"></i>
+            </div>
+            <h4>Source Code</h4>
+            <p>Open source repository on GitHub</p>
+            <a href="https://github.com/c9ai/c9ai" class="doc-link" target="_blank">View GitHub</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal for Manual -->
+<div id="manualModal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">C9 AI Manual</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="manual-content">
+          <!-- Manual content will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Documentation Section Styles */
+.documentation-section {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.section-subtitle {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  margin-bottom: 3rem;
+}
+
+.installation-section {
+  margin-bottom: 4rem;
+}
+
+.install-card {
+  background: white;
+  border-radius: 15px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid #e3e8f0;
+}
+
+.install-card h3 {
+  color: #2c3e50;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.install-step {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.install-step:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.install-step h4 {
+  color: #34495e;
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
+}
+
+.code-block {
+  position: relative;
+  background: #2c3e50;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 1rem 0;
+}
+
+.code-block pre {
+  margin: 0;
+  color: #ecf0f1;
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.copy-btn:hover {
+  background: #2980b9;
+}
+
+.quick-start-section {
+  margin-bottom: 4rem;
+}
+
+.guide-card {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  height: 100%;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  border: 1px solid #e3e8f0;
+}
+
+.guide-card h3 {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quick-start-list, .requirements-list {
+  list-style: none;
+  padding: 0;
+}
+
+.quick-start-list li {
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #ecf0f1;
+  color: #34495e;
+}
+
+.quick-start-list li code {
+  background: #ecf0f1;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  color: #e74c3c;
+}
+
+.requirements-list li {
+  padding: 0.6rem 0;
+  color: #34495e;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.requirements-list .fa-check {
+  color: #27ae60;
+}
+
+.docs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.doc-item {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  border: 1px solid #e3e8f0;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.doc-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.doc-icon {
+  font-size: 3rem;
+  color: #3498db;
+  margin-bottom: 1rem;
+}
+
+.doc-item h4 {
+  color: #2c3e50;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.doc-item p {
+  color: #7f8c8d;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.doc-link {
+  display: inline-block;
+  background: #3498db;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+.doc-link:hover {
+  background: #2980b9;
+  text-decoration: none;
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .install-card, .guide-card {
+    padding: 1.5rem;
+  }
+  
+  .docs-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .code-block {
+    padding: 1rem;
+  }
+  
+  .copy-btn {
+    position: static;
+    margin-top: 1rem;
+    width: 100%;
+  }
+}
+</style>
+
+<script>
+// JavaScript for Documentation Section
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    // Show success feedback
+    showToast('Copied to clipboard!');
+  });
+}
+
+function showToast(message) {
+  // Create toast notification
+  const toast = document.createElement('div');
+  toast.className = 'toast-notification';
+  toast.textContent = message;
+  toast.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #27ae60;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 6px;
+    z-index: 9999;
+    animation: slideIn 0.3s ease;
+  `;
+  
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+function showManual() {
+  // Load manual content
+  const manualContent = `
+    <h3>C9 AI Complete Manual</h3>
+    
+    <h4>Installation</h4>
+    <p>Install C9 AI globally using npm:</p>
+    <pre><code>npm install -g c9ai</code></pre>
+    
+    <h4>Commands</h4>
+    <ul>
+      <li><strong>c9ai</strong> - Start C9 AI</li>
+      <li><strong>c9ai todos</strong> - Manage todos</li>
+      <li><strong>c9ai analytics</strong> - View analytics</li>
+      <li><strong>c9ai interactive</strong> - Interactive mode</li>
+      <li><strong>c9ai switch &lt;model&gt;</strong> - Switch AI model</li>
+      <li><strong>c9ai tools</strong> - List tools</li>
+      <li><strong>c9ai --help</strong> - Show help</li>
+    </ul>
+    
+    <h4>Features</h4>
+    <ul>
+      <li>AI-powered task management</li>
+      <li>Productivity analytics</li>
+      <li>Multi-AI model support (Claude, Gemini)</li>
+      <li>Interactive conversational interface</li>
+      <li>Cross-platform compatibility</li>
+    </ul>
+    
+    <h4>System Requirements</h4>
+    <ul>
+      <li>Node.js >= 16.0.0</li>
+      <li>NPM package manager</li>
+      <li>Terminal/Command Line access</li>
+      <li>Internet connection for AI features</li>
+    </ul>
+  `;
+  
+  document.getElementById('manual-content').innerHTML = manualContent;
+  $('#manualModal').modal('show');
+}
+
+
+// Add CSS animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+`;
+document.head.appendChild(style);
+</script>

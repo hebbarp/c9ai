@@ -1,0 +1,57 @@
+# Development files
+node_modules/
+.git/
+.gitignore
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local development
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+test/
+tests/
+__tests__/
+*.test.js
+*.spec.js
+
+# Documentation generation
+docs/
+coverage/
+
+# Development tools
+nodemon.json
+.eslintrc*
+.prettierrc*
+
+# Workshop and demo files
+workshop-demo.sh
+test-basic.js
+c9ai-current.html
+documentation.html
+website-documentation.html
+
+# Local config and data
+config/
+todo.md
+
+# Build artifacts
+dist/
+build/

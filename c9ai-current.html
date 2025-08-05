@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Tasking - AI-Powered Productivity Revolution</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .powerdBy {
+            border: 1px solid #db5919;
+            border-radius: 12px;
+            padding: 3px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 0;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo img {
+            height: 60px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .cta-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 120px 0 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="80" r="1" fill="white" opacity="0.1"/><circle cx="40" cy="60" r="1" fill="white" opacity="0.1"/><circle cx="90" cy="30" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grain)"/></svg>');
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero .subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-image {
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .hero-image img {
+            max-width: 500px;
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Productivity Stats */
+        .stats {
+            background: white;
+            padding: 4rem 0;
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 2rem;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8eaff 100%);
+            transition: transform 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Features Section */
+        .features {
+            background: #f8f9ff;
+            padding: 6rem 0;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .section-header p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Feature Slider */
+        .feature-slider {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+
+        .feature-slides {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .feature-slide {
+            min-width: 100%;
+            padding: 4rem;
+            display: flex;
+            align-items: center;
+            gap: 4rem;
+        }
+
+        .feature-content h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .feature-content p {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: #555;
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .feature-visual {
+            flex: 1;
+            text-align: center;
+        }
+
+        .feature-visual img,
+        .feature-visual video {
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Slider Controls */
+        .slider-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .slider-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            background: #ddd;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .slider-btn.active {
+            background: #667eea;
+        }
+
+        /* Productivity Benefits */
+        .benefits {
+            padding: 6rem 0;
+            background: white;
+        }
+
+        .benefits-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            margin-top: 4rem;
+        }
+
+        .benefit-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .benefit-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+        }
+
+        .benefit-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit-card p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6rem 0;
+            text-align: center;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        /* Workshop Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalSlideIn 0.5s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .workshop-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .workshop-feature {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f8f9ff;
+            border-radius: 15px;
+        }
+
+        .workshop-feature h4 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-step {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .modal-step.fade-out {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        .registration-form {
+            background: #f8f9ff;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .feature-slide {
+                flex-direction: column;
+                padding: 2rem;
+                gap: 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="logo" id="sidebar-toggle">
+                    <img src="https://www.knoblycream.com/grfx/img/knobly_logo.png" alt="Chirper Logo">
+                </div>
+                <span class="powerdBy">Powered by c9ai</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#benefits">Benefits</a></li>
+                <li><a href="#documentation">Documentation</a></li>
+                <li><a href="#productivity">Productivity</a></li>
+            </ul>
+            <button class="cta-btn" onclick="openTalkToUsModal()">Talk to us</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-container">
+            <h1>Transform Your Productivity</h1>
+            <p class="subtitle">AI-Powered Task Management That Actually Works</p>
+            <div class="hero-image">
+                <img src="vibe_tasking.png" alt="Vibe Tasking Dashboard" />
+            </div>
+            <p>Stop juggling tasks. Start achieving results.</p>
+        </div>
+    </section>
+
+    <!-- Productivity Stats -->
+    <section class="stats">
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-number">85%</div>
+                <div class="stat-label">Productivity Increase</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">4.5hrs</div>
+                <div class="stat-label">Time Saved Daily</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">10,000+</div>
+                <div class="stat-label">Tasks Automated</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">98%</div>
+                <div class="stat-label">User Satisfaction</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section with Slider -->
+    <section class="features" id="features">
+        <div class="features-container">
+            <div class="section-header">
+                <h2>Revolutionary Features</h2>
+                <p>Experience the future of task management with our cutting-edge AI technology</p>
+            </div>
+
+            <div class="feature-slider">
+                <div class="feature-slides" id="featureSlides">
+                    <!-- Slide 1: AI Automation -->
+                    <div class="feature-slide">
+                        <div class="feature-content">
+                            <h3>🤖 AI-Powered Automation</h3>
+                            <p>Let artificial intelligence handle your routine tasks while you focus on what matters
+                                most. Our advanced AI learns your patterns and preferences to optimize your workflow.
+                            </p>
+                            <ul class="feature-list">
+                                <li>Automatic task prioritization</li>
+                                <li>Smart scheduling optimization</li>
+                                <li>Intelligent deadline management</li>
+                                <li>Contextual task suggestions</li>
+                            </ul>
+                        </div>
+                        <div class="feature-visual">
+                            <video width="400" height="300" autoplay muted loop>
+                                <source src="AI_Powered_Task_Management_Video.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+
+                    <!-- Slide 2: Productivity Analytics -->
+                    <div class="feature-slide">
+                        <div class="feature-content">
+                            <h3>📊 Productivity Analytics</h3>
+                            <p>Get deep insights into your work patterns and productivity metrics. Understand where your
+                                time goes and how to optimize it for maximum efficiency.</p>
+                            <ul class="feature-list">
+                                <li>Real-time productivity tracking</li>
+                                <li>Detailed performance reports</li>
+                                <li>Time allocation analysis</li>
+                                <li>Goal achievement metrics</li>
+                            </ul>
+                        </div>
+                        <div class="feature-visual">
+                            <div
+                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 3rem; border-radius: 15px; text-align: center;">
+                                <h4 style="font-size: 2rem; margin-bottom: 1rem;">📈</h4>
+                                <p>Advanced Analytics Dashboard</p>
+                                <div style="margin-top: 2rem; display: flex; justify-content: space-around;">
+                                    <div><strong>85%</strong><br>Efficiency</div>
+                                    <div><strong>4.5h</strong><br>Saved</div>
+                                    <div><strong>127</strong><br>Tasks</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slide 3: Team Collaboration -->
+                    <div class="feature-slide">
+                        <div class="feature-content">
+                            <h3>👥 Smart Collaboration</h3>
+                            <p>Seamlessly coordinate with your team using intelligent collaboration tools that
+                                automatically sync tasks, deadlines, and progress updates.</p>
+                            <ul class="feature-list">
+                                <li>Real-time team synchronization</li>
+                                <li>Automatic progress updates</li>
+                                <li>Smart delegation features</li>
+                                <li>Integrated communication tools</li>
+                            </ul>
+                        </div>
+                        <div class="feature-visual">
+                            <div style="background: #f8f9ff; padding: 3rem; border-radius: 15px; text-align: center;">
+                                <h4 style="font-size: 2rem; margin-bottom: 1rem; color: #667eea;">🤝</h4>
+                                <p style="color: #333; margin-bottom: 2rem;">Team Productivity Hub</p>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                                    <div
+                                        style="background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                        <div
+                                            style="width: 30px; height: 30px; background: #667eea; border-radius: 50%; margin: 0 auto 0.5rem;">
+                                        </div>
+                                        <small>John</small>
+                                    </div>
+                                    <div
+                                        style="background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                        <div
+                                            style="width: 30px; height: 30px; background: #764ba2; border-radius: 50%; margin: 0 auto 0.5rem;">
+                                        </div>
+                                        <small>Sarah</small>
+                                    </div>
+                                    <div
+                                        style="background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                        <div
+                                            style="width: 30px; height: 30px; background: #ffa726; border-radius: 50%; margin: 0 auto 0.5rem;">
+                                        </div>
+                                        <small>Mike</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slider-controls">
+                    <button class="slider-btn active" onclick="showSlide(0)"></button>
+                    <button class="slider-btn" onclick="showSlide(1)"></button>
+                    <button class="slider-btn" onclick="showSlide(2)"></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Productivity Benefits -->
+    <section class="benefits" id="benefits">
+        <div class="benefits-container">
+            <div class="section-header">
+                <h2>Productivity Benefits</h2>
+                <p>See how Vibe Tasking transforms your daily workflow and boosts your efficiency</p>
+            </div>
+
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">⚡</div>
+                    <h3>Instant Task Processing</h3>
+                    <p>Process and organize hundreds of tasks in seconds with our advanced AI algorithms. Never let
+                        important tasks slip through the cracks again.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">🎯</div>
+                    <h3>Laser-Focused Priority</h3>
+                    <p>Automatically identify and focus on high-impact tasks that drive results. Eliminate time wasted
+                        on low-value activities.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">📈</div>
+                    <h3>Measurable Results</h3>
+                    <p>Track your productivity gains with detailed analytics and reporting. See exactly how much time
+                        and effort you're saving every day.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">🔄</div>
+                    <h3>Seamless Integration</h3>
+                    <p>Works with all your existing tools and platforms. No disruption to your current workflow - just
+                        enhanced productivity from day one.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">🧠</div>
+                    <h3>Intelligent Learning</h3>
+                    <p>Our AI learns from your behavior and continuously improves its recommendations. The more you use
+                        it, the smarter it gets.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">💪</div>
+                    <h3>Stress Reduction</h3>
+                    <p>Reduce overwhelm and mental fatigue by letting AI handle the complexity of task management. Focus
+                        your energy on creative and strategic work.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation & Installation Section -->
+    <section class="documentation-section" id="documentation">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 6rem 2rem;">
+            <div style="text-align: center; margin-bottom: 4rem;">
+                <h2 style="font-size: 2.5rem; font-weight: 700; color: #2c3e50; margin-bottom: 1rem;">Documentation & Installation</h2>
+                <p style="font-size: 1.2rem; color: #7f8c8d;">Get started with C9 AI in minutes</p>
+            </div>
+
+            <!-- Installation Section -->
+            <div style="margin-bottom: 4rem;">
+                <div style="max-width: 800px; margin: 0 auto;">
+                    <div style="background: white; border-radius: 15px; padding: 2.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #e3e8f0;">
+                        <h3 style="color: #2c3e50; font-size: 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.5rem;">📦</span> Quick Installation
+                        </h3>
+                        
+                        <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #ecf0f1;">
+                            <h4 style="color: #34495e; font-size: 1.3rem; margin-bottom: 0.8rem;">Step 1: Install Node.js</h4>
+                            <p>Download and install Node.js (version 16.0.0 or higher) from <a href="https://nodejs.org" target="_blank" style="color: #3498db;">nodejs.org</a></p>
+                        </div>
+                        
+                        <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #ecf0f1;">
+                            <h4 style="color: #34495e; font-size: 1.3rem; margin-bottom: 0.8rem;">Step 2: Install C9 AI</h4>
+                            <div style="position: relative; background: #2c3e50; border-radius: 8px; padding: 1rem 1.5rem; margin: 1rem 0;">
+                                <pre style="margin: 0; color: #ecf0f1; font-family: 'Courier New', monospace; font-size: 1.1rem;">npm install -g c9ai</pre>
+                                <button style="position: absolute; top: 10px; right: 15px; background: #3498db; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" onclick="copyToClipboard('npm install -g c9ai')">
+                                    📋 Copy
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 0;">
+                            <h4 style="color: #34495e; font-size: 1.3rem; margin-bottom: 0.8rem;">Step 3: Start Using C9 AI</h4>
+                            <div style="position: relative; background: #2c3e50; border-radius: 8px; padding: 1rem 1.5rem; margin: 1rem 0;">
+                                <pre style="margin: 0; color: #ecf0f1; font-family: 'Courier New', monospace; font-size: 1.1rem;">c9ai</pre>
+                                <button style="position: absolute; top: 10px; right: 15px; background: #3498db; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer;" onclick="copyToClipboard('c9ai')">
+                                    📋 Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Start Guide -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
+                <div style="background: white; border-radius: 15px; padding: 2rem; box-shadow: 0 5px 20px rgba(0,0,0,0.08); border: 1px solid #e3e8f0;">
+                    <h3 style="color: #2c3e50; font-size: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.2rem;">🚀</span> Quick Start
+                    </h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 0.8rem 0; border-bottom: 1px solid #ecf0f1; color: #34495e;">
+                            <strong>Basic Usage:</strong> Run <code style="background: #ecf0f1; padding: 0.2rem 0.5rem; border-radius: 4px; font-family: 'Courier New', monospace; color: #e74c3c;">c9ai</code> to start
+                        </li>
+                        <li style="padding: 0.8rem 0; border-bottom: 1px solid #ecf0f1; color: #34495e;">
+                            <strong>Manage Todos:</strong> <code style="background: #ecf0f1; padding: 0.2rem 0.5rem; border-radius: 4px; font-family: 'Courier New', monospace; color: #e74c3c;">c9ai todos</code>
+                        </li>
+                        <li style="padding: 0.8rem 0; border-bottom: 1px solid #ecf0f1; color: #34495e;">
+                            <strong>Analytics:</strong> <code style="background: #ecf0f1; padding: 0.2rem 0.5rem; border-radius: 4px; font-family: 'Courier New', monospace; color: #e74c3c;">c9ai analytics</code>
+                        </li>
+                        <li style="padding: 0.8rem 0; border-bottom: 1px solid #ecf0f1; color: #34495e;">
+                            <strong>Interactive Mode:</strong> <code style="background: #ecf0f1; padding: 0.2rem 0.5rem; border-radius: 4px; font-family: 'Courier New', monospace; color: #e74c3c;">c9ai interactive</code>
+                        </li>
+                        <li style="padding: 0.8rem 0; color: #34495e;">
+                            <strong>Help:</strong> <code style="background: #ecf0f1; padding: 0.2rem 0.5rem; border-radius: 4px; font-family: 'Courier New', monospace; color: #e74c3c;">c9ai --help</code>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div style="background: white; border-radius: 15px; padding: 2rem; box-shadow: 0 5px 20px rgba(0,0,0,0.08); border: 1px solid #e3e8f0;">
+                    <h3 style="color: #2c3e50; font-size: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.2rem;">⚙️</span> System Requirements
+                    </h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 0.6rem 0; color: #34495e; display: flex; align-items: center; gap: 0.8rem;">
+                            <span style="color: #27ae60;">✓</span> Node.js >= 16.0.0
+                        </li>
+                        <li style="padding: 0.6rem 0; color: #34495e; display: flex; align-items: center; gap: 0.8rem;">
+                            <span style="color: #27ae60;">✓</span> NPM package manager
+                        </li>
+                        <li style="padding: 0.6rem 0; color: #34495e; display: flex; align-items: center; gap: 0.8rem;">
+                            <span style="color: #27ae60;">✓</span> Terminal/Command Line
+                        </li>
+                        <li style="padding: 0.6rem 0; color: #34495e; display: flex; align-items: center; gap: 0.8rem;">
+                            <span style="color: #27ae60;">✓</span> Windows, macOS, or Linux
+                        </li>
+                        <li style="padding: 0.6rem 0; color: #34495e; display: flex; align-items: center; gap: 0.8rem;">
+                            <span style="color: #27ae60;">✓</span> Internet connection for AI features
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Documentation Links -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                <div style="background: white; border-radius: 12px; padding: 2rem; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.08); border: 1px solid #e3e8f0; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="font-size: 3rem; color: #3498db; margin-bottom: 1rem;">📖</div>
+                    <h4 style="color: #2c3e50; font-size: 1.3rem; margin-bottom: 1rem;">Full Manual</h4>
+                    <p style="color: #7f8c8d; margin-bottom: 1.5rem; line-height: 1.6;">Complete guide with all features and commands</p>
+                    <a href="documentation.html" style="background: #3498db; color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 6px; text-decoration: none; font-weight: 500; cursor: pointer; display: inline-block;">View Manual</a>
+                </div>
+                
+                
+                
+                <div style="background: white; border-radius: 12px; padding: 2rem; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.08); border: 1px solid #e3e8f0; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="font-size: 3rem; color: #3498db; margin-bottom: 1rem;">🐙</div>
+                    <h4 style="color: #2c3e50; font-size: 1.3rem; margin-bottom: 1rem;">Source Code</h4>
+                    <p style="color: #7f8c8d; margin-bottom: 1.5rem; line-height: 1.6;">Open source repository on GitHub</p>
+                    <a href="https://github.com/c9ai/c9ai" style="background: #3498db; color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 6px; text-decoration: none; font-weight: 500; cursor: pointer;" target="_blank">View GitHub</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section" id="productivity">
+        <div class="cta-container">
+            <h2>Ready to 10x Your Productivity?</h2>
+            <p>Join thousands of professionals who have transformed their workflow with Vibe Tasking</p>
+            <div class="cta-buttons">
+                <button class="btn-primary" onclick="openTalkToUsModal()">Talk to us</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workshop Modal -->
+    <div id="workshopModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2>🎯 EXCLUSIVE EXECUTIVE WORKSHOP</h2>
+                <p>Full Day Training for CEOs, CXOs & Senior Leaders</p>
+            </div>
+            <div class="modal-body">
+                <!-- Step 1: Workshop Information -->
+                <div id="workshopInfo" class="modal-step">
+                    <div
+                        style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 1rem; border-radius: 10px; text-align: center; margin-bottom: 2rem;">
+                        <strong>⚠️ LIMITED SEATS AVAILABLE</strong>
+                    </div>
+
+                    <div class="workshop-features">
+                        <div class="workshop-feature">
+                            <h4>🎯 Who Should Attend</h4>
+                            <p>CEOs, CTOs, CIOs, COOs, VPs & Senior Executives</p>
+                        </div>
+                        <div class="workshop-feature">
+                            <h4>🚀 What You'll Learn</h4>
+                            <p>AI & Automated Scripts Mastery for Leadership</p>
+                        </div>
+                        <div class="workshop-feature">
+                            <h4>⏰ Duration</h4>
+                            <p>Full Day Intensive Training Session</p>
+                        </div>
+                        <div class="workshop-feature">
+                            <h4>💼 Outcome</h4>
+                            <p>10x Productivity Improvement Strategy</p>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8f9ff; padding: 2rem; border-radius: 15px; margin-top: 2rem;">
+                        <h3 style="text-align: center; margin-bottom: 1rem; color: #333;">🚀 Transform Your Executive
+                            Leadership</h3>
+                        <p style="text-align: center; color: #666; margin-bottom: 2rem;">
+                            Join industry leaders in mastering AI-powered productivity. Learn cutting-edge automation
+                            strategies that will revolutionize how you and your team work.
+                        </p>
+                        <div style="text-align: center;">
+                            <button onclick="showRegistrationForm()" class="submit-btn"
+                                style="max-width: 300px; margin: 0 auto;">
+                                📋 Know More - Register Interest
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Registration Form -->
+                <div id="registrationStep" class="modal-step" style="display: none;">
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <button onclick="showWorkshopInfo()"
+                            style="background: transparent; border: none; color: #667eea; cursor: pointer; font-size: 0.9rem;">
+                            ← Back to Workshop Details
+                        </button>
+                    </div>
+
+                    <form id="registrationForm" class="registration-form">
+                        <h3 style="text-align: center; margin-bottom: 1.5rem; color: #333;">📝 Secure Your Executive
+                            Seat</h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fullName">Full Name *</label>
+                                <input type="text" id="fullName" name="fullName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address *</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone">Phone Number *</label>
+                                <input type="tel" id="phone" name="phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="company">Company/Organization *</label>
+                                <input type="text" id="company" name="company" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="position">Executive Position *</label>
+                                <select id="position" name="position" required>
+                                    <option value="">Select your position</option>
+                                    <option value="CEO">Chief Executive Officer (CEO)</option>
+                                    <option value="CTO">Chief Technology Officer (CTO)</option>
+                                    <option value="CIO">Chief Information Officer (CIO)</option>
+                                    <option value="COO">Chief Operating Officer (COO)</option>
+                                    <option value="CFO">Chief Financial Officer (CFO)</option>
+                                    <option value="VP">Vice President</option>
+                                    <option value="Director">Director</option>
+                                    <option value="Senior Manager">Senior Manager</option>
+                                    <option value="Other Executive">Other Executive Role</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="experience">AI/Automation Experience</label>
+                                <select id="experience" name="experience">
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
+                                    <option value="Expert">Expert</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-btn">
+                            🚀 REGISTER NOW - SECURE MY SEAT!
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Talk to Us Modal -->
+    <div id="talkToUsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeTalkToUsModal()">&times;</span>
+                <h2>💬 Talk to Us</h2>
+                <p>Let's discuss how we can transform your productivity</p>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h3 style="color: #333; margin-bottom: 1rem;">🚀 Ready to revolutionize your workflow?</h3>
+                    <p style="color: #666; line-height: 1.6;">
+                        Get personalized insights on how Vibe Tasking can transform your team's productivity.
+                        Our experts will analyze your current workflow and provide tailored recommendations.
+                    </p>
+                </div>
+
+                <div
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 10px; text-align: center; margin-bottom: 2rem;">
+                    <strong>💡 Free consultation • No commitment required • Expert advice</strong>
+                </div>
+
+                <form id="talkToUsForm" class="registration-form">
+                    <h3 style="text-align: center; margin-bottom: 1.5rem; color: #333;">📝 Get in Touch</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ttu_fullName">Full Name *</label>
+                            <input type="text" id="ttu_fullName" name="fullName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ttu_email">Email Address *</label>
+                            <input type="email" id="ttu_email" name="email" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ttu_phone">Phone Number *</label>
+                            <input type="tel" id="ttu_phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ttu_company">Company/Organization *</label>
+                            <input type="text" id="ttu_company" name="company" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ttu_position">Your Role *</label>
+                        <select id="ttu_position" name="position" required>
+                            <option value="">Select your role</option>
+                            <option value="CEO">Chief Executive Officer (CEO)</option>
+                            <option value="CTO">Chief Technology Officer (CTO)</option>
+                            <option value="CIO">Chief Information Officer (CIO)</option>
+                            <option value="COO">Chief Operating Officer (COO)</option>
+                            <option value="CFO">Chief Financial Officer (CFO)</option>
+                            <option value="VP">Vice President</option>
+                            <option value="Director">Director</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Team Lead">Team Lead</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ttu_message">What can we help you with? (Optional)</label>
+                        <textarea id="ttu_message" name="message" rows="3"
+                            style="width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; font-family: inherit; resize: vertical;"
+                            placeholder="Tell us about your productivity challenges or what you'd like to achieve..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        💬 Let's Talk - Schedule Consultation
+                    </button>
+
+                    <p style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 1rem;">
+                        We'll get back to you within 24 hours
+                    </p>
+                </form>
+
+                <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e0e0e0;">
+                    <p style="color: #666; margin-bottom: 1rem;">Interested in our Executive Workshop instead?</p>
+                    <button onclick="closeTalkToUsModal(); openWorkshopModal();" class="btn-secondary"
+                        style="background: transparent; color: #667eea; border: 2px solid #667eea; padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-weight: 600;">
+                        🎯 View Executive Workshop
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Vibe Tasking. All rights reserved. | Transforming Productivity Through AI</p>
+    </footer>
+
+    <script>
+        // Feature Slider
+        let currentSlide = 0;
+        const totalSlides = 3;
+
+        function showSlide(index) {
+            const slides = document.getElementById('featureSlides');
+            const buttons = document.querySelectorAll('.slider-btn');
+
+            // Update slide position
+            slides.style.transform = `translateX(-${index * 100}%)`;
+
+            // Update active button
+            buttons.forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+
+            currentSlide = index;
+        }
+
+        // Auto-advance slider
+        setInterval(() => {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            showSlide(currentSlide);
+        }, 6000);
+
+        // Workshop Modal
+        const modal = document.getElementById('workshopModal');
+        const closeBtn = document.querySelector('.close');
+
+        function openWorkshopModal() {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            showWorkshopInfo(); // Always start with workshop info
+        }
+
+        function closeWorkshopModal() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            showWorkshopInfo(); // Reset to first step when closing
+        }
+
+        function showWorkshopInfo() {
+            const workshopInfo = document.getElementById('workshopInfo');
+            const registrationStep = document.getElementById('registrationStep');
+
+            // Fade out current step
+            registrationStep.style.opacity = '0';
+            registrationStep.style.transform = 'translateX(-20px)';
+
+            setTimeout(() => {
+                registrationStep.style.display = 'none';
+                workshopInfo.style.display = 'block';
+                workshopInfo.style.opacity = '0';
+                workshopInfo.style.transform = 'translateX(20px)';
+
+                // Fade in new step
+                setTimeout(() => {
+                    workshopInfo.style.opacity = '1';
+                    workshopInfo.style.transform = 'translateX(0)';
+                }, 10);
+            }, 150);
+        }
+
+        function showRegistrationForm() {
+            const workshopInfo = document.getElementById('workshopInfo');
+            const registrationStep = document.getElementById('registrationStep');
+
+            // Fade out current step
+            workshopInfo.style.opacity = '0';
+            workshopInfo.style.transform = 'translateX(-20px)';
+
+            setTimeout(() => {
+                workshopInfo.style.display = 'none';
+                registrationStep.style.display = 'block';
+                registrationStep.style.opacity = '0';
+                registrationStep.style.transform = 'translateX(20px)';
+
+                // Fade in new step
+                setTimeout(() => {
+                    registrationStep.style.opacity = '1';
+                    registrationStep.style.transform = 'translateX(0)';
+                }, 10);
+            }, 150);
+        }
+
+        closeBtn.onclick = closeWorkshopModal;
+
+        window.onclick = function (event) {
+            if (event.target === modal) {
+                closeWorkshopModal();
+            }
+            if (event.target === document.getElementById('talkToUsModal')) {
+                closeTalkToUsModal();
+            }
+        }
+
+        // Talk to Us Modal
+        const talkToUsModal = document.getElementById('talkToUsModal');
+
+        function openTalkToUsModal() {
+            talkToUsModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTalkToUsModal() {
+            talkToUsModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Auto-open workshop modal after 5 seconds
+        setTimeout(() => {
+            openWorkshopModal();
+        }, 5000);
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            });
+        });
+
+        // Talk to Us Form submission
+        document.getElementById('talkToUsForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = {
+                fullName: formData.get('fullName'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                company: formData.get('company'),
+                position: formData.get('position'),
+                experience: 'Not specified',
+                inquiryType: 'talktous',
+                message: formData.get('message') || '',
+                registrationDate: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('register.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('🎉 Thank you for reaching out! We will contact you within 24 hours to discuss your productivity needs.');
+                    this.reset();
+                    closeTalkToUsModal();
+                } else {
+                    alert('❌ Submission failed: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Network error. Please check your connection and try again.');
+            }
+        });
+
+        // Workshop Registration Form submission
+        document.getElementById('registrationForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = {
+                fullName: formData.get('fullName'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                company: formData.get('company'),
+                position: formData.get('position'),
+                experience: formData.get('experience'),
+                inquiryType: 'workshop',
+                registrationDate: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('register.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('🎉 Registration successful! We will contact you soon with workshop details.');
+                    this.reset();
+                    closeWorkshopModal();
+                } else {
+                    alert('❌ Registration failed: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Network error. Please check your connection and try again.');
+            }
+        });
+
+        // Documentation Section Functions
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('Copied to clipboard!');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #27ae60;
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 6px;
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function showManual() {
+            alert(`C9 AI Manual
+
+Installation:
+npm install -g c9ai
+
+Commands:
+• c9ai - Start C9 AI
+• c9ai todos - Manage todos
+• c9ai analytics - View analytics  
+• c9ai interactive - Interactive mode
+• c9ai switch <model> - Switch AI model
+• c9ai tools - List tools
+• c9ai --help - Show help
+
+Features:
+• AI-powered task management
+• Productivity analytics
+• Multi-AI model support (Claude, Gemini)
+• Interactive conversational interface
+• Cross-platform compatibility
+
+System Requirements:
+• Node.js >= 16.0.0
+• NPM package manager
+• Terminal/Command Line access
+• Internet connection for AI features
+
+Package: https://www.npmjs.com/package/c9ai`);
+        }
+
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = \`
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        \`;
+        document.head.appendChild(style);
+
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function () {
+            // Animate stats on scroll
+            const observerOptions = {
+                threshold: 0.5,
+                rootMargin: '0px 0px -100px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'float 2s ease-in-out';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.stat-item, .benefit-card').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+
+</html>

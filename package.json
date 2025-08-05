@@ -1,0 +1,73 @@
+{
+  "name": "c9ai",
+  "version": "2.0.0",
+  "description": "C9 AI - Autonomous AI-Powered Productivity CLI with Local LLM Support",
+  "main": "src/index.js",
+  "bin": {
+    "c9ai": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "install-global": "npm install -g .",
+    "test": "echo \"No tests specified\" && exit 0",
+    "build:exe": "pkg . --out-path dist",
+    "build:msi": "node build-msi.js",
+    "build:nsis": "makensis installer.nsi",
+    "build:all": "npm run build:exe && npm run build:msi",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "ai",
+    "productivity",
+    "claude",
+    "gemini",
+    "phi-3",
+    "llama",
+    "local-llm",
+    "privacy",
+    "natural-language",
+    "todo",
+    "automation",
+    "cli"
+  ],
+  "author": "C9 AI Team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/c9ai/c9ai.git"
+  },
+  "homepage": "https://github.com/c9ai/c9ai#readme",
+  "bugs": {
+    "url": "https://github.com/c9ai/c9ai/issues"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "chokidar": "^3.5.3",
+    "commander": "^11.1.0",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^8.2.4",
+    "node-fetch": "^2.7.0",
+    "node-llama-cpp": "^3.11.0",
+    "ora": "^5.4.1",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "electron-wix-msi": "^5.1.3",
+    "nodemon": "^3.0.2",
+    "pkg": "^5.8.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "pkg": {
+    "scripts": "src/**/*.js",
+    "assets": "assets/**/*",
+    "targets": [
+      "node16-win-x64",
+      "node16-macos-x64",
+      "node16-linux-x64"
+    ],
+    "outputPath": "dist"
+  }
+}

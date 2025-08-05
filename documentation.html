@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C9 AI Documentation - Complete Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid #e1e5e9;
+            position: fixed;
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+            padding: 2rem 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-header {
+            padding: 0 2rem 1rem;
+            border-bottom: 1px solid #e1e5e9;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-header h3 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+        }
+
+        .toc {
+            list-style: none;
+        }
+
+        .toc-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .toc-section > a {
+            display: block;
+            padding: 0.8rem 2rem;
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .toc-section > a:hover,
+        .toc-section > a.active {
+            background: #f8f9ff;
+            border-left-color: #667eea;
+            color: #667eea;
+        }
+
+        .toc-subsection {
+            list-style: none;
+            margin-left: 1rem;
+        }
+
+        .toc-subsection li a {
+            display: block;
+            padding: 0.5rem 2rem;
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .toc-subsection li a:hover,
+        .toc-subsection li a.active {
+            background: #f8f9ff;
+            color: #667eea;
+        }
+
+        /* Content Area */
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 2rem;
+            max-width: calc(100vw - 280px);
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 10px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            max-width: 800px;
+        }
+
+        .content-section h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        .content-section h2 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            padding-top: 1rem;
+        }
+
+        .content-section h3 {
+            color: #34495e;
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        .content-section h4 {
+            color: #34495e;
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem;
+        }
+
+        .content-section p {
+            margin-bottom: 1rem;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .content-section ul, .content-section ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #555;
+        }
+
+        .content-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            position: relative;
+            background: #2c3e50;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            margin: 0;
+            color: #ecf0f1;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .code-block .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .code-block .copy-btn:hover {
+            background: #2980b9;
+        }
+
+        .inline-code {
+            background: #f1f3f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e74c3c;
+            font-size: 0.9rem;
+        }
+
+        /* Info Boxes */
+        .info-box {
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+
+        .info-box.note {
+            background: #e8f4f8;
+            border-left-color: #3498db;
+        }
+
+        .info-box.warning {
+            background: #fef9e7;
+            border-left-color: #f39c12;
+        }
+
+        .info-box.tip {
+            background: #e8f5e8;
+            border-left-color: #27ae60;
+        }
+
+        .info-box .icon {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        th {
+            background: #f8f9ff;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Mobile Responsive */
+        .mobile-toggle {
+            display: none;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+                z-index: 1001;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .content {
+                margin-left: 0;
+                max-width: 100vw;
+                padding: 1rem;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .content-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .content-section h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Scroll Indicators */
+        .scroll-indicator {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 4px;
+            height: calc(100vh - 100px);
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 2px;
+            z-index: 999;
+        }
+
+        .scroll-progress {
+            width: 100%;
+            background: #667eea;
+            border-radius: 2px;
+            transition: height 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <span>📚</span> C9 AI Documentation
+            </div>
+            <div class="breadcrumb">
+                <a href="index.html">← Back to C9 AI</a>
+            </div>
+            <button class="mobile-toggle" onclick="toggleSidebar()">
+                📋 Menu
+            </button>
+        </div>
+    </header>
+
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator">
+        <div class="scroll-progress" id="scrollProgress"></div>
+    </div>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Table of Contents</h3>
+            </div>
+            <ul class="toc">
+                <li class="toc-section">
+                    <a href="#getting-started" class="active">🚀 Getting Started</a>
+                    <ul class="toc-subsection">
+                        <li><a href="#installation">Installation</a></li>
+                        <li><a href="#quick-start">Quick Start</a></li>
+                        <li><a href="#system-requirements">System Requirements</a></li>
+                    </ul>
+                </li>
+                <li class="toc-section">
+                    <a href="#commands">⚡ Commands</a>
+                    <ul class="toc-subsection">
+                        <li><a href="#basic-commands">Basic Commands</a></li>
+                        <li><a href="#todo-management">Todo Management</a></li>
+                        <li><a href="#ai-interactions">AI Interactions</a></li>
+                        <li><a href="#analytics">Analytics</a></li>
+                    </ul>
+                </li>
+                <li class="toc-section">
+                    <a href="#features">✨ Features</a>
+                    <ul class="toc-subsection">
+                        <li><a href="#ai-automation">AI Automation</a></li>
+                        <li><a href="#productivity-tracking">Productivity Tracking</a></li>
+                        <li><a href="#cross-platform">Cross-platform Support</a></li>
+                    </ul>
+                </li>
+                <li class="toc-section">
+                    <a href="#configuration">⚙️ Configuration</a>
+                    <ul class="toc-subsection">
+                        <li><a href="#ai-models">AI Models</a></li>
+                        <li><a href="#settings">Settings</a></li>
+                        <li><a href="#customization">Customization</a></li>
+                    </ul>
+                </li>
+                <li class="toc-section">
+                    <a href="#examples">📖 Examples</a>
+                    <ul class="toc-subsection">
+                        <li><a href="#basic-usage">Basic Usage</a></li>
+                        <li><a href="#advanced-workflows">Advanced Workflows</a></li>
+                        <li><a href="#automation-scripts">Automation Scripts</a></li>
+                    </ul>
+                </li>
+                <li class="toc-section">
+                    <a href="#troubleshooting">🔧 Troubleshooting</a>
+                    <ul class="toc-subsection">
+                        <li><a href="#common-issues">Common Issues</a></li>
+                        <li><a href="#error-messages">Error Messages</a></li>
+                        <li><a href="#support">Support</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Content -->
+        <main class="content">
+            <!-- Getting Started Section -->
+            <section class="content-section" id="getting-started">
+                <h1>🚀 Getting Started with C9 AI</h1>
+                <p>Welcome to C9 AI, the revolutionary AI-powered productivity CLI that transforms how you manage tasks and boost your efficiency. This comprehensive guide will help you get started and master all the features.</p>
+
+                <h2 id="installation">📦 Installation</h2>
+                <p>C9 AI is distributed as an npm package and can be installed globally on your system.</p>
+
+                <h3>Prerequisites</h3>
+                <p>Before installing C9 AI, ensure you have:</p>
+                <ul>
+                    <li>Node.js version 16.0.0 or higher</li>
+                    <li>npm package manager</li>
+                    <li>Terminal or command line access</li>
+                </ul>
+
+                <h3>Global Installation</h3>
+                <p>Install C9 AI globally using npm:</p>
+                <div class="code-block">
+                    <pre>npm install -g c9ai</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('npm install -g c9ai')">📋 Copy</button>
+                </div>
+
+                <div class="info-box note">
+                    <span class="icon">💡</span>
+                    <strong>Note:</strong> You may need to use <code class="inline-code">sudo</code> on macOS/Linux or run as Administrator on Windows if you encounter permission issues.
+                </div>
+
+                <h3>Verify Installation</h3>
+                <p>After installation, verify that C9 AI is properly installed:</p>
+                <div class="code-block">
+                    <pre>c9ai --version</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai --version')">📋 Copy</button>
+                </div>
+
+                <h2 id="quick-start">⚡ Quick Start</h2>
+                <p>Get up and running with C9 AI in under 5 minutes:</p>
+
+                <h3>1. First Run</h3>
+                <p>Start C9 AI for the first time:</p>
+                <div class="code-block">
+                    <pre>c9ai</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai')">📋 Copy</button>
+                </div>
+
+                <h3>2. View Available Commands</h3>
+                <p>See all available commands and options:</p>
+                <div class="code-block">
+                    <pre>c9ai --help</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai --help')">📋 Copy</button>
+                </div>
+
+                <h3>3. Interactive Mode</h3>
+                <p>Start an interactive session with AI:</p>
+                <div class="code-block">
+                    <pre>c9ai interactive</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai interactive')">📋 Copy</button>
+                </div>
+
+                <h2 id="system-requirements">💻 System Requirements</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Requirement</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Node.js</td>
+                            <td>>= 16.0.0</td>
+                            <td>LTS version recommended</td>
+                        </tr>
+                        <tr>
+                            <td>NPM</td>
+                            <td>>= 7.0.0</td>
+                            <td>Comes with Node.js</td>
+                        </tr>
+                        <tr>
+                            <td>Operating System</td>
+                            <td>Windows, macOS, Linux</td>
+                            <td>Cross-platform support</td>
+                        </tr>
+                        <tr>
+                            <td>Memory</td>
+                            <td>512 MB RAM</td>
+                            <td>Minimum requirement</td>
+                        </tr>
+                        <tr>
+                            <td>Internet</td>
+                            <td>Required</td>
+                            <td>For AI features</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Commands Section -->
+            <section class="content-section" id="commands">
+                <h1>⚡ Commands Reference</h1>
+                <p>C9 AI provides a comprehensive set of commands for task management, AI interactions, and productivity tracking.</p>
+
+                <h2 id="basic-commands">🔧 Basic Commands</h2>
+                
+                <h3>Help and Information</h3>
+                <div class="code-block">
+                    <pre>c9ai --help          # Show help information
+c9ai --version       # Display version number
+c9ai config          # Show current configuration</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai --help')">📋 Copy</button>
+                </div>
+
+                <h3>Interactive Mode</h3>
+                <div class="code-block">
+                    <pre>c9ai interactive     # Start interactive AI session
+c9ai i               # Short form for interactive</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai interactive')">📋 Copy</button>
+                </div>
+
+                <h2 id="todo-management">📋 Todo Management</h2>
+                <p>Manage your tasks efficiently with AI-powered todo commands:</p>
+
+                <h3>List Todos</h3>
+                <div class="code-block">
+                    <pre>c9ai todos           # List all todos
+c9ai todos list      # Explicit list command</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai todos')">📋 Copy</button>
+                </div>
+
+                <h3>Add Todos</h3>
+                <div class="code-block">
+                    <pre>c9ai todos add "Complete project documentation"
+c9ai todos add "Schedule team meeting" --priority high</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai todos add "Complete project documentation"')">📋 Copy</button>
+                </div>
+
+                <h3>Execute Todos</h3>
+                <div class="code-block">
+                    <pre>c9ai todos execute   # AI-powered todo execution
+c9ai todos sync      # Sync with external systems</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai todos execute')">📋 Copy</button>
+                </div>
+
+                <h2 id="ai-interactions">🤖 AI Interactions</h2>
+                <p>Leverage powerful AI models for various tasks:</p>
+
+                <h3>Switch AI Models</h3>
+                <div class="code-block">
+                    <pre>c9ai switch claude   # Switch to Claude AI
+c9ai switch gemini   # Switch to Gemini AI</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai switch claude')">📋 Copy</button>
+                </div>
+
+                <h2 id="analytics">📊 Analytics</h2>
+                <p>Track your productivity and performance:</p>
+
+                <div class="code-block">
+                    <pre>c9ai analytics       # View productivity insights
+c9ai tools           # List available tools</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai analytics')">📋 Copy</button>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="content-section" id="features">
+                <h1>✨ Features Overview</h1>
+                <p>Discover the powerful features that make C9 AI your ultimate productivity companion.</p>
+
+                <h2 id="ai-automation">🤖 AI-Powered Automation</h2>
+                <ul>
+                    <li><strong>Intelligent Task Processing:</strong> AI analyzes and prioritizes your tasks automatically</li>
+                    <li><strong>Smart Scheduling:</strong> Optimal time allocation based on your patterns</li>
+                    <li><strong>Context-Aware Suggestions:</strong> Relevant recommendations for your workflow</li>
+                    <li><strong>Multi-Model Support:</strong> Choose between Claude, Gemini, and other AI models</li>
+                </ul>
+
+                <h2 id="productivity-tracking">📈 Productivity Tracking</h2>
+                <ul>
+                    <li><strong>Real-time Analytics:</strong> Monitor your productivity metrics live</li>
+                    <li><strong>Performance Reports:</strong> Detailed insights into your work patterns</li>
+                    <li><strong>Goal Tracking:</strong> Set and monitor achievement targets</li>
+                    <li><strong>Time Analysis:</strong> Understand where your time is spent</li>
+                </ul>
+
+                <h2 id="cross-platform">🌐 Cross-Platform Support</h2>
+                <ul>
+                    <li><strong>Universal Compatibility:</strong> Works on Windows, macOS, and Linux</li>
+                    <li><strong>Cloud Synchronization:</strong> Access your data from any device</li>
+                    <li><strong>Integration Ready:</strong> Connect with popular productivity tools</li>
+                    <li><strong>Offline Capability:</strong> Basic functions work without internet</li>
+                </ul>
+
+                <div class="info-box tip">
+                    <span class="icon">💡</span>
+                    <strong>Pro Tip:</strong> Use <code class="inline-code">c9ai interactive</code> to explore features in a conversational manner with AI assistance.
+                </div>
+            </section>
+
+            <!-- Configuration Section -->
+            <section class="content-section" id="configuration">
+                <h1>⚙️ Configuration</h1>
+                <p>Customize C9 AI to match your workflow and preferences.</p>
+
+                <h2 id="ai-models">🧠 AI Models Configuration</h2>
+                <p>C9 AI supports multiple AI models. You can switch between them based on your needs:</p>
+
+                <h3>Available Models</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Strengths</th>
+                            <th>Best For</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Claude</td>
+                            <td>Analytical, detailed responses</td>
+                            <td>Complex problem solving</td>
+                        </tr>
+                        <tr>
+                            <td>Gemini</td>
+                            <td>Fast, efficient processing</td>
+                            <td>Quick task automation</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Switching Models</h3>
+                <div class="code-block">
+                    <pre># Switch to Claude (default)
+c9ai switch claude
+
+# Switch to Gemini
+c9ai switch gemini
+
+# Check current model
+c9ai config</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai switch claude')">📋 Copy</button>
+                </div>
+
+                <h2 id="settings">🔧 Settings</h2>
+                <p>Customize various aspects of C9 AI behavior:</p>
+
+                <div class="info-box warning">
+                    <span class="icon">⚠️</span>
+                    <strong>Note:</strong> Configuration files are stored in your system's config directory. Changes take effect immediately.
+                </div>
+            </section>
+
+            <!-- Examples Section -->
+            <section class="content-section" id="examples">
+                <h1>📖 Examples & Use Cases</h1>
+                <p>Learn through practical examples of how to use C9 AI effectively.</p>
+
+                <h2 id="basic-usage">🔰 Basic Usage Examples</h2>
+                
+                <h3>Daily Task Management</h3>
+                <div class="code-block">
+                    <pre># Start your day
+c9ai todos
+
+# Add today's tasks
+c9ai todos add "Review project proposals"
+c9ai todos add "Team standup at 10 AM"
+c9ai todos add "Finish quarterly report"
+
+# Let AI help prioritize
+c9ai todos execute</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai todos')">📋 Copy</button>
+                </div>
+
+                <h3>Interactive AI Session</h3>
+                <div class="code-block">
+                    <pre># Start interactive mode
+c9ai interactive
+
+# Example conversation:
+> "Help me plan my week"
+> "What should I prioritize today?"
+> "Create a schedule for my meetings"</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai interactive')">📋 Copy</button>
+                </div>
+
+                <h2 id="advanced-workflows">🚀 Advanced Workflows</h2>
+                
+                <h3>Productivity Analysis</h3>
+                <div class="code-block">
+                    <pre># View detailed analytics
+c9ai analytics
+
+# Check productivity trends
+c9ai analytics --detailed
+
+# Export productivity report
+c9ai analytics --export</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai analytics')">📋 Copy</button>
+                </div>
+
+                <h2 id="automation-scripts">⚡ Automation Scripts</h2>
+                <p>Create powerful automation workflows with C9 AI:</p>
+
+                <div class="code-block">
+                    <pre># Morning routine automation
+#!/bin/bash
+echo "🌅 Starting daily routine..."
+c9ai todos
+c9ai analytics
+c9ai interactive</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('c9ai todos && c9ai analytics')">📋 Copy</button>
+                </div>
+            </section>
+
+            <!-- Troubleshooting Section -->
+            <section class="content-section" id="troubleshooting">
+                <h1>🔧 Troubleshooting</h1>
+                <p>Solutions to common issues and problems you might encounter.</p>
+
+                <h2 id="common-issues">❓ Common Issues</h2>
+
+                <h3>Installation Problems</h3>
+                <div class="info-box warning">
+                    <span class="icon">⚠️</span>
+                    <strong>Permission Denied Error:</strong>
+                    <p>If you get permission errors during installation:</p>
+                    <div class="code-block">
+                        <pre># On macOS/Linux
+sudo npm install -g c9ai
+
+# On Windows (Run as Administrator)
+npm install -g c9ai</pre>
+                    </div>
+                </div>
+
+                <h3>Command Not Found</h3>
+                <div class="info-box note">
+                    <span class="icon">💡</span>
+                    <strong>Solution:</strong> Make sure npm global bin directory is in your PATH:
+                    <div class="code-block">
+                        <pre># Check npm global path
+npm config get prefix
+
+# Add to your shell profile
+export PATH=$PATH:$(npm config get prefix)/bin</pre>
+                    </div>
+                </div>
+
+                <h2 id="error-messages">🚨 Error Messages</h2>
+                
+                <h3>Network Connection Errors</h3>
+                <p>AI features require internet connection. If you see network errors:</p>
+                <ul>
+                    <li>Check your internet connection</li>
+                    <li>Verify firewall settings</li>
+                    <li>Try switching AI models</li>
+                </ul>
+
+                <h3>Node.js Version Issues</h3>
+                <div class="code-block">
+                    <pre># Check Node.js version
+node --version
+
+# Should be >= 16.0.0
+# Update if necessary from nodejs.org</pre>
+                    <button class="copy-btn" onclick="copyToClipboard('node --version')">📋 Copy</button>
+                </div>
+
+                <h2 id="support">🆘 Getting Support</h2>
+                <p>If you need additional help:</p>
+                <ul>
+                    <li><strong>GitHub Issues:</strong> <a href="https://github.com/c9ai/c9ai/issues" target="_blank">Report bugs and request features</a></li>
+                    <li><strong>NPM Package:</strong> <a href="https://www.npmjs.com/package/c9ai" target="_blank">View package details</a></li>
+                    <li><strong>Documentation:</strong> This comprehensive guide covers most use cases</li>
+                </ul>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // Copy to clipboard functionality
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('Copied to clipboard!');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: #27ae60;
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 6px;
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Sidebar toggle for mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        // Smooth scrolling and active navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers for smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                        
+                        // Update active states
+                        updateActiveNavigation(this.getAttribute('href'));
+                        
+                        // Close mobile sidebar
+                        document.getElementById('sidebar').classList.remove('active');
+                    }
+                });
+            });
+
+            // Scroll progress indicator
+            function updateScrollProgress() {
+                const scrollTop = window.pageYOffset;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = (scrollTop / docHeight) * 100;
+                document.getElementById('scrollProgress').style.height = scrollPercent + '%';
+            }
+
+            // Update active navigation based on scroll position
+            function updateActiveNavigationOnScroll() {
+                const sections = document.querySelectorAll('.content-section');
+                const navLinks = document.querySelectorAll('.toc a');
+                
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - 100;
+                    if (window.pageYOffset >= sectionTop) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + current) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            function updateActiveNavigation(href) {
+                document.querySelectorAll('.toc a').forEach(link => {
+                    link.classList.remove('active');
+                });
+                document.querySelector(`a[href="${href}"]`).classList.add('active');
+            }
+
+            // Add scroll listeners
+            window.addEventListener('scroll', function() {
+                updateScrollProgress();
+                updateActiveNavigationOnScroll();
+            });
+
+            // Initial calls
+            updateScrollProgress();
+            updateActiveNavigationOnScroll();
+        });
+
+        // Add CSS animation for toast
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

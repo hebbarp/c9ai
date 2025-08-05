@@ -1,0 +1,39 @@
+name: Build Windows Installer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-installer:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Build executable
+      run: npm run build:exe
+      
+    - name: Install NSIS
+      run: |
+        choco install nsis -y
+        refreshenv
+        
+    - name: Build installer
+      run: makensis installer.nsi
+        
+    - name: Upload installer
+      uses: actions/upload-artifact@v3
+      with:
+        name: c9ai-installer
+        path: dist/c9ai-installer.exe

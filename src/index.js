@@ -68,7 +68,7 @@ async function interactiveMode() {
 program
     .name('c9ai')
     .description('C9 AI - Autonomous AI-Powered Productivity System')
-    .version('2.0.0');
+    .version('2.1.0');
 
 program
     .command('switch <model>')

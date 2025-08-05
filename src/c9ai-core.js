@@ -1234,30 +1234,91 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
             try {
                 await this.sleep(500); // Simulate processing time
                 
-                // Smart pattern matching for demo purposes
+                // Enhanced conversational pattern matching
                 const taskLower = prompt.toLowerCase();
                 
-                if (taskLower.includes('compile') && taskLower.includes('research')) {
-                    resolve('@action: compile research_paper.tex');
-                } else if (taskLower.includes('open') && taskLower.includes('budget')) {
-                    resolve('@action: open budget.xlsx');
-                } else if (taskLower.includes('check') && taskLower.includes('github')) {
-                    resolve('@action: open https://github.com/user/repo/issues');
-                } else if (taskLower.includes('run') && taskLower.includes('cleanup')) {
-                    resolve('@action: run cleanup-weekly.sh');
-                } else if (taskLower.includes('search')) {
-                    const searchTerm = taskLower.match(/search.*?for\s+(.+?)(?:\s|$)/)?.[1] || 'tutorial';
-                    resolve(`@action: search ${searchTerm}`);
-                } else if (taskLower.includes('compile')) {
-                    resolve('@action: compile document.tex');
-                } else if (taskLower.includes('open')) {
-                    const fileType = taskLower.includes('spreadsheet') ? 'xlsx' : 'txt';
-                    resolve(`@action: open file.${fileType}`);
-                } else if (taskLower.includes('list') && (taskLower.includes('files') || taskLower.includes('directories'))) {
+                // Greetings and conversational responses
+                if (taskLower.match(/^(hi|hello|hey|greetings|good morning|good afternoon|good evening)$/)) {
+                    resolve('Hello! I\'m C9 AI. I can help you with tasks like:\n• "open excel" - Open applications\n• "list files" - Show directory contents\n• "search for X" - Web search\n• "compile document" - Build projects\nWhat can I help you with?');
+                } else if (taskLower.match(/^(how are you|what\'s up|how\'s it going)$/)) {
+                    resolve('I\'m doing great! Ready to help you be more productive. What task would you like me to help with?');
+                } else if (taskLower.includes('thank') || taskLower.includes('thanks')) {
+                    resolve('You\'re welcome! Happy to help. Is there anything else you need assistance with?');
+                } 
+                
+                // Enhanced application opening
+                else if (taskLower.includes('open')) {
+                    let app = '';
+                    if (taskLower.includes('excel') || taskLower.includes('spreadsheet')) {
+                        app = 'excel';
+                    } else if (taskLower.includes('word') || taskLower.includes('document')) {
+                        app = 'word';
+                    } else if (taskLower.includes('browser') || taskLower.includes('chrome') || taskLower.includes('firefox')) {
+                        app = 'chrome';
+                    } else if (taskLower.includes('code') || taskLower.includes('vscode') || taskLower.includes('editor')) {
+                        app = 'code';
+                    } else if (taskLower.includes('terminal') || taskLower.includes('command')) {
+                        app = 'terminal';
+                    } else if (taskLower.includes('calculator') || taskLower.includes('calc')) {
+                        app = 'calculator';
+                    } else if (taskLower.includes('notes') || taskLower.includes('notepad')) {
+                        app = 'notepad';
+                    } else {
+                        // Extract filename or generic open
+                        const fileMatch = taskLower.match(/open\s+(.+)/);
+                        app = fileMatch ? fileMatch[1].trim() : 'file';
+                    }
+                    resolve(`@action: open ${app}`);
+                }
+                
+                // File and directory operations
+                else if (taskLower.includes('list') && (taskLower.includes('files') || taskLower.includes('directories') || taskLower.includes('folder'))) {
                     resolve('@action: list files');
-                } else {
-                    // If we can't understand, provide helpful feedback
-                    reject(new Error(`Could not understand: "${prompt}". Try commands like "open file", "compile document", or "search for tutorial"`));
+                } else if (taskLower.includes('show') && (taskLower.includes('files') || taskLower.includes('directory'))) {
+                    resolve('@action: list files');
+                }
+                
+                // Search operations
+                else if (taskLower.includes('search')) {
+                    const searchTerm = taskLower.match(/search.*?(?:for\s+)?(.+?)(?:\s|$)/)?.[1] || 'tutorial';
+                    resolve(`@action: search ${searchTerm}`);
+                } else if (taskLower.includes('find') && !taskLower.includes('file')) {
+                    const searchTerm = taskLower.match(/find\s+(.+)/)?.[1] || 'information';
+                    resolve(`@action: search ${searchTerm}`);
+                }
+                
+                // System operations
+                else if (taskLower.includes('check') && taskLower.includes('disk')) {
+                    resolve('@action: check disk usage');
+                } else if (taskLower.includes('show') && taskLower.includes('process')) {
+                    resolve('@action: show processes');
+                }
+                
+                // Development tasks
+                else if (taskLower.includes('compile') || taskLower.includes('build')) {
+                    const target = taskLower.includes('research') ? 'research_paper.tex' : 'document.tex';
+                    resolve(`@action: compile ${target}`);
+                } else if (taskLower.includes('run') && taskLower.includes('script')) {
+                    resolve('@action: run script.sh');
+                }
+                
+                // Help and guidance
+                else if (taskLower.match(/^(help|what can you do|commands|options)$/)) {
+                    resolve('I can help you with:\n• Opening applications: "open excel", "open browser"\n• File operations: "list files", "show directory"\n• Searching: "search for tutorials"\n• System info: "check disk usage", "show processes"\n• Development: "compile document", "run script"\n\nTry any of these commands!');
+                }
+                
+                // Generic intent recognition
+                else if (taskLower.includes('create') || taskLower.includes('make') || taskLower.includes('new')) {
+                    const target = taskLower.includes('document') ? 'document.txt' : 'file.txt';
+                    resolve(`@action: open ${target}`);
+                } else if (taskLower.includes('close') || taskLower.includes('exit') || taskLower.includes('quit')) {
+                    resolve('To exit C9AI, type "exit" or "quit". To close an application, try "close [app name]".');
+                }
+                
+                // Fallback with better suggestions
+                else {
+                    const suggestions = this.getSuggestions(taskLower);
+                    reject(new Error(`I'm not sure what you mean by "${prompt}". ${suggestions}`));
                 }
 
                 clearTimeout(timeout);
@@ -1267,6 +1328,20 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
                 reject(error);
             }
         });
+    }
+
+    getSuggestions(input) {
+        if (input.includes('excel') || input.includes('spreadsheet')) {
+            return 'Try: "open excel"';
+        } else if (input.includes('file') || input.includes('document')) {
+            return 'Try: "list files" or "open document"';
+        } else if (input.includes('search') || input.includes('find')) {
+            return 'Try: "search for [topic]"';
+        } else if (input.includes('help')) {
+            return 'Try: "help" for available commands';
+        } else {
+            return 'Try commands like: "open excel", "list files", "search for tutorials", or "help"';
+        }
     }
 
     async parseNaturalLanguageTodo(todoText) {
@@ -1299,14 +1374,21 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
                 spinner = ora('Analyzing with local AI...').start();
                 
                 try {
-                    const response = await this.interpretCommand(input);
-                    spinner.succeed('Command interpreted');
+                    const response = await this.runLocalAI(input);
+                    spinner.succeed('Response generated');
                     spinner = null; // Clear reference
                     
-                    await this.executeInterpretedCommand(response);
+                    // Check if it's an action or conversational response
+                    if (response.startsWith('@action:')) {
+                        const action = response.replace('@action:', '').trim();
+                        await this.executeAction(action);
+                    } else {
+                        // It's a conversational response, just display it
+                        console.log(chalk.cyan(`🤖 ${response}`));
+                    }
                 } catch (interpretError) {
                     if (spinner) {
-                        spinner.fail('Failed to interpret command');
+                        spinner.fail('Failed to process command');
                         spinner = null;
                     }
                     throw interpretError;
@@ -1382,6 +1464,49 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
             throw new Error('Use "switch local" or "switch claude" to change models. Type "help" for available commands.');
         } else {
             throw new Error(`Could not understand: "${input}". Try commands like "list files", "open document", or "switch local"`);
+        }
+    }
+
+    async executeAction(action) {
+        console.log(chalk.green(`🔧 Executing: ${action}`));
+        
+        try {
+            // Parse different action types
+            if (action.startsWith('open ')) {
+                const target = action.replace('open ', '').trim();
+                await this.runIntent('open', target);
+            } else if (action.startsWith('search ')) {
+                const query = action.replace('search ', '').trim();
+                await this.runIntent('search', query);
+            } else if (action.startsWith('list ')) {
+                // Handle list commands
+                const isWindows = process.platform === 'win32';
+                const command = isWindows ? 'dir' : 'ls -la';
+                const result = await this.runCommand(command, true);
+                console.log(chalk.white(result));
+            } else if (action.includes('disk usage')) {
+                const isWindows = process.platform === 'win32';
+                const command = isWindows ? 'wmic logicaldisk get size,freespace,caption' : 'df -h';
+                const result = await this.runCommand(command, true);
+                console.log(chalk.white(result));
+            } else if (action.includes('processes')) {
+                const isWindows = process.platform === 'win32';
+                const command = isWindows ? 'tasklist' : 'ps aux | head -20';
+                const result = await this.runCommand(command, true);
+                console.log(chalk.white(result));
+            } else if (action.startsWith('compile ')) {
+                const target = action.replace('compile ', '').trim();
+                await this.runIntent('compile', target);
+            } else if (action.startsWith('run ')) {
+                const script = action.replace('run ', '').trim();
+                await this.runIntent('run', script);
+            } else {
+                // Generic command execution
+                const result = await this.runCommand(action, true);
+                console.log(chalk.white(result));
+            }
+        } catch (error) {
+            console.log(chalk.red(`❌ Action failed: ${error.message}`));
         }
     }
 

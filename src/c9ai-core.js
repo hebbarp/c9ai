@@ -28,7 +28,6 @@ class C9AI {
         // Timeout and retry configuration
         this.localModelTimeout = 30000; // 30 seconds
         this.maxRetries = 3;
-        this.retryCount = 0;
         this.toolsRegistry = {}; // This will be for internal tools, not external scripts
         this.running = false;
         this.maxIterations = 20;
@@ -1160,14 +1159,9 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
         }
     }
 
-    async runLocalAI(prompt) {
+    async runLocalAI(prompt, retryCount = 0) {
         if (!this.localModel || !this.localModel.ready) {
             await this.initLocalModel();
-        }
-
-        // Reset retry count for new requests
-        if (this.retryCount === 0) {
-            this.retryCount = 0;
         }
 
         try {
@@ -1180,14 +1174,11 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
             }
             
         } catch (error) {
-            this.retryCount++;
-            
-            if (this.retryCount < this.maxRetries) {
-                console.log(chalk.yellow(`⚠️ Local AI retry ${this.retryCount}/${this.maxRetries}: ${error.message}`));
+            if (retryCount < this.maxRetries) {
+                console.log(chalk.yellow(`⚠️ Local AI retry ${retryCount + 1}/${this.maxRetries}: ${error.message}`));
                 await this.sleep(1000); // Wait before retry
-                return await this.runLocalAI(prompt);
+                return await this.runLocalAI(prompt, retryCount + 1);
             } else {
-                this.retryCount = 0; // Reset for next request
                 throw new Error(`Local AI failed after ${this.maxRetries} attempts: ${error.message}`);
             }
         }
@@ -1300,14 +1291,26 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
     async processNaturalLanguageCommand(input) {
         console.log(chalk.cyan(`🤖 Processing: "${input}"`));
         
+        let spinner = null;
+        
         try {
             // Try intelligent processing first (local or pattern matching)
             if (await this.hasLocalModel()) {
-                const spinner = ora('Analyzing with local AI...').start();
-                const response = await this.interpretCommand(input);
-                spinner.succeed('Command interpreted');
+                spinner = ora('Analyzing with local AI...').start();
                 
-                await this.executeInterpretedCommand(response);
+                try {
+                    const response = await this.interpretCommand(input);
+                    spinner.succeed('Command interpreted');
+                    spinner = null; // Clear reference
+                    
+                    await this.executeInterpretedCommand(response);
+                } catch (interpretError) {
+                    if (spinner) {
+                        spinner.fail('Failed to interpret command');
+                        spinner = null;
+                    }
+                    throw interpretError;
+                }
             } else {
                 // Fallback to simple pattern matching or suggest using AI
                 const suggestion = this.suggestCommand(input);
@@ -1319,6 +1322,11 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
                 }
             }
         } catch (error) {
+            // Make sure spinner stops in case of any error
+            if (spinner) {
+                spinner.fail('Command processing failed');
+            }
+            
             console.log(chalk.red(`❌ Error processing command: ${error.message}`));
             console.log(chalk.yellow('💡 Type "help" for available commands or try "@claude" for assistance.'));
         }
@@ -1369,8 +1377,11 @@ ${chalk.cyan('🌟 ============================================ 🌟')}
                 action: 'show_processes',
                 command: command
             };
+        } else if (inputLower.includes('model') || inputLower.includes('switch')) {
+            // Handle model switching commands
+            throw new Error('Use "switch local" or "switch claude" to change models. Type "help" for available commands.');
         } else {
-            throw new Error('Could not interpret command');
+            throw new Error(`Could not understand: "${input}". Try commands like "list files", "open document", or "switch local"`);
         }
     }
 

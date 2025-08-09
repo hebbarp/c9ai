@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>Block Calendar Time</h4>
+            </div>
+            <div class="card-body">
+                <form id="block-form">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Event Title *</label>
+                        <input type="text" class="form-control" id="title" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="start_time" class="form-label">Start Time *</label>
+                                <input type="datetime-local" class="form-control" id="start_time" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="end_time" class="form-label">End Time *</label>
+                                <input type="datetime-local" class="form-control" id="end_time" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" rows="3" placeholder="Optional description for this blocked time"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notification_email" class="form-label">Notification Email</label>
+                        <input type="email" class="form-control" id="notification_email" placeholder="Email to receive notification (optional)">
+                        <small class="form-text text-muted">Leave empty if you don't want email notifications</small>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Block Calendar Time</button>
+                        <a href="/" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Success!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Calendar time has been blocked successfully!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="/" class="btn btn-primary">View All Events</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('block-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        title: document.getElementById('title').value,
+        start_time: document.getElementById('start_time').value,
+        end_time: document.getElementById('end_time').value,
+        description: document.getElementById('description').value,
+        notification_email: document.getElementById('notification_email').value
+    };
+    
+    // Validate that end time is after start time
+    if (new Date(formData.end_time) <= new Date(formData.start_time)) {
+        alert('End time must be after start time');
+        return;
+    }
+    
+    const submitBtn = document.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Blocking...';
+    
+    fetch('/block', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success modal
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
+            
+            // Reset form
+            document.getElementById('block-form').reset();
+        } else {
+            alert('Error blocking calendar time: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        alert('Error blocking calendar time: ' + error.message);
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Block Calendar Time';
+    });
+});
+
+// Set minimum date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const today = now.toISOString().slice(0, 16);
+    document.getElementById('start_time').min = today;
+    document.getElementById('end_time').min = today;
+    
+    // Update end time minimum when start time changes
+    document.getElementById('start_time').addEventListener('change', function() {
+        document.getElementById('end_time').min = this.value;
+    });
+});
+</script>
+{% endblock %}

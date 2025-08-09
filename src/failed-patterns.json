@@ -1,0 +1,70 @@
+[
+  {
+    "input": "fetch top news",
+    "timestamp": "2025-08-06T01:51:04.346Z",
+    "suggestions": [
+      {
+        "tool": "search_web",
+        "description": "Open a web search for the given query",
+        "score": 0.6
+      }
+    ],
+    "learned": false
+  },
+  {
+    "input": "fetch top news",
+    "timestamp": "2025-08-06T01:51:09.368Z",
+    "suggestions": [
+      {
+        "tool": "search_web",
+        "description": "Open a web search for the given query",
+        "score": 0.6
+      }
+    ],
+    "learned": false
+  },
+  {
+    "input": "hello there",
+    "timestamp": "2025-08-08T06:45:14.908Z",
+    "suggestions": [
+      {
+        "tool": "list_files",
+        "description": "List files and directories in the current or specified directory",
+        "score": 0.2
+      },
+      {
+        "tool": "search_web",
+        "description": "Open a web search for the given query",
+        "score": 0.2
+      },
+      {
+        "tool": "compile_pdf_pandoc",
+        "description": "Compile the file using pandoc",
+        "score": 0.2
+      }
+    ],
+    "learned": false
+  },
+  {
+    "input": "what is the capital of north korea",
+    "timestamp": "2025-08-08T06:54:07.480Z",
+    "suggestions": [
+      {
+        "tool": "list_files",
+        "description": "List files and directories in the current or specified directory",
+        "score": 0.8
+      },
+      {
+        "tool": "github_issues",
+        "description": "List GitHub issues for a repository",
+        "score": 0.8
+      },
+      {
+        "tool": "search_web",
+        "description": "Open a web search for the given query",
+        "score": 0.8
+      }
+    ],
+    "learned": false
+  }
+]

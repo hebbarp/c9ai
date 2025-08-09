@@ -113,6 +113,7 @@ c9ai models remove phi-3           # Free up disk space
 |-------|------|-----------|-----------|
 | **Phi-3** | 2.2GB | Excellent reasoning, tool use | Perfect for natural language → actions |
 | **TinyLLaMA** | 680MB | Fast, lightweight | Quick testing, simple commands |
+| **GPT-OSS-20B** | 11.7GB | Advanced reasoning, tool calling | Complex tasks, on-device inference |
 | **Claude** | Cloud API | Advanced reasoning | Complex analysis, coding help |
 | **Gemini** | Cloud API | Creative tasks | Content creation, brainstorming |
 

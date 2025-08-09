@@ -1,73 +1,34 @@
 {
   "name": "c9ai",
-  "version": "2.2.1",
-  "description": "C9 AI - Autonomous AI-Powered Productivity CLI with Semi-Learning System",
+  "version": "1.0.0",
+  "description": "AI-powered development assistant",
   "main": "src/index.js",
   "bin": {
-    "c9ai": "src/index.js"
+    "c9ai": "./src/index.js"
   },
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "install-global": "npm install -g .",
-    "test": "echo \"No tests specified\" && exit 0",
-    "build:exe": "pkg . --out-path dist",
-    "build:msi": "node build-msi.js",
-    "build:nsis": "makensis installer-simple.nsi",
-    "build:all": "npm run build:exe && npm run build:msi",
-    "clean": "rm -rf dist"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "link": "npm link"
   },
-  "keywords": [
-    "ai",
-    "productivity",
-    "claude",
-    "gemini",
-    "phi-3",
-    "llama",
-    "local-llm",
-    "privacy",
-    "natural-language",
-    "todo",
-    "automation",
-    "cli"
-  ],
-  "author": "C9 AI Team",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hebbarp/c9ai.git"
-  },
-  "homepage": "https://github.com/hebbarp/c9ai#readme",
-  "bugs": {
-    "url": "https://github.com/hebbarp/c9ai/issues"
-  },
-  "license": "MIT",
   "dependencies": {
     "chalk": "^4.1.2",
-    "chokidar": "^3.5.3",
     "commander": "^11.1.0",
-    "fs-extra": "^11.2.0",
+    "dotenv": "^17.2.1",
+    "fs-extra": "^10.1.0",
     "inquirer": "^8.2.4",
-    "node-fetch": "^2.7.0",
-    "node-llama-cpp": "^3.11.0",
+    "node-llama-cpp": "^2.0.0",
     "ora": "^5.4.1",
-    "yaml": "^2.3.4"
+    "zod": "^4.0.16"
   },
   "devDependencies": {
-    "electron-wix-msi": "^5.1.3",
-    "nodemon": "^3.0.2",
-    "pkg": "^5.8.1"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "pkg": {
-    "scripts": "src/**/*.js",
-    "assets": "assets/**/*",
-    "targets": [
-      "node18-win-x64",
-      "node18-macos-x64",
-      "node18-linux-x64"
-    ],
-    "outputPath": "dist"
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "@types/jest": "^27.0.3",
+    "babel-jest": "^30.0.5",
+    "jest": "^27.5.1",
+    "supertest": "^6.1.6"
   }
 }

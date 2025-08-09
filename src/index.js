@@ -2,8 +2,11 @@
 
 const { program } = require('commander');
 const chalk = require('chalk');
-const inquirer = require('inquirer');
-const C9AI = require('./c9ai-core');
+const readline = require('readline');
+const C9AI = require('./core/C9AICore');
+const Logger = require('./utils/logger');
+
+const c9ai = new C9AI();
 
 // ASCII Art Banner
 const banner = `
@@ -19,137 +22,109 @@ ${chalk.green('  🤖 Claude CLI    ✨ Gemini CLI    🚀 Tool Use  ')}
 ${chalk.cyan('🌟 ============================================ 🌟')}
 `;
 
-// Core CLI instance
-const c9ai = new C9AI();
-
-// Signal handlers for graceful exit
-process.on('SIGINT', () => {
-    console.log(chalk.yellow('\n🛑 Received Ctrl+C. Type "exit" to quit gracefully or "emergency exit" to force quit.'));
-});
-
-process.on('SIGTERM', () => {
-    console.log(chalk.yellow('\n👋 Shutting down gracefully...'));
-    process.exit(0);
-});
-
-// Interactive mode
+// --- Interactive Mode Function ---
 async function interactiveMode() {
+    await c9ai.init();
     console.log(banner);
-    console.log(chalk.cyan('\nNew in this version: Type @claude or @gemini to start an interactive session!'));
+    Logger.info('Welcome to C9AI. Type "help" for commands or "exit" to quit.');
 
-    console.log(chalk.green('\nQuick Actions:'));
-    console.log(chalk.white('  claude <prompt>   - Quick prompt to Claude'));
-    console.log(chalk.white('  gemini <prompt>   - Quick prompt to Gemini'));
-    console.log(chalk.white('  todos             - Manage your tasks'));
-    console.log(chalk.white('  help              - Show all commands'));
-    console.log(chalk.white('  exit/quit/stop    - Quit c9ai'));
-    console.log(chalk.white('  emergency exit    - Force quit if stuck\n'));
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        prompt: chalk.cyan('c9ai> '),
+        removeHistoryDuplicates: true
+    });
 
-    while (true) {
-        try {
-            const { command } = await inquirer.prompt([
-                {
-                    type: 'input',
-                    name: 'command',
-                    message: chalk.cyan('c9ai>'),
-                    prefix: ''
-                }
-            ]);
-
-            if (command.trim() === 'exit' || command.trim() === 'quit' || command.trim() === 'stop') {
-                console.log(chalk.yellow('\\n👋 Thanks for using C9 AI!'));
-                process.exit(0);
-            }
-            
-            // Emergency exit for Ctrl+C equivalent
-            if (command.trim().toLowerCase() === 'emergency exit') {
-                console.log(chalk.red('\\n🛑 Emergency exit activated!'));
-                process.exit(0);
-            }
-
-            if (command.trim() === '') continue;
-
-            await c9ai.handleCommand(command.trim());
-        } catch (error) {
-            if (error.isTtyError) {
-                console.log(chalk.red('Interactive mode not supported in this environment'));
-                process.exit(1);
-            } else {
-                console.error(chalk.red('Error:'), error.message);
-            }
+    rl.on('line', (line) => {
+        const input = line.trim();
+        if (input.toLowerCase() === 'exit' || input.toLowerCase() === 'quit') {
+            rl.close();
+            return;
+        } 
+        
+        if (input) {
+            // Handle command asynchronously but don't await in the event handler
+            c9ai.handleCommand(input)
+                .then(() => {
+                    rl.prompt();
+                })
+                .catch((err) => {
+                    Logger.error('Error:', err.message);
+                    rl.prompt();
+                });
+        } else {
+            rl.prompt();
         }
-    }
+    });
+
+    rl.on('close', () => {
+        console.log(chalk.yellow('\n👋 Thanks for using C9AI!'));
+        process.exit(0);
+    });
+
+    rl.on('SIGINT', () => {
+        console.log(chalk.yellow('\n🛑 Received Ctrl+C. Type "exit" to quit gracefully.'));
+        rl.prompt();
+    });
+
+    rl.on('error', (err) => {
+        Logger.error('Readline error:', err.message);
+        rl.prompt();
+    });
+
+    rl.prompt();
 }
 
-// CLI Commands
+// --- CLI Command Definitions ---
 program
     .name('c9ai')
     .description('C9 AI - Autonomous AI-Powered Productivity System')
-    .version('2.1.0');
+    .version('1.0.0');
 
 program
     .command('switch <model>')
-    .description('Switch default AI model (claude|gemini)')
+    .description('Switch default AI model (claude|gemini|local)')
     .action(async (model) => {
-        await c9ai.switchModel(model);
+        await c9ai.init();
+        await c9ai.modelHandler.switchModel(model);
     });
 
 program
-    .command('todos [action] [task...]')
-    .description('Manage todos (list|add|execute|sync)')
-    .action(async (action, task) => {
-        await c9ai.handleTodos(action, task);
+    .command('models [action]')
+    .description('Manage local AI models (list)')
+    .action(async (action) => {
+        await c9ai.init();
+        await c9ai.modelHandler.handle([action]);
     });
 
-program
-    .command('analytics')
-    .description('Show productivity analytics')
-    .action(async () => {
-        await c9ai.showAnalytics();
-    });
-
-program
-    .command('tools')
-    .description('List available tools')
-    .action(async () => {
-        await c9ai.listTools();
-    });
-
-program
-    .command('models [action] [model]')
-    .description('Manage local AI models (list|install|remove|status)')
-    .action(async (action, model) => {
-        await c9ai.handleModels(action, model);
-    });
-
-program
-    .command('logo')
-    .alias('banner')
-    .description('Display the c9ai banner')
-    .action(() => {
-        console.log(banner);
-    });
-
-program
-    .command('interactive')
-    .alias('i')
-    .description('Start interactive mode')
-    .action(interactiveMode);
-
-// Default action - start interactive mode
-if (process.argv.length === 2) {
-    interactiveMode();
-} else {
-    program.parse();
+// --- Main Application Logic ---
+async function run() {
+    // If no commands are passed, start interactive mode
+    if (process.argv.length <= 2) {
+        await interactiveMode();
+    } else {
+        // Otherwise, parse the command-line arguments
+        await program.parseAsync(process.argv);
+    }
 }
 
-// Handle uncaught errors
-process.on('uncaughtException', (error) => {
-    console.error(chalk.red('\\n❌ Uncaught Error:'), error.message);
+// --- Run the app and handle errors ---
+run().catch(error => {
+    Logger.error('A critical error occurred:', error.message);
     process.exit(1);
 });
 
+// Handle uncaught exceptions and rejections
+process.on('uncaughtException', (error) => {
+    Logger.error('Uncaught Exception:', error.message);
+});
+
 process.on('unhandledRejection', (reason, promise) => {
-    console.error(chalk.red('\\n❌ Unhandled Rejection:'), reason);
-    process.exit(1);
+    Logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log(chalk.yellow('\n👋 Shutting down gracefully...'));
+    process.exit(0);
 });

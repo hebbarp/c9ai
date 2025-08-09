@@ -1,0 +1,335 @@
+{
+  "tools": {
+    "list_files": {
+      "name": "list_files",
+      "description": "List files and directories in the current or specified directory",
+      "command": "ls -la",
+      "windows_command": "dir",
+      "parameters": {
+        "path": {
+          "type": "string",
+          "description": "Directory path to list (optional, defaults to current directory)",
+          "required": false
+        }
+      }
+    },
+    "check_disk_usage": {
+      "name": "check_disk_usage",
+      "description": "Check disk space usage on all drives",
+      "command": "df -h",
+      "windows_command": "wmic logicaldisk get size,freespace,caption",
+      "parameters": {}
+    },
+    "show_processes": {
+      "name": "show_processes",
+      "description": "Show running processes",
+      "command": "ps aux | head -20",
+      "windows_command": "tasklist",
+      "parameters": {}
+    },
+    "github_issues": {
+      "name": "github_issues",
+      "description": "List GitHub issues for a repository",
+      "command": "gh issue list",
+      "windows_command": "gh issue list",
+      "parameters": {
+        "repo": {
+          "type": "string",
+          "description": "Repository name (e.g., owner/repo)",
+          "required": false,
+          "default": "hebbarp/todo-management"
+        }
+      }
+    },
+    "execute_github_issues": {
+      "name": "execute_github_issues",
+      "description": "Read GitHub issues and execute them as tasks",
+      "command": "gh issue list --json number,title,body,labels",
+      "windows_command": "gh issue list --json number,title,body,labels",
+      "parameters": {
+        "repo": {
+          "type": "string",
+          "description": "Repository name (e.g., owner/repo)",
+          "required": false,
+          "default": "hebbarp/todo-management"
+        }
+      }
+    },
+    "git_status": {
+      "name": "git_status",
+      "description": "Show git repository status",
+      "command": "git status",
+      "windows_command": "git status",
+      "parameters": {}
+    },
+    "search_web": {
+      "name": "search_web",
+      "description": "Open a web search for the given query",
+      "command": "open 'https://www.google.com/search?q={{query}}'",
+      "windows_command": "start \"\" \"https://www.google.com/search?q={{query}}\"",
+      "linux_command": "xdg-open 'https://www.google.com/search?q={{query}}'",
+      "parameters": {
+        "query": {
+          "type": "string",
+          "description": "Search query",
+          "required": true
+        }
+      }
+    },
+    "open_application": {
+      "name": "open_application",
+      "description": "Open an application or file",
+      "command": "open {{target}}",
+      "windows_command": "start \"\" \"{{target}}\"",
+      "linux_command": "xdg-open {{target}}",
+      "parameters": {
+        "target": {
+          "type": "string",
+          "description": "Application name or file path to open",
+          "required": true
+        }
+      }
+    },
+    "create_content": {
+      "name": "create_content",
+      "description": "Create written content like posts, articles, or documents",
+      "command": "echo 'Content creation'",
+      "windows_command": "echo Content creation",
+      "parameters": {
+        "type": {
+          "type": "string",
+          "description": "Type of content (post, article, document, etc.)",
+          "required": true
+        },
+        "topic": {
+          "type": "string",
+          "description": "Topic or subject for the content",
+          "required": true
+        },
+        "filename": {
+          "type": "string",
+          "description": "Optional filename to save content",
+          "required": false
+        }
+      }
+    },
+    "compile_pdf_pandoc": {
+      "name": "compile_pdf_pandoc",
+      "description": "Compile the file using pandoc",
+      "command": "pandoc {{target}}",
+      "parameters": {
+        "-S": {
+          "type": "string",
+          "description": "system",
+          "required": false
+        }
+      }
+    },
+    "convert_video": {
+      "name": "convert_video",
+      "description": "Convert video files between formats using ffmpeg",
+      "command": "ffmpeg -i {{input}} {{output}}",
+      "windows_command": "ffmpeg -i {{input}} {{output}}",
+      "parameters": {
+        "input": {
+          "type": "string",
+          "description": "Input video file path",
+          "required": true
+        },
+        "output": {
+          "type": "string",
+          "description": "Output video file path with desired format",
+          "required": true
+        },
+        "quality": {
+          "type": "string",
+          "description": "Video quality (high, medium, low)",
+          "required": false,
+          "default": "medium"
+        }
+      }
+    },
+    "extract_audio": {
+      "name": "extract_audio",
+      "description": "Extract audio from video files using ffmpeg",
+      "command": "ffmpeg -i {{input}} -vn -acodec copy {{output}}",
+      "windows_command": "ffmpeg -i {{input}} -vn -acodec copy {{output}}",
+      "parameters": {
+        "input": {
+          "type": "string",
+          "description": "Input video file path",
+          "required": true
+        },
+        "output": {
+          "type": "string",
+          "description": "Output audio file path (e.g., audio.mp3)",
+          "required": true
+        }
+      }
+    },
+    "compress_video": {
+      "name": "compress_video",
+      "description": "Compress video files to reduce size using ffmpeg",
+      "command": "ffmpeg -i {{input}} -crf 28 -preset fast {{output}}",
+      "windows_command": "ffmpeg -i {{input}} -crf 28 -preset fast {{output}}",
+      "parameters": {
+        "input": {
+          "type": "string",
+          "description": "Input video file path",
+          "required": true
+        },
+        "output": {
+          "type": "string",
+          "description": "Output compressed video file path",
+          "required": true
+        },
+        "quality": {
+          "type": "string",
+          "description": "Compression level (low=23, medium=28, high=35)",
+          "required": false,
+          "default": "28"
+        }
+      }
+    },
+    "resize_image": {
+      "name": "resize_image",
+      "description": "Resize images using ImageMagick",
+      "command": "magick {{input}} -resize {{size}} {{output}}",
+      "windows_command": "magick {{input}} -resize {{size}} {{output}}",
+      "parameters": {
+        "input": {
+          "type": "string",
+          "description": "Input image file path",
+          "required": true
+        },
+        "output": {
+          "type": "string",
+          "description": "Output image file path",
+          "required": true
+        },
+        "size": {
+          "type": "string",
+          "description": "New size (e.g., 800x600, 50%, 1920x1080)",
+          "required": true
+        }
+      }
+    },
+    "convert_image": {
+      "name": "convert_image",
+      "description": "Convert images between formats using ImageMagick",
+      "command": "magick {{input}} {{output}}",
+      "windows_command": "magick {{input}} {{output}}",
+      "parameters": {
+        "input": {
+          "type": "string",
+          "description": "Input image file path",
+          "required": true
+        },
+        "output": {
+          "type": "string",
+          "description": "Output image file path with desired format",
+          "required": true
+        },
+        "quality": {
+          "type": "string",
+          "description": "Image quality (1-100 for JPEG)",
+          "required": false
+        }
+      }
+    },
+    "optimize_image": {
+      "name": "optimize_image",
+      "description": "Optimize images for web using ImageMagick",
+      "command": "magick {{input}} -strip -interlace Plane -gaussian-blur 0.05 -quality 85% {{output}}",
+      "windows_command": "magick {{input}} -strip -interlace Plane -gaussian-blur 0.05 -quality 85% {{output}}",
+      "parameters": {
+        "input": {
+          "type": "string",
+          "description": "Input image file path",
+          "required": true
+        },
+        "output": {
+          "type": "string",
+          "description": "Output optimized image file path",
+          "required": true
+        }
+      }
+    },
+    "create_thumbnail": {
+      "name": "create_thumbnail",
+      "description": "Create image thumbnails using ImageMagick",
+      "command": "magick {{input}} -thumbnail {{size}} {{output}}",
+      "windows_command": "magick {{input}} -thumbnail {{size}} {{output}}",
+      "parameters": {
+        "input": {
+          "type": "string",
+          "description": "Input image file path",
+          "required": true
+        },
+        "output": {
+          "type": "string",
+          "description": "Output thumbnail file path",
+          "required": true
+        },
+        "size": {
+          "type": "string",
+          "description": "Thumbnail size (e.g., 150x150, 200x200)",
+          "required": false,
+          "default": "150x150"
+        }
+      }
+    },
+    "check_calendar": {
+      "name": "check_calendar",
+      "description": "Check calendar events for today using macOS Calendar",
+      "command": "osascript -e 'tell application \"Calendar\" to get summary of events of calendar 1 whose start date is greater than (current date) and start date is less than ((current date) + 1 * days)'",
+      "windows_command": "powershell -Command \"Get-WinEvent -FilterHashtable @{LogName='Application'; ID=1000} -MaxEvents 5 | Select-Object TimeCreated, Message\"",
+      "linux_command": "if [ -f ~/.local/share/evolution/calendar/system/calendar.ics ]; then grep -A5 $(date +%Y%m%d) ~/.local/share/evolution/calendar/system/calendar.ics; else echo 'No calendar file found. Please export calendar or use web calendar.'; fi",
+      "parameters": {
+        "date": {
+          "type": "string",
+          "description": "Date to check (YYYY-MM-DD format, defaults to today)",
+          "required": false
+        }
+      }
+    },
+    "check_calendar_file": {
+      "name": "check_calendar_file",
+      "description": "Check calendar events from exported .ics file",
+      "command": "grep -A10 -B2 $(date +%Y%m%d) {{calendar_file}} || echo 'No events found for today'",
+      "windows_command": "findstr /C:\"$(powershell -Command 'Get-Date -Format yyyyMMdd')\" {{calendar_file}}",
+      "parameters": {
+        "calendar_file": {
+          "type": "string",
+          "description": "Path to calendar .ics file",
+          "required": true
+        }
+      }
+    },
+    "project_dashboard": {
+      "name": "project_dashboard",
+      "description": "Generate project status dashboard from GitHub issues and local todos",
+      "command": "echo '# Project Dashboard - '$(date) > dashboard.md && echo '' >> dashboard.md && echo '## GitHub Issues' >> dashboard.md && gh issue list --limit 10 --json number,title,state,assignees --template '{{range .}}* [{{.state}}] #{{.number}}: {{.title}}{{if .assignees}} ({{range .assignees}}@{{.login}} {{end}}){{end}}{{\"\\n\"}}{{end}}' >> dashboard.md 2>/dev/null || echo '* GitHub CLI not configured or no issues found' >> dashboard.md && echo '' >> dashboard.md && echo '## Local Todos' >> dashboard.md && if [ -f todo.md ]; then cat todo.md >> dashboard.md; else echo '* No local todo.md found' >> dashboard.md; fi && echo '' >> dashboard.md && echo '## Git Status' >> dashboard.md && git status --porcelain | head -10 >> dashboard.md 2>/dev/null || echo '* Not a git repository' >> dashboard.md && cat dashboard.md",
+      "windows_command": "echo # Project Dashboard - %date% > dashboard.md && echo. >> dashboard.md && echo ## GitHub Issues >> dashboard.md && gh issue list --limit 10 --json number,title,state >> dashboard.md 2>nul || echo * GitHub CLI not configured >> dashboard.md && echo. >> dashboard.md && echo ## Local Todos >> dashboard.md && if exist todo.md (type todo.md >> dashboard.md) else (echo * No local todo.md found >> dashboard.md) && echo. >> dashboard.md && echo ## Git Status >> dashboard.md && git status --porcelain >> dashboard.md 2>nul || echo * Not a git repository >> dashboard.md && type dashboard.md",
+      "parameters": {
+        "format": {
+          "type": "string",
+          "description": "Output format (markdown, json, text)",
+          "required": false,
+          "default": "markdown"
+        }
+      }
+    },
+    "standup_notes": {
+      "name": "standup_notes",
+      "description": "Generate daily standup notes from git commits and todos",
+      "command": "echo '# Daily Standup Notes - '$(date +%Y-%m-%d) > standup.md && echo '' >> standup.md && echo '## What I did yesterday:' >> standup.md && git log --oneline --since='yesterday' --author=\"$(git config user.name)\" | head -5 | sed 's/^/* /' >> standup.md 2>/dev/null || echo '* No recent commits found' >> standup.md && echo '' >> standup.md && echo '## What I plan to do today:' >> standup.md && if [ -f todo.md ]; then grep '\\- \\[ \\]' todo.md | head -3 | sed 's/^/* /' >> standup.md; else echo '* Check todo list' >> standup.md; fi && echo '' >> standup.md && echo '## Blockers:' >> standup.md && echo '* None at the moment' >> standup.md && cat standup.md",
+      "windows_command": "echo # Daily Standup Notes - %date% > standup.md && echo. >> standup.md && echo ## What I did yesterday: >> standup.md && git log --oneline --since=\"yesterday\" --author=\"%USERNAME%\" >> standup.md 2>nul || echo * No recent commits found >> standup.md && echo. >> standup.md && echo ## What I plan to do today: >> standup.md && if exist todo.md (findstr \"- \\[ \\]\" todo.md >> standup.md) else (echo * Check todo list >> standup.md) && echo. >> standup.md && echo ## Blockers: >> standup.md && echo * None at the moment >> standup.md && type standup.md",
+      "parameters": {}
+    }
+  },
+  "tool_selection_prompt": "You are a smart tool selector. Match user requests to the best available tool.\n\nAvailable tools:\n{tools}\n\nUser request: \"{user_input}\"\n\nAnalyze the request and select the most appropriate tool. Examples:\n- \"show disk usage\" → check_disk_usage\n- \"list files\" → list_files  \n- \"show processes\" → show_processes\n- \"git status\" → git_status\n- \"search for X\" → search_web\n- \"open X\" → open_application\n- \"convert video to mp4\" → convert_video\n- \"extract audio from video\" → extract_audio\n- \"compress this video\" → compress_video\n- \"resize image to 800x600\" → resize_image\n- \"convert png to jpg\" → convert_image\n- \"optimize image for web\" → optimize_image\n- \"create thumbnail\" → create_thumbnail
+- \"check my calendar\" → check_calendar
+- \"show project dashboard\" → project_dashboard
+- \"generate standup notes\" → standup_notes\n\nRespond ONLY in this JSON format:\n{\n  \"tool\": \"exact_tool_name\",\n  \"parameters\": {},\n  \"reasoning\": \"brief explanation\"\n}"
+}

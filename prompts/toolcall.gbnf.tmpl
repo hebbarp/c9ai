@@ -1,0 +1,29 @@
+root ::= ws object ws
+object ::= "{" ws members ws "}"
+members ::= member (ws "," ws member)*
+
+member ::= key_tool | key_args | key_conf | key_reason
+
+key_tool ::= "\"tool\"" ws ":" ws tool_name
+tool_name ::= "\"" ( {{TOOL_ENUM}} | "none" ) "\""
+
+key_args ::= "\"args\"" ws ":" ws args_obj
+; NOTE: by default we allow generic JSON; optionally replace args_obj with per-tool grammars.
+args_obj ::= "{" ws (pair (ws "," ws pair)*)? ws "}"
+pair ::= string ws ":" ws value
+
+key_conf ::= "\"confidence\"" ws ":" ws number
+key_reason ::= "\"reason\"" ws ":" ws string
+
+value ::= string | number | obj | arr | "true" | "false" | "null"
+obj ::= "{" ws (pair (ws "," ws pair)*)? ws "}"
+arr ::= "[" ws (value (ws "," ws value)*)? ws "]"
+string ::= "\"" chars "\""
+chars ::= ([^"\\] | escape)*
+escape ::= "\\" ["\\/bfnrt] | "\\u" hex hex hex hex
+hex ::= [0-9a-fA-F]
+number ::= "-"? int frac? exp?
+int ::= "0" | [1-9][0-9]*
+frac ::= "." [0-9]+
+exp ::= [eE] [-+]? [0-9]+
+ws ::= [ \t\n\r]*

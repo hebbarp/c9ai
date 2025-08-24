@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>c9ai — Agent Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #000000;
+      --panel: #121212;
+      --muted: #1a1a1a;
+      --text: #ffffff;
+      --sub: #b3b3b3;
+      --primary: #7c83ff;
+      --primary-ink: #ffffff;
+      --bubble: #1a1a1a;
+      --user: #7c83ff;
+      --danger: #ff4d6d;
+      --ok: #2ecc71;
+      --border: #333333;
+    }
+    
+    /* Light mode - can be toggled with data-theme="light" on body */
+    [data-theme="light"] {
+      --bg: #f7f7f8;
+      --panel: #ffffff;
+      --muted: #f0f0f0;
+      --text: #1a1a1a;
+      --sub: #666666;
+      --primary: #7c83ff;
+      --primary-ink: #ffffff;
+      --bubble: #f9f9f9;
+      --user: #7c83ff;
+      --danger: #ff4d6d;
+      --ok: #2ecc71;
+      --border: #e1e1e1;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+      max-height: 100vh;
+      overflow: hidden;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    .shell {
+      max-width: 1200px; margin: 0 auto; padding: 16px;
+      display: grid; gap: 16px; grid-template-columns: 320px 1fr;
+      min-height: calc(100vh - 32px);
+      max-height: calc(100vh - 32px);
+      overflow: hidden;
+    }
+    @media (max-width: 960px) { .shell { grid-template-columns: 1fr; } }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,.25); display: flex; flex-direction: column; }
+    .card .hd { padding: 14px 16px; border-bottom: 1px solid var(--border); font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .card .bd { padding: 16px; flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+    
+    /* Chat area styling for better layout */
+    .chat {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      max-height: calc(60vh - 100px); /* Reasonable max height */
+      padding: 8px;
+      /* Ensure smooth scrolling */
+      scroll-behavior: smooth;
+    }
+    
+    /* Input area should not shrink */
+    .input-area {
+      flex-shrink: 0;
+    }
+    .row { display: flex; gap: 10px; align-items: center; }
+    .col { display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 0; }
+    
+    /* Ensure chat card takes appropriate space */
+    .col .card:first-child {
+      flex: 1;
+      min-height: 400px;
+      max-height: calc(70vh);
+    }
+    
+    /* Timeline card should be smaller */
+    .col .card:last-child {
+      flex: 0 0 auto;
+      max-height: 300px;
+    }
+    
+    /* Timeline itself should be scrollable */
+    .timeline {
+      overflow-y: auto;
+      max-height: 250px;
+      padding: 8px;
+      scroll-behavior: smooth;
+    }
+    
+    /* Message styling improvements */
+    .msg {
+      margin-bottom: 12px;
+    }
+    
+    .msg .bubble {
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      line-height: 1.4;
+    }
+
+    .pill { background: var(--muted); color: var(--text); padding: 6px 10px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); }
+    .btn {
+      background: var(--primary); color: white; border: 0; padding: 10px 14px; border-radius: 12px; cursor: pointer;
+      font-weight: 600;
+    }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+    .btn.secondary { background: var(--muted); color: var(--text); }
+    .btn.ghost { background: transparent; border: 1px solid var(--border); }
+    .input, .select, .textarea {
+      width: 100%; background: var(--muted); color: var(--text);
+      border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+    }
+    .textarea { min-height: 72px; resize: vertical; }
+    .hint { font-size: 12px; color: var(--sub); font-weight: 500; }
+    .stack { display: grid; gap: 8px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 2px; }
+    .chip { 
+      background: var(--muted); 
+      border: 1px solid var(--border); 
+      border-radius: 999px; 
+      padding: 8px 12px; 
+      cursor: pointer; 
+      font-size: 12px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .chip:hover { 
+      border-color: var(--primary); 
+      background: var(--accent);
+      transform: translateY(-1px);
+    }
+    .toggle {
+      display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text);
+    }
+    .toggle input { width: 18px; height: 18px; }
+
+    .msg { display: flex; }
+    .msg .bubble {
+      max-width: min(85%, 740px);
+      padding: 10px 14px; border-radius: 16px; white-space: pre-wrap; word-break: break-word;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    }
+    .msg.user { justify-content: flex-end; }
+    .msg.user .bubble { background: var(--user); color: var(--primary-ink); }
+    .msg.assistant .bubble { background: var(--bubble); }
+    .msg.system .bubble { background: #122; color: #acf; }
+
+    .timeline { 
+      flex: 2; 
+      min-height: 200px; 
+      max-height: none; 
+      overflow: auto; 
+      padding: 8px; 
+      border-radius: 12px; 
+      background: var(--panel); 
+      border: 1px solid var(--border); 
+    }
+    .trow { 
+      display: grid; 
+      grid-template-columns: 80px 1fr; 
+      gap: 12px; 
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; 
+      font-size: 13px;
+      line-height: 1.4;
+      padding: 2px 0;
+    }
+    .trow .time { 
+      color: var(--text); 
+      opacity: 0.7;
+      font-weight: 500;
+      font-size: 12px;
+    }
+    .ok { color: var(--ok); }
+    .err { color: var(--danger); }
+    
+    /* Enhanced status indicators */
+    .status-starting { 
+      color: #fbbf24; 
+      animation: pulse 2s infinite;
+    }
+    .status-tool { color: #3b82f6; }
+    .status-result { color: #10b981; }
+    .status-error { color: var(--danger); }
+    .status-success { color: var(--ok); font-weight: 600; }
+    
+    /* Loading animation */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    /* Status type indicators */
+    .trow[data-status="starting"] { background: rgba(251, 191, 36, 0.05); }
+    .trow[data-status="tool"] { background: rgba(59, 130, 246, 0.05); }
+    .trow[data-status="error"] { background: rgba(239, 68, 68, 0.05); }
+    .trow[data-status="success"] { background: rgba(16, 185, 129, 0.05); }
+    .divider { height: 1px; background: var(--border); margin: 8px 0; }
+
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono"; background: #0f1220; border: 1px solid var(--border); padding: 0 6px; border-radius: 6px; color: #c9d2ff; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <!-- Controls -->
+    <div class="card">
+      <div class="hd">🤖 c9ai — Agent
+        <div style="margin-left:auto; display:flex; gap:8px;">
+          <button id="btnBench" class="btn ghost">Speed Test</button>
+          <button id="btnHealth" class="btn ghost">Connections</button>
+          <button id="btnSettings" class="btn secondary">Settings</button>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="stack">
+          <div class="stack">
+            <label class="hint">Provider</label>
+            <select id="provider" class="select">
+              <option value="llamacpp" selected>llama.cpp (local)</option>
+              <option value="ollama">Ollama (local)</option>
+              <option value="claude">Claude (cloud)</option>
+              <option value="gemini">Gemini (cloud)</option>
+            </select>
+          </div>
+
+          <div class="stack">
+            <label class="hint">Allowed tools</label>
+            <div class="row" style="flex-wrap:wrap; gap:10px 14px">
+              <label class="toggle"><input type="checkbox" class="tool" value="shell.run" checked> shell.run</label>
+              <label class="toggle"><input type="checkbox" class="tool" value="script.run" checked> script.run</label>
+              <label class="toggle"><input type="checkbox" class="tool" value="fs.read" checked> fs.read</label>
+              <label class="toggle"><input type="checkbox" class="tool" value="fs.write" checked> fs.write</label>
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="toggle"><input id="streamFinal" type="checkbox" checked> Stream final</label>
+            <span class="pill">live</span>
+          </div>
+
+          <div class="stack">
+            <label class="hint">Agent API Base</label>
+            <input id="apiBase" class="input" value="http://127.0.0.1:8787" />
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="stack">
+            <div class="hint">Quick Examples</div>
+            <div class="chips" id="examples" style="max-height: 120px; overflow-y: auto;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat + Timeline -->
+    <div class="col">
+      <div class="card">
+        <div class="hd">💬 Chat</div>
+        <div class="bd">
+          <div id="chat" class="chat"></div>
+          <div class="input-area">
+            <div class="row" style="margin-top:10px;">
+              <textarea id="prompt" class="textarea" placeholder="Type a task and press Send…"></textarea>
+              <button id="send" class="btn" style="height:72px; min-width:90px;">Send</button>
+            </div>
+            <div class="hint" style="margin-top:8px;">Tip: Press <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> to send</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">🖥️ Agent Timeline</div>
+        <div class="bd">
+          <div id="timeline" class="timeline"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="padding:8px 12px;color:#8b8ea6;font-size:12px;text-align:center">
+    Powered locally by <span style="opacity:.9">llama.cpp</span>
+  </div>
+
+  <script>
+    // ===== Utilities =====
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const chat = $("#chat");
+    const timeline = $("#timeline");
+    const sendBtn = $("#send");
+    const promptEl = $("#prompt");
+    const providerEl = $("#provider");
+    const apiBaseEl = $("#apiBase");
+    const streamFinalEl = $("#streamFinal");
+
+    const quick = [
+      { label: "Create a text file with greeting", prompt: "Create hello-ui.txt with: Hello from the UI agent. Then read it back." },
+      { label: "List files in directory", prompt: "Run a shell command to print working directory and list files." },
+      { label: "Create HTML page about space", prompt: "Create index.html with a simple HTML page about space exploration, then tell me where the file is." },
+      { label: "Create JSON config file", prompt: "Create config.json with {\"name\":\"demo\",\"enabled\":true} and then show its contents." },
+    ];
+    const exWrap = $("#examples");
+    quick.forEach(q => {
+      const b = document.createElement("button");
+      b.className = "chip";
+      b.textContent = q.label;
+      b.onclick = () => promptEl.value = q.prompt;
+      exWrap.appendChild(b);
+    });
+
+    function timeStr() { 
+      const now = new Date();
+      return now.toLocaleTimeString([], { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: false 
+      });
+    }
+    function addMsg(role, content) {
+      const wrap = document.createElement("div");
+      wrap.className = `msg ${role}`;
+      const b = document.createElement("div");
+      b.className = "bubble";
+      b.textContent = content;
+      wrap.appendChild(b);
+      chat.appendChild(wrap);
+      chat.scrollTop = chat.scrollHeight;
+    }
+    function addTimeline(type, text, cls="") {
+      const row = document.createElement("div");
+      row.className = "trow";
+      
+      // Add data attribute for enhanced styling
+      row.setAttribute("data-status", type);
+      
+      // Determine enhanced CSS class based on type and content
+      let enhancedCls = cls;
+      if (!enhancedCls) {
+        if (type === "status" && text.includes("starting")) enhancedCls = "status-starting";
+        else if (type === "tool") enhancedCls = "status-tool";
+        else if (type === "toolResult") enhancedCls = "status-result";
+        else if (type === "error") enhancedCls = "status-error";
+        else if (type === "final" || text.includes("✅")) enhancedCls = "status-success";
+      }
+      
+      const t = document.createElement("div");
+      t.className = "time";
+      t.textContent = timeStr();
+      
+      const c = document.createElement("div");
+      c.innerHTML = (enhancedCls ? `<span class="${enhancedCls}">` : "") + text + (enhancedCls ? "</span>" : "");
+      
+      row.appendChild(t); 
+      row.appendChild(c);
+      timeline.appendChild(row);
+      timeline.scrollTop = timeline.scrollHeight;
+      
+      // Auto-remove pulse animation after some time for starting status
+      if (enhancedCls === "status-starting") {
+        setTimeout(() => {
+          const spans = row.querySelectorAll('.status-starting');
+          spans.forEach(span => span.classList.remove('status-starting'));
+        }, 10000); // Remove after 10 seconds
+      }
+    }
+
+    // Robust SSE reader (multi-line data safe)
+    async function* readSSE(response) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+      let event = { type: "", dataLines: [] };
+      const flush = () => {
+        const dataStr = event.dataLines.join("\n");
+        let payload = null;
+        
+        // Try to parse as JSON, but fallback to string for events that send plain text
+        if (dataStr) {
+          try { 
+            payload = JSON.parse(dataStr);
+          } catch (e) {
+            // For status, detected, and token events, the data is often plain text
+            if (event.type === "status" || event.type === "detected" || event.type === "token") {
+              payload = dataStr; // Keep as string
+            } else {
+              // For other events, log the error as this might be a real JSON issue
+              console.warn(`SSE JSON parse failed for event '${event.type}':`, e.message, "raw:", dataStr);
+              payload = dataStr; // Fallback to string
+            }
+          }
+        }
+        
+        const out = { type: event.type, payload, raw: dataStr };
+        event = { type: "", dataLines: [] };
+        return out;
+      };
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let idx;
+        while ((idx = buffer.indexOf("\n\n")) >= 0) {
+          const chunk = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 2);
+          const lines = chunk.split(/\r?\n/);
+          for (const line of lines) {
+            if (line.startsWith("event:")) {
+              if (event.type || event.dataLines.length) yield flush();
+              event.type = line.slice(6).trim();
+            } else if (line.startsWith("data:")) {
+              event.dataLines.push(line.slice(5).trimStart());
+            }
+          }
+          if (event.type || event.dataLines.length) yield flush();
+        }
+      }
+    }
+
+    async function runAgent(prompt) {
+      const provider = providerEl.value;
+      const allow = $$(".tool").filter(x => x.checked).map(x => x.value);
+      const apiBase = apiBaseEl.value || "http://127.0.0.1:8787";
+      const body = JSON.stringify({ prompt, provider, allow });
+
+      addMsg("user", prompt);
+      addTimeline("status", "🟡 starting…");
+
+      sendBtn.disabled = true;
+
+      try {
+        const resp = await fetch(apiBase + "/api/agent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json; charset=utf-8" },
+          body
+        });
+
+        for await (const ev of readSSE(resp)) {
+          if (!ev || !ev.type) continue;
+          if (ev.type === "status") addTimeline("status", "🟡 " + String(ev.payload));
+          if (ev.type === "detected") addTimeline("detected", "🔎 " + String(ev.payload));
+          if (ev.type === "plan") addTimeline("plan", "🧭 " + JSON.stringify(ev.payload));
+          if (ev.type === "tool") addTimeline("tool", "🔧 " + ev.payload?.name + " " + JSON.stringify(ev.payload?.args));
+          if (ev.type === "toolResult") addTimeline("toolResult", "🛠️ " + ev.payload?.name + " → " + (typeof ev.payload?.out === "string" ? ev.payload?.out : JSON.stringify(ev.payload?.out)));
+          if (ev.type === "final") {
+            const text = ev.payload?.text || "";
+            addMsg("assistant", text);
+            addTimeline("final", "✅ done", "ok");
+          }
+          if (ev.type === "error") addTimeline("error", "❌ " + (ev.payload?.error || JSON.stringify(ev.payload)), "err");
+        }
+      } catch (e) {
+        addTimeline("error", "❌ fetch failed: " + e.message, "err");
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    // ===== Settings Modal (basic) =====
+    // Modal HTML
+    const modal = document.createElement("div");
+    modal.id = "settingsModal";
+    modal.style.cssText = "position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:9999";
+    modal.innerHTML = `
+      <div style="background:#0f1117;border:1px solid #2a2d3a;border-radius:12px;min-width:320px;max-width:520px;padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <b>Settings</b>
+          <button id="settingsClose" class="btn ghost">Close</button>
+        </div>
+        <div class="stack">
+          <label class="hint">Default provider</label>
+          <select id="stProvider" class="select">
+            <optgroup label="🏠 Local">
+              <option value="llamacpp">llamacpp</option>
+              <option value="ollama">ollama</option>
+            </optgroup>
+            <optgroup label="☁️ Cloud">
+              <option value="claude">claude</option>
+              <option value="gemini">gemini</option>
+              <option value="openai">openai</option>
+              <option value="deepseek">deepseek</option>
+            </optgroup>
+            <optgroup label="🔀 Hybrid">
+              <option value="claude-hybrid">claude + local tools</option>
+              <option value="gemini-hybrid">gemini + local tools</option>
+              <option value="openai-hybrid">openai + local tools</option>
+              <option value="deepseek-hybrid">deepseek + local tools</option>
+            </optgroup>
+          </select>
+          <label class="hint">Confirm threshold (0..1)</label>
+          <input id="stThreshold" class="input" type="number" step="0.05" min="0" max="1" />
+          <label class="hint">Allowed tools (comma-separated)</label>
+          <input id="stTools" class="input" placeholder="shell.run,script.run,fs.read,fs.write" />
+          <div class="divider"></div>
+          <label class="hint">API Keys</label>
+          <input id="stClaude" class="input" placeholder="ANTHROPIC_API_KEY" />
+          <input id="stGemini" class="input" placeholder="GEMINI_API_KEY" />
+          <input id="stOpenAI" class="input" placeholder="OPENAI_API_KEY" />
+          <input id="stDeepSeek" class="input" placeholder="DEEPSEEK_API_KEY" />
+          <input id="stSerp" class="input" placeholder="SERPAPI_KEY" />
+          <div class="row" style="justify-content:flex-end;gap:8px;margin-top:8px">
+            <button id="settingsSave" class="btn">Save</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+
+    const btnStartLocal = $("#btnStartLocal");
+    const btnBench = $("#btnBench");
+    const btnHealth = $("#btnHealth");
+    const btnSettings = $("#btnSettings");
+    const settingsClose = $("#settingsClose");
+    const stProvider = $("#stProvider");
+    const stThreshold = $("#stThreshold");
+    const stTools = $("#stTools");
+    const stClaude = $("#stClaude");
+    const stGemini = $("#stGemini");
+    const stOpenAI = $("#stOpenAI");
+    const stDeepSeek = $("#stDeepSeek");
+    const stSerp = $("#stSerp");
+    const settingsSave = $("#settingsSave");
+
+    async function loadSettings() {
+      try {
+        const r = await fetch((apiBaseEl.value || "http://127.0.0.1:8787") + "/api/settings");
+        const s = await r.json();
+        stProvider.value = s.provider || "llamacpp";
+        stThreshold.value = typeof s.confirmThreshold === "number" ? s.confirmThreshold : 0.6;
+        stTools.value = Array.isArray(s.allowedTools) ? s.allowedTools.join(",") : "shell.run,script.run,fs.read,fs.write";
+        stClaude.value = s.apiKeys?.ANTHROPIC_API_KEY || "";
+        stGemini.value = s.apiKeys?.GEMINI_API_KEY || "";
+        stOpenAI.value = s.apiKeys?.OPENAI_API_KEY || "";
+        stDeepSeek.value = s.apiKeys?.DEEPSEEK_API_KEY || "";
+        stSerp.value = s.apiKeys?.SERPAPI_KEY || "";
+        // also sync UI defaults
+        providerEl.value = stProvider.value;
+      } catch (e) {
+        console.warn("settings load failed", e);
+      }
+    }
+    async function saveSettings() {
+      const api = apiBaseEl.value || "http://127.0.0.1:8787";
+      const payload = {
+        provider: stProvider.value || "llamacpp",
+        confirmThreshold: Number(stThreshold.value || 0.6),
+        allowedTools: (stTools.value || "").split(",").map(s => s.trim()).filter(Boolean),
+        apiKeys: { 
+          ANTHROPIC_API_KEY: stClaude.value || "",
+          GEMINI_API_KEY: stGemini.value || "",
+          OPENAI_API_KEY: stOpenAI.value || "",
+          DEEPSEEK_API_KEY: stDeepSeek.value || "",
+          SERPAPI_KEY: stSerp.value || "" 
+        }
+      };
+      try {
+        await fetch(api + "/api/settings", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        providerEl.value = payload.provider;
+        addTimeline("status", "✅ Settings saved", "ok");
+        modal.style.display = "none";
+      } catch (e) {
+        addTimeline("error", "❌ Settings save failed: " + e.message, "err");
+      }
+    }
+
+    btnStartLocal?.addEventListener("click", async () => {
+      const api = "http://127.0.0.1:8787";
+      addTimeline("status", "Starting local llama.cpp…");
+      try {
+        // default: GPU start (no CPU fallback)
+        const r = await fetch(api + "/api/launch", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+        if (!r.ok) throw new Error(await r.text());
+        const { baseUrl, model } = await r.json();
+        addTimeline("status", `Local ready at ${baseUrl} (model: ${model})`);
+        // Optionally redirect the tab to llama UI
+        window.open(baseUrl + "/#/chat", "_blank");
+      } catch (e) {
+        addTimeline("error", "Failed to start local: " + (e?.message || e));
+      }
+    });
+
+    btnBench?.addEventListener("click", async () => {
+      const api = "http://127.0.0.1:8787";
+      addTimeline("status", "Benchmarking speed…");
+      try {
+        const r = await fetch(api + "/api/bench");
+        const j = await r.json();
+        if (!r.ok) throw new Error(j?.error || r.statusText);
+        if (j?.tps) {
+          addTimeline("status", `⚡ ${j.tps.toFixed(2)} tokens/sec (${j.tokens} tokens in ${j.ms} ms)`);
+        } else {
+          addTimeline("status", `Benchmark ok but no timings. Raw: ${JSON.stringify(j)}`);
+        }
+      } catch (e) {
+        addTimeline("error", "Bench failed: " + (e?.message || e));
+      }
+    });
+
+    btnHealth?.addEventListener("click", async () => {
+      const r = await fetch("http://127.0.0.1:8787/api/health");
+      const j = await r.json();
+      addTimeline("status", `llama: ${j.llama ? "ok" : "down"} · claude key: ${j.claude} · gemini key: ${j.gemini} · openai key: ${j.openai}`);
+    });
+
+    btnSettings?.addEventListener("click", () => { modal.style.display = "flex"; loadSettings(); });
+    settingsClose?.addEventListener("click", () => { modal.style.display = "none"; });
+    settingsSave?.addEventListener("click", saveSettings);
+
+    // ===== Wire controls
+    sendBtn.addEventListener("click", () => {
+      const text = promptEl.value.trim();
+      if (!text) return;
+      promptEl.value = "";
+      runAgent(text);
+    });
+    promptEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        sendBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>

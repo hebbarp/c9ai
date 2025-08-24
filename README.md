@@ -221,6 +221,54 @@ c9ai switch claude            # Set default to Claude
 - **🎯 Context-Aware Suggestions** - Smarter recommendations
 - **⚙️ Auto-Optimization** - Self-improving workflow automation
 
+## Agentic Tools
+
+Built-ins: `shell.run`, `script.run`, `fs.read`, `fs.write`
+
+New tools (enable by adding to `allowedTools` or toggle in UI):
+
+- `web.search` — Google via SerpAPI. Requires `export SERPAPI_KEY=...`.
+  - Args: `{ q: string, num?: number (<=20) }`
+  - Result: `{ engine, total, items: [{title,link,snippet}] }`
+  - Example prompt: *"Search for latest llama.cpp releases and give me top 3 links."*
+
+- `tex.compile` — Compile LaTeX to PDF using `pdflatex` or `xelatex`.
+  - Args: `{ mainFile: "paper.tex", engine?: "pdflatex"|"xelatex", outputDir?: "build/tex" }`
+  - Output: `{ ok, code, pdf, stdout, stderr }`
+  - Example: *"Compile docs/main.tex with xelatex and tell me where the PDF is."*
+
+- `ffmpeg.run` — Run ffmpeg with controlled arguments.
+  - Args: `{ input: "in.mp4", output: "out.mp4", args?: string|string[], overwrite?: boolean }`
+  - Example: *"Transcode input.mov to output.mp4 at 2Mbps, 720p."*  
+    → args: `-vf scale=-2:720 -b:v 2M -c:v libx264 -c:a aac -b:a 128k`
+
+- `image.convert` — ImageMagick conversion.
+  - Args: `{ input, output, resize?: "800x600"|"50%", quality?: 1..100 }`
+  - Example: *"Resize img.png to 800x and save as jpg."*
+
+> Note: Tools are path-sandboxed to the repo root. External CLIs (`ffmpeg`, `pdflatex`, `convert/magick`) must be installed and in PATH.
+
+- **GitHub** (requires `GITHUB_TOKEN`)
+  - `gh.issues.list` `{ owner, repo, state?: "open"|"closed"|"all", labels?: string|string[] }`
+  - `gh.issues.create` `{ owner, repo, title, body?, labels? }`
+  - `gh.issues.comment` `{ owner, repo, issueNumber, body }`
+
+- **Email** via SMTP (requires `SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS`, optional `SMTP_SECURE=true|false`)
+  - `mail.send` `{ to, subject, text?, html? }` (one of text/html required)
+
+- **WhatsApp** via Twilio (requires `TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM`)
+  - `whatsapp.send` `{ to: "+91xxxx", body }`
+
+### Command Aliases
+Add your own friendly commands that map to tools in `src/commands/aliases.js`.
+Use the `command.run` tool with `{ name, params }` to invoke them.
+Example:
+```json
+{ "tool": "command.run", "args": { "name": "send-email", "params": {
+  "to":"user@example.com", "subject":"Hi", "text":"Hello from agent"
+}}}
+```
+
 ## 🤝 Contributing
 
 C9 AI is designed for extensibility:

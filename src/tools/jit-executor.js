@@ -26,6 +26,24 @@ class JITExecutor {
   }
 
   /**
+   * Get user-defined functions as context assignments for calculator context
+   */
+  getUserFunctions() {
+    try {
+      const { globalRegistry } = require('./function-registry');
+      const contextCode = globalRegistry.getContextAssignments();
+      
+      if (contextCode.trim()) {
+        console.log(`📚 Loading ${globalRegistry.getFunctionNames().length} user-defined functions`);
+        return contextCode;
+      }
+    } catch (error) {
+      console.log(`Failed to load user functions: ${error.message}`);
+    }
+    return '';
+  }
+
+  /**
    * Generate unique filename for JIT app
    */
   generateFilename(extension) {
@@ -40,6 +58,9 @@ class JITExecutor {
   async executeCalculator(expression) {
     const filename = this.generateFilename('js');
     const filepath = path.join(this.tempDir, filename);
+
+    // Get user-defined functions
+    const userFunctionCode = this.getUserFunctions();
 
     // Generate Node.js calculator app with VM
     const code = `
@@ -85,6 +106,9 @@ try {
     pi: Math.PI,
     e: Math.E,
     
+    // User-defined functions
+    ${userFunctionCode}
+    
     // Result storage
     result: undefined,
     
@@ -113,9 +137,35 @@ try {
       if (rate === 0) return -(pv + pmt * nper);
       return -(pv * Math.pow(1 + rate, nper) + pmt * (Math.pow(1 + rate, nper) - 1) / rate);
     },
-    npv: (rate, values) => {
-      // Net Present Value
-      return values.reduce((acc, value, index) => acc + value / Math.pow(1 + rate, index), 0);
+    npv: (rate, ...values) => {
+      // Net Present Value - Excel standard: NPV(rate, value1, value2, ...)
+      // Also accepts: NPV(rate, [value1, value2, ...])
+      let cashFlows;
+      
+      if (values.length === 1 && Array.isArray(values[0])) {
+        // Called as npv(rate, [array])
+        cashFlows = values[0];
+      } else {
+        // Called as npv(rate, val1, val2, val3, ...)
+        cashFlows = values;
+      }
+      
+      if (!Array.isArray(cashFlows) || cashFlows.length === 0) {
+        throw new Error('NPV requires cash flow values');
+      }
+      
+      return cashFlows.reduce((acc, value, index) => acc + value / Math.pow(1 + rate, index), 0);
+    },
+    pmt: (rate, nper, pv, fv = 0, type = 0) => {
+      // Payment calculation for loans/annuities
+      // rate: interest rate per period
+      // nper: number of periods 
+      // pv: present value (loan amount, negative for money borrowed)
+      // fv: future value (default 0)
+      // type: 0 = payment at end of period, 1 = at beginning
+      if (rate === 0) return -(pv + fv) / nper;
+      const pvif = Math.pow(1 + rate, nper);
+      return -((pv * pvif + fv) * rate) / ((pvif - 1) * (1 + rate * type));
     },
     irr: (values, guess = 0.1) => {
       // Internal Rate of Return (Newton-Raphson approximation)
@@ -134,6 +184,22 @@ try {
     cagr: (beginning, ending, periods) => Math.pow(ending / beginning, 1 / periods) - 1,
     compound: (principal, rate, periods) => principal * Math.pow(1 + rate, periods)
   };
+  
+  // Add case-insensitive aliases for all functions
+  const functionNames = Object.keys(context).filter(key => typeof context[key] === 'function');
+  functionNames.forEach(name => {
+    // Add uppercase version
+    const upperName = name.toUpperCase();
+    if (!context[upperName]) {
+      context[upperName] = context[name];
+    }
+    
+    // Add title case version for common functions
+    const titleName = name.charAt(0).toUpperCase() + name.slice(1);
+    if (!context[titleName]) {
+      context[titleName] = context[name];
+    }
+  });
   
   // Make context safe for execution
   vm.createContext(context);
@@ -1363,6 +1429,91 @@ try {
   }
 
   /**
+   * Execute XML-Lisp to JavaScript transpiler
+   */
+  async executeXMLTranspiler(xmlCode) {
+    try {
+      if (!xmlCode || !xmlCode.trim()) {
+        return {
+          success: false,
+          error: 'No XML code provided. Usage: @transpile <xml-function-definition>',
+          example: `@transpile <function name="test">
+  <params>
+    <param name="x" type="number"/>
+  </params>
+  <body>
+    <multiply>
+      <ref>x</ref>
+      <number>2</number>
+    </multiply>
+  </body>
+</function>`
+        };
+      }
+
+      // NOTE: XML-Lisp transpiler archived - this method will be replaced with BASIC execution
+      // const { XMLLispTranspiler } = require('./xml-lisp-transpiler');
+      // const transpiler = new XMLLispTranspiler();
+      
+      return {
+        success: false,
+        error: 'XML transpiler temporarily disabled - will be replaced with BASIC interpreter',
+        suggestion: 'Use @calc for mathematical operations'
+      };
+      
+      // Validate XML structure
+      if (!xmlCode.includes('<function') || !xmlCode.includes('</function>')) {
+        return {
+          success: false,
+          error: 'Invalid XML-Lisp format. Must include <function> tags.',
+          input: xmlCode.substring(0, 200) + '...'
+        };
+      }
+      
+      // Transpile to JavaScript
+      const javascript = transpiler.transpile(xmlCode);
+      
+      // Test and register the generated function
+      let testResult = null;
+      try {
+        // Extract function name for testing
+        const nameMatch = xmlCode.match(/name="([^"]+)"/);
+        const functionName = nameMatch ? nameMatch[1] : 'unknown';
+        
+        // Try to execute it safely
+        const vm = require('vm');
+        const context = { Math: Math };
+        vm.createContext(context);
+        vm.runInContext(javascript, context, { timeout: 1000 });
+        
+        // Register the function in the global registry
+        const { globalRegistry } = require('./function-registry');
+        await globalRegistry.registerFunction(functionName, javascript, xmlCode);
+        
+        testResult = `Function '${functionName}' compiled successfully and registered for use in calculations.`;
+      } catch (testError) {
+        testResult = `Warning: Function compiled but registration failed: ${testError.message}`;
+      }
+      
+      return {
+        success: true,
+        type: 'xml_transpilation',
+        xml_input: xmlCode,
+        javascript_output: javascript,
+        test_result: testResult,
+        message: 'XML-Lisp successfully transpiled to JavaScript'
+      };
+      
+    } catch (error) {
+      return {
+        success: false,
+        error: `XML transpilation failed: ${error.message}`,
+        input: xmlCode.substring(0, 200) + '...'
+      };
+    }
+  }
+
+  /**
    * Execute a JIT system information app
    */
   async executeSystemInfo() {
@@ -1423,6 +1574,912 @@ console.log(JSON.stringify(info, null, 2));
   }
 
   /**
+   * Execute function inspector to show source code of built-in functions
+   */
+  async executeFunctionInspector(functionName) {
+    try {
+      if (!functionName) {
+        // List all available functions (built-in + user-defined)
+        const builtInFunctions = [
+          'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2',
+          'sqrt', 'pow', 'exp', 'log', 'log10', 'abs', 'floor', 'ceil', 'round',
+          'min', 'max', 'random', 'PI', 'E',
+          'sum', 'avg', 'median', 'stdev', 'variance', 'factorial', 'fibonacci',
+          'gcd', 'lcm', 'isPrime', 'primeFactors', 'nthPrime',
+          'pv', 'fv', 'npv', 'pmt', 'irr', 'cagr', 'compound'
+        ];
+
+        // Add user-defined functions
+        let userFunctions = [];
+        try {
+          const { globalRegistry } = require('./function-registry');
+          userFunctions = globalRegistry.getFunctionNames();
+        } catch (error) {
+          console.log('Error loading user functions list:', error.message);
+        }
+        
+        return {
+          success: true,
+          type: 'function_list',
+          message: 'Available functions for inspection',
+          functions: builtInFunctions,
+          userFunctions: userFunctions,
+          usage: 'Use @inspect functionName to view source code'
+        };
+      }
+      
+      // Normalize function name (try both cases)
+      const normalizedName = functionName.toLowerCase();
+      
+      // First check if it's a user-defined function
+      try {
+        const { globalRegistry } = require('./function-registry');
+        const functionInfo = globalRegistry.getFunctionInfo(functionName) || globalRegistry.getFunctionInfo(normalizedName);
+        
+        if (functionInfo) {
+          return {
+            success: true,
+            type: 'function_inspection',
+            functionName: functionName,
+            actualName: functionInfo.name,
+            description: `User-defined function created via XML-Lisp transpilation`,
+            source: functionInfo.xmlSource || 'XML source not available',
+            sourceType: 'xml-lisp',
+            javascript: functionInfo.jsSource,
+            created: new Date(functionInfo.created).toLocaleString(),
+            lastUsed: new Date(functionInfo.lastUsed).toLocaleString()
+          };
+        }
+      } catch (registryError) {
+        console.log('Error checking user function registry:', registryError.message);
+      }
+      
+      // If not a user function, proceed with built-in function inspection
+      // Get the function source from the calculator context
+      const jitFilename = this.generateFilename('js');
+      const jitPath = path.join(this.tempDir, jitFilename);
+      
+      const code = `
+// JIT Function Inspector - Generated by C9AI
+const vm = require('vm');
+
+// Define all calculator functions (same as calculator context)
+const functions = {
+  // Math functions
+  sin: Math.sin, cos: Math.cos, tan: Math.tan,
+  asin: Math.asin, acos: Math.acos, atan: Math.atan, atan2: Math.atan2,
+  sqrt: Math.sqrt, pow: Math.pow, exp: Math.exp,
+  log: Math.log, log10: Math.log10, abs: Math.abs,
+  floor: Math.floor, ceil: Math.ceil, round: Math.round,
+  min: Math.min, max: Math.max, random: Math.random,
+  PI: Math.PI, E: Math.E,
+  
+  // Statistical functions
+  sum: (values) => values.reduce((a, b) => a + b, 0),
+  avg: (values) => values.reduce((a, b) => a + b, 0) / values.length,
+  median: (values) => {
+    const sorted = [...values].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  },
+  stdev: (values) => {
+    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+    const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+    return Math.sqrt(variance);
+  },
+  variance: (values) => {
+    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+    return values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+  },
+  
+  // Number theory
+  factorial: (n) => n <= 1 ? 1 : n * functions.factorial(n - 1),
+  fibonacci: (n) => n <= 1 ? n : functions.fibonacci(n - 1) + functions.fibonacci(n - 2),
+  gcd: (a, b) => b === 0 ? Math.abs(a) : functions.gcd(b, a % b),
+  lcm: (a, b) => Math.abs(a * b) / functions.gcd(a, b),
+  isPrime: (n) => {
+    if (n < 2) return false;
+    for (let i = 2; i <= Math.sqrt(n); i++) {
+      if (n % i === 0) return false;
+    }
+    return true;
+  },
+  primeFactors: (n) => {
+    const factors = [];
+    for (let i = 2; i <= n; i++) {
+      while (n % i === 0) {
+        factors.push(i);
+        n /= i;
+      }
+    }
+    return factors;
+  },
+  nthPrime: (n) => {
+    const primes = [];
+    let candidate = 2;
+    while (primes.length < n) {
+      if (functions.isPrime(candidate)) primes.push(candidate);
+      candidate++;
+    }
+    return primes[n - 1];
+  },
+  
+  // Financial functions
+  pv: (rate, nper, pmt, fv = 0, type = 0) => {
+    if (rate === 0) return -(pmt * nper + fv);
+    const pvifa = (1 - Math.pow(1 + rate, -nper)) / rate;
+    return -(pmt * pvifa * (1 + rate * type) + fv * Math.pow(1 + rate, -nper));
+  },
+  fv: (rate, nper, pmt, pv = 0) => {
+    if (rate === 0) return -(pv + pmt * nper);
+    return -(pv * Math.pow(1 + rate, nper) + pmt * (Math.pow(1 + rate, nper) - 1) / rate);
+  },
+  npv: (rate, ...values) => {
+    let cashFlows;
+    if (values.length === 1 && Array.isArray(values[0])) {
+      cashFlows = values[0];
+    } else {
+      cashFlows = values;
+    }
+    if (!Array.isArray(cashFlows) || cashFlows.length === 0) {
+      throw new Error('NPV requires cash flow values');
+    }
+    return cashFlows.reduce((acc, value, index) => acc + value / Math.pow(1 + rate, index), 0);
+  },
+  pmt: (rate, nper, pv, fv = 0, type = 0) => {
+    if (rate === 0) return -(pv + fv) / nper;
+    const pvif = Math.pow(1 + rate, nper);
+    return -((pv * pvif + fv) * rate) / ((pvif - 1) * (1 + rate * type));
+  },
+  irr: (values, guess = 0.1) => {
+    let rate = guess;
+    for (let i = 0; i < 100; i++) {
+      const npvRate = values.reduce((acc, value, index) => acc + value / Math.pow(1 + rate, index), 0);
+      const derivRate = values.reduce((acc, value, index) => acc - index * value / Math.pow(1 + rate, index + 1), 0);
+      const newRate = rate - npvRate / derivRate;
+      if (Math.abs(newRate - rate) < 0.0001) return newRate;
+      rate = newRate;
+    }
+    return rate;
+  },
+  cagr: (beginning, ending, periods) => Math.pow(ending / beginning, 1 / periods) - 1,
+  compound: (principal, rate, periods) => principal * Math.pow(1 + rate, periods)
+};
+
+const functionName = '${normalizedName}';
+const result = {
+  success: true,
+  type: 'function_inspection',
+  functionName: functionName
+};
+
+// Check if function exists (case-insensitive)
+let actualFunction = null;
+let actualName = null;
+
+for (const [name, func] of Object.entries(functions)) {
+  if (name.toLowerCase() === functionName) {
+    actualFunction = func;
+    actualName = name;
+    break;
+  }
+}
+
+if (!actualFunction) {
+  result.success = false;
+  result.error = \`Function '\${functionName}' not found\`;
+  result.availableFunctions = Object.keys(functions).filter(name => 
+    typeof functions[name] === 'function'
+  ).sort();
+} else {
+  result.actualName = actualName;
+  result.source = actualFunction.toString();
+  result.description = getDescription(actualName);
+}
+
+function getDescription(name) {
+  const descriptions = {
+    npv: 'Net Present Value - Calculates NPV of cash flows at given discount rate',
+    pv: 'Present Value - Current value of future payments at given interest rate',
+    fv: 'Future Value - Value of investment after specified periods at given rate',
+    pmt: 'Payment - Periodic payment amount for loans/annuities',
+    irr: 'Internal Rate of Return - Rate that makes NPV equal to zero',
+    cagr: 'Compound Annual Growth Rate - Annual growth rate over multiple periods',
+    compound: 'Compound Interest - Final amount with compound interest',
+    factorial: 'Factorial - Product of positive integers from 1 to n',
+    fibonacci: 'Fibonacci - nth number in Fibonacci sequence',
+    gcd: 'Greatest Common Divisor - Largest positive integer that divides both numbers',
+    lcm: 'Least Common Multiple - Smallest positive integer divisible by both numbers',
+    isPrime: 'Prime Test - Checks if number is prime',
+    primeFactors: 'Prime Factorization - Returns array of prime factors',
+    sum: 'Sum - Adds all values in array',
+    avg: 'Average - Mean of all values in array',
+    median: 'Median - Middle value when array is sorted',
+    stdev: 'Standard Deviation - Measure of data spread',
+    variance: 'Variance - Square of standard deviation'
+  };
+  return descriptions[name] || 'Mathematical function';
+}
+
+console.log(JSON.stringify(result, null, 2));
+`;
+      
+      fs.writeFileSync(jitPath, code);
+      const { stdout, stderr } = await execAsync(`node "${jitPath}"`, {
+        timeout: 5000,
+        cwd: this.tempDir
+      });
+      
+      const result = JSON.parse(stdout.trim());
+      this.cleanup(jitPath);
+      
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        error: `Function inspection failed: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * Execute AI Function Generator - Creates XML-Lisp functions from natural language
+   */
+  async executeAIFunctionGenerator(description) {
+    try {
+      if (!description || !description.trim()) {
+        return {
+          success: false,
+          error: 'No description provided. Usage: @create <function description>',
+          example: '@create Calculate compound interest given principal, rate, and time'
+        };
+      }
+
+      // Import required modules
+      const { FunctionGenerator } = require('./function-generator');
+      const { globalRegistry } = require('./function-registry');
+      
+      // Create function generator
+      const generator = new FunctionGenerator({
+        localProvider: 'llamacpp',
+        cloudProvider: 'openai'
+      });
+
+      console.log(`🧠 Generating function from description: "${description}"`);
+      
+      // Extract function name from description or generate one
+      const functionName = this.extractFunctionName(description);
+      
+      // Generate the function
+      const result = await generator.generateFunction(
+        functionName,
+        description,
+        { businessContext: true }
+      );
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: `Function generation failed: ${result.error}`,
+          description
+        };
+      }
+
+      // Register the function for persistent storage
+      if (result.xml && result.javascript) {
+        try {
+          await globalRegistry.addFunction(functionName, result.xml);
+          console.log(`✅ Function '${functionName}' registered successfully`);
+        } catch (registryError) {
+          console.log(`⚠️ Function generated but registration failed: ${registryError.message}`);
+        }
+      }
+
+      return {
+        success: true,
+        functionName,
+        description,
+        xml: result.xml,
+        javascript: result.javascript,
+        transpiled: result.transpiled,
+        source: result.source,
+        message: `✨ Generated function '${functionName}' from description`,
+        usage: `You can now use: @calc ${functionName}(...parameters...)`
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: `AI function generation failed: ${error.message}`,
+        description
+      };
+    }
+  }
+
+  /**
+   * Extract or generate a function name from natural language description
+   */
+  extractFunctionName(description) {
+    // Simple heuristics to extract function name from description
+    const desc = description.toLowerCase().trim();
+    
+    // Common business/financial patterns
+    if (desc.includes('break') && desc.includes('even')) return 'breakEvenPoint';
+    if (desc.includes('roi') || desc.includes('return on investment')) return 'roi';
+    if (desc.includes('compound interest')) return 'compoundInterest';
+    if (desc.includes('present value')) return 'presentValue';
+    if (desc.includes('future value')) return 'futureValue';
+    if (desc.includes('inflation')) return 'inflationAdjusted';
+    if (desc.includes('ltv') || desc.includes('lifetime value')) return 'lifetimeValue';
+    if (desc.includes('churn')) return 'churnRate';
+    if (desc.includes('cac') || desc.includes('acquisition cost')) return 'customerAcquisitionCost';
+    if (desc.includes('mrr') || desc.includes('monthly recurring')) return 'monthlyRecurringRevenue';
+    if (desc.includes('arr') || desc.includes('annual recurring')) return 'annualRecurringRevenue';
+    
+    // Generic patterns
+    if (desc.includes('calculate')) {
+      const match = desc.match(/calculate (\w+(?:\s+\w+)*)/);
+      if (match) {
+        return match[1].replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+      }
+    }
+    
+    // Fallback: generate name from first few words
+    const words = desc.split(/\s+/).slice(0, 3);
+    return words
+      .map(word => word.replace(/[^a-zA-Z0-9]/g, ''))
+      .filter(word => word.length > 0)
+      .map((word, index) => index === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join('');
+  }
+
+  /**
+   * Execute Executive Request Processing - Decomposes business requests into XML-Lisp functions
+   */
+  async executeExecutiveRequest(request) {
+    try {
+      if (!request || !request.trim()) {
+        return {
+          success: false,
+          error: 'No executive request provided.',
+          usage: 'Use structured format with bullet points:',
+          examples: [
+            '@executive INVESTMENT\n  - amount: 100000\n  - upside: 10%\n  - downside: 8%\n  - years: 5',
+            '@executive VENDOR_DISCOUNT\n  - invoice amount: 10000 INR\n  - discount offered: 1%\n  - payment terms: immediate',
+            '@executive SAAS_BREAKEVEN\n  - customer acquisition cost: 500\n  - monthly recurring revenue: 50\n  - churn rate: 5%',
+            '@executive FINANCE\n  - principal: 50000\n  - rate: 6%\n  - years: 10'
+          ],
+          availableDomains: ['INVESTMENT', 'VENDOR_DISCOUNT', 'SAAS_BREAKEVEN', 'FINANCE']
+        };
+      }
+
+      // Check if this is a structured query (has domain + bullet points)
+      const isStructuredQuery = request.includes('\n') && request.includes('- ');
+      
+      if (isStructuredQuery) {
+        return await this.executeStructuredRequest(request);
+      } else {
+        // Fallback to the old NLP approach for backward compatibility
+        return await this.executeNLPRequest(request);
+      }
+
+    } catch (error) {
+      return {
+        success: false,
+        error: `Executive request execution failed: ${error.message}`,
+        request,
+        technicalDetails: error.stack
+      };
+    }
+  }
+
+  /**
+   * Execute structured executive request (new compiler approach)
+   */
+  async executeStructuredRequest(structuredQuery) {
+    try {
+      // NOTE: XML-Lisp system archived - this will be replaced with BASIC interpreter
+      // const { ExecutiveStructuredParser } = require('./executive-structured-parser');
+      // const parser = new ExecutiveStructuredParser();
+      
+      return {
+        success: false,
+        error: 'Executive structured requests temporarily disabled - will be replaced with @prog BASIC syntax',
+        suggestion: 'Use @calc for simple math or wait for @prog implementation'
+      };
+
+      console.log(`🏗️ Parsing structured executive query: "${structuredQuery}"`);
+
+      const parseResult = parser.parseStructuredQuery(structuredQuery);
+
+      if (!parseResult.success) {
+        return {
+          success: false,
+          error: parseResult.error,
+          availableDomains: parser.getAvailableDomains(),
+          suggestion: 'Use the structured format with bullet points as shown in examples'
+        };
+      }
+
+      // Transpile XML-Lisp to JavaScript and register the function
+      try {
+        const { XMLLispTranspiler } = require('./xml-lisp-transpiler');
+        const { globalRegistry } = require('./function-registry');
+        
+        const transpiler = new XMLLispTranspiler();
+        const javascript = transpiler.transpile(parseResult.xmlFunction);
+        
+        await globalRegistry.registerFunction(
+          parseResult.functionName, 
+          javascript, 
+          parseResult.xmlFunction
+        );
+        
+        console.log(`✅ Transpiled and registered structured function: ${parseResult.functionName}`);
+        
+      } catch (registryError) {
+        console.log(`⚠️ Function generated but registration failed: ${registryError.message}`);
+      }
+
+      return {
+        success: true,
+        approach: 'structured',
+        domain: parseResult.domain,
+        functionName: parseResult.functionName,
+        parameters: parseResult.parameters,
+        xmlFunction: parseResult.xmlFunction,
+        executionSteps: parseResult.executionSteps,
+        message: `✨ Structured executive request processed successfully!`,
+        summary: `Generated ${parseResult.domain} analysis function with structured parameters`,
+        nextSteps: parseResult.executionSteps.map(step => step.command),
+        instructions: [
+          `🎯 Domain: ${parseResult.domain} analysis`,
+          `📊 Function: ${parseResult.functionName} created and registered`,
+          `🚀 Ready to execute - use the provided commands`,
+          `💡 Function is now available for future use with @calc`
+        ]
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: `Structured request processing failed: ${error.message}`,
+        approach: 'structured'
+      };
+    }
+  }
+
+  /**
+   * Execute BASIC program with @prog command
+   */
+  async executeBasicProgram(basicCode, inputs = {}) {
+    try {
+      if (!basicCode || !basicCode.trim()) {
+        return {
+          success: false,
+          error: 'No BASIC program provided',
+          usage: 'Example: @prog\nLET result = x * 3 + 10\nRETURN result',
+          examples: [
+            'LET tax = income * 0.20\nRETURN tax',
+            'LET area = length * width\nRETURN area'
+          ]
+        };
+      }
+
+      console.log(`🔧 Executing BASIC program: "${basicCode}"`);
+
+      const { BasicInterpreter } = require('./basic-interpreter');
+      const interpreter = new BasicInterpreter();
+      
+      const result = interpreter.execute(basicCode, inputs);
+      
+      if (!result.success) {
+        return {
+          success: false,
+          error: `BASIC execution failed: ${result.error}`,
+          program: basicCode,
+          suggestion: 'Check your BASIC syntax. Supported: LET, RETURN, arithmetic'
+        };
+      }
+
+      return {
+        success: true,
+        program: basicCode,
+        result: result.result,
+        variables: result.variables,
+        type: 'basic_program'
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: `BASIC program execution error: ${error.message}`,
+        program: basicCode,
+        technicalDetails: error.stack
+      };
+    }
+  }
+
+  /**
+   * Execute language code generation with @lang command
+   */
+  async executeLanguageGeneration(language, task) {
+    try {
+      if (!task || !task.trim()) {
+        return {
+          success: false,
+          error: 'No task specified for code generation',
+          usage: 'Example: @lang python: create QR code generator',
+          supportedLanguages: ['python', 'javascript', 'bash', 'powershell', 'java', 'go', 'rust']
+        };
+      }
+
+      console.log(`🔨 Generating ${language} code for task: "${task}"`);
+
+      // Use existing script generator if available, otherwise create simple template
+      const { ScriptGenerator } = require('./generator/script-generator');
+      const generator = new ScriptGenerator(null); // No LLM provider for now
+
+      const analysisResult = generator.fallbackAnalysis(task, { language });
+      const codeTemplate = this.generateCodeTemplate(language, task, analysisResult);
+      
+      // Generate filename and save to .c9ai/generated-code directory
+      const filename = this.generateFilename(language, task);
+      const codeDir = path.join(process.cwd(), '.c9ai', 'generated-code');
+      
+      // Ensure the directory exists
+      if (!fs.existsSync(codeDir)) {
+        fs.mkdirSync(codeDir, { recursive: true });
+      }
+      
+      const filepath = path.join(codeDir, filename);
+      
+      // Save the generated code to disk
+      fs.writeFileSync(filepath, codeTemplate, 'utf8');
+      
+      // Make executable if needed
+      const isExecutable = this.isExecutableLanguage(language);
+      if (isExecutable) {
+        try {
+          require('child_process').execSync(`chmod +x "${filepath}"`, { stdio: 'ignore' });
+        } catch (error) {
+          // Ignore chmod errors on Windows
+        }
+      }
+      
+      console.log(`💾 Code saved to: ${filepath}`);
+
+      return {
+        success: true,
+        language: language,
+        task: task,
+        code: codeTemplate,
+        type: 'language_generation',
+        filepath: filepath,
+        filename: filename,
+        executable: isExecutable,
+        saveOptions: {
+          filename: filename,
+          executable: isExecutable
+        }
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: `Language code generation failed: ${error.message}`,
+        language: language,
+        task: task
+      };
+    }
+  }
+
+  /**
+   * Generate simple code template for language/task
+   */
+  generateCodeTemplate(language, task, analysis) {
+    const timestamp = new Date().toISOString();
+    
+    switch (language.toLowerCase()) {
+      case 'python':
+        return `#!/usr/bin/env python3
+"""
+${task}
+Generated by C9AI on ${timestamp}
+"""
+
+import sys
+import os
+
+def main():
+    """
+    TODO: Implement ${task}
+    """
+    print("Starting ${task}...")
+    
+    # Add your implementation here
+    result = "Task completed"
+    
+    print(f"Result: {result}")
+    return result
+
+if __name__ == "__main__":
+    main()`;
+
+      case 'javascript':
+      case 'js':
+        return `#!/usr/bin/env node
+/**
+ * ${task}
+ * Generated by C9AI on ${timestamp}
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+async function main() {
+    // TODO: Implement ${task}
+    console.log('Starting ${task}...');
+    
+    // Add your implementation here
+    const result = 'Task completed';
+    
+    console.log('Result:', result);
+    return result;
+}
+
+// Run if called directly
+if (require.main === module) {
+    main().catch(console.error);
+}
+
+module.exports = { main };`;
+
+      case 'bash':
+      case 'sh':
+        return `#!/bin/bash
+# ${task}
+# Generated by C9AI on ${timestamp}
+
+set -e  # Exit on error
+
+echo "Starting ${task}..."
+
+# TODO: Implement ${task}
+# Add your implementation here
+
+echo "Task completed successfully"`;
+
+      case 'powershell':
+      case 'ps1':
+        return `# ${task}
+# Generated by C9AI on ${timestamp}
+
+Write-Host "Starting ${task}..."
+
+# TODO: Implement ${task}
+# Add your implementation here
+
+Write-Host "Task completed successfully"`;
+
+      default:
+        return `// ${task}
+// Generated by C9AI on ${timestamp}
+// Language: ${language}
+
+// TODO: Implement ${task}
+// Add your implementation here
+
+console.log("Task completed");`;
+    }
+  }
+
+  /**
+   * Generate appropriate filename for language/task
+   */
+  generateFilename(language, task) {
+    const safeName = task.toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '_')
+      .substring(0, 30);
+    
+    const extensions = {
+      python: 'py',
+      javascript: 'js',
+      js: 'js',
+      bash: 'sh',
+      sh: 'sh',
+      powershell: 'ps1',
+      ps1: 'ps1',
+      java: 'java',
+      go: 'go',
+      rust: 'rs',
+      c: 'c',
+      cpp: 'cpp'
+    };
+    
+    const ext = extensions[language.toLowerCase()] || 'txt';
+    return `${safeName}.${ext}`;
+  }
+
+  /**
+   * Check if language produces executable files
+   */
+  isExecutableLanguage(language) {
+    const executables = ['python', 'javascript', 'js', 'bash', 'sh', 'powershell', 'ps1'];
+    return executables.includes(language.toLowerCase());
+  }
+
+  /**
+   * Save code extracted from AI-generated response
+   */
+  async saveGeneratedCode(response) {
+    try {
+      if (!response || !response.trim()) {
+        return {
+          success: false,
+          error: 'No response provided to parse for code',
+          usage: 'Pass AI response text that contains code blocks'
+        };
+      }
+
+      console.log(`💾 Parsing AI response for code blocks...`);
+
+      const { CodeParser } = require('./code-parser');
+      const parser = new CodeParser();
+      
+      const parseResult = parser.parseCodeFromResponse(response);
+      
+      if (!parseResult.hasCode) {
+        return {
+          success: false,
+          error: 'No code blocks found in response',
+          suggestion: 'Make sure the response contains code blocks wrapped in ```'
+        };
+      }
+
+      const savedFiles = [];
+      
+      // Save all code blocks
+      for (const codeBlock of parseResult.codeBlocks) {
+        const saveResult = await parser.saveCode(codeBlock);
+        savedFiles.push(saveResult);
+      }
+
+      return {
+        success: true,
+        savedFiles: savedFiles,
+        installCommands: parseResult.installCommands,
+        codeBlockCount: parseResult.codeBlocks.length,
+        type: 'code_save'
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: `Code save failed: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * Execute saved script file
+   */
+  async executeScript(filename) {
+    try {
+      if (!filename || !filename.trim()) {
+        return {
+          success: false,
+          error: 'No script filename provided',
+          usage: 'Provide filename of script to execute'
+        };
+      }
+
+      console.log(`🚀 Executing script: ${filename}`);
+
+      const { CodeParser } = require('./code-parser');
+      const parser = new CodeParser();
+      
+      // Determine full path to file
+      let filepath = filename;
+      
+      if (!path.isAbsolute(filename)) {
+        // Try generated-code directory first
+        const codeDir = path.join(process.cwd(), '.c9ai', 'generated-code');
+        const generatedPath = path.join(codeDir, filename);
+        
+        // Check if file exists in generated directory
+        if (fs.existsSync(generatedPath)) {
+          filepath = generatedPath;
+        } else {
+          // Look in current working directory
+          const cwdPath = path.join(process.cwd(), filename);
+          if (fs.existsSync(cwdPath)) {
+            filepath = cwdPath;
+          } else {
+            // Use as-is and let execution fail with proper error
+            filepath = filename;
+          }
+        }
+      }
+      
+      // Check if file exists
+      if (!fs.existsSync(filepath)) {
+        return {
+          success: false,
+          error: `Script file not found: ${filepath}`,
+          suggestion: 'Make sure the file exists and path is correct',
+          searchedPaths: [
+            path.join(process.cwd(), '.c9ai', 'generated-code', filename),
+            path.join(process.cwd(), filename),
+            filename
+          ]
+        };
+      }
+      
+      const executeResult = await parser.executeCode(filepath);
+      
+      return {
+        success: executeResult.success,
+        output: executeResult.output,
+        error: executeResult.error,
+        command: executeResult.command,
+        filepath: executeResult.filepath,
+        type: 'script_execution'
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: `Script execution failed: ${error.message}`,
+        filename: filename
+      };
+    }
+  }
+
+  /**
+   * Execute NLP executive request (fallback approach)
+   */
+  async executeNLPRequest(request) {
+    try {
+      const { ExecutiveRequestProcessor } = require('./executive-request-processor');
+      const processor = new ExecutiveRequestProcessor();
+
+      console.log(`🤖 Processing NLP executive request: "${request}"`);
+
+      const result = await processor.processExecutiveRequest(request);
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: `NLP processing failed: ${result.error}`,
+          request,
+          approach: 'nlp',
+          suggestion: 'Try using the structured format instead:'
+        };
+      }
+
+      return {
+        success: true,
+        approach: 'nlp',
+        request: request,
+        functions: result.functions,
+        workflow: result.workflow,
+        message: `✨ NLP executive request processed successfully!`,
+        summary: `Generated ${result.functions.length} business functions`,
+        instructions: result.workflow.steps.map(step => step.description)
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: `NLP request processing failed: ${error.message}`,
+        approach: 'nlp'
+      };
+    }
+  }
+
+  /**
    * Cleanup temporary files
    */
   cleanup(filepath) {
@@ -1460,6 +2517,70 @@ console.log(JSON.stringify(info, null, 2));
 
 // Tool interface for C9AI
 async function executeJIT(args) {
+  console.log('🚀 JIT executeJIT called with args:', args);
+  
+  // Check if this is a function generation request from the frontend
+  if (args.expression && args.expression.startsWith('jit:generateFunction:')) {
+    console.log('🎯 Function generation request detected');
+    const parts = args.expression.split(':');
+    if (parts.length >= 5 && parts[4] === 'confirmed') {
+      const functionName = parts[2];
+      const parameters = parts[3];
+      console.log(`🔧 Generating function: ${functionName}(${parameters})`);
+      
+      // Import the function generator
+      const { FunctionGenerator } = require('./function-generator');
+      const generator = new FunctionGenerator();
+      
+      try {
+        // Generate the function
+        const generation = await generator.generateFunction(functionName, parameters);
+        
+        if (!generation.success) {
+          return {
+            success: false,
+            error: generation.error
+          };
+        }
+        
+        // Execute the generated function
+        const execution = await generator.executeFunction(
+          generation.code, 
+          functionName, 
+          parameters
+        );
+        
+        if (!execution.success) {
+          return {
+            success: false,
+            error: execution.error,
+            generatedCode: generation.code
+          };
+        }
+        
+        return {
+          success: true,
+          result: execution.result,
+          formatted: typeof execution.result === 'number' 
+            ? execution.result.toLocaleString(undefined, { maximumFractionDigits: 10 })
+            : String(execution.result),
+          expression: execution.expression,
+          generatedFunction: {
+            name: functionName,
+            code: generation.code,
+            source: generation.source,
+            provider: generation.provider
+          }
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: `Function generation failed: ${error.message}`
+        };
+      }
+    }
+  }
+  
   const executor = new JITExecutor();
   const { type, ...params } = args;
 
@@ -1470,7 +2591,35 @@ async function executeJIT(args) {
     switch (type) {
       case 'calc':
       case 'calculator':
-        return await executor.executeCalculator(params.expression);
+        console.log(`🧮 Calculator execution for: ${params.expression}`);
+        const result = await executor.executeCalculator(params.expression);
+        console.log(`✅ Calculator result:`, result);
+        
+        // Check if this is an unknown function error
+        console.log(`🔍 Checking for unknown function. Success: ${result.success}, Error: ${result.error}`);
+        if (result && !result.success && result.error && result.error.includes('is not defined')) {
+          console.log(`🎯 Detected 'is not defined' error: ${result.error}`);
+          const match = result.error.match(/(\w+) is not defined/);
+          if (match) {
+            const functionName = match[1];
+            const funcCallMatch = params.expression.match(new RegExp(functionName + '\\s*\\(([^)]*)\\)'));
+            const parameters = funcCallMatch ? funcCallMatch[1] : '';
+            
+            const unknownFunctionError = {
+              success: false,
+              error: "unknown_function",
+              functionName: functionName,
+              parameters: parameters,
+              message: "Function '" + functionName + "' not found. Would you like me to generate it?",
+              expression: params.expression
+            };
+            
+            console.log(`🚨 Returning unknown function error:`, unknownFunctionError);
+            return unknownFunctionError;
+          }
+        }
+        
+        return result;
         
       case 'analyze':
       case 'data':
@@ -1489,6 +2638,9 @@ async function executeJIT(args) {
       case 'info':
         return await executor.executeSystemInfo();
         
+      case 'inspect':
+        return await executor.executeFunctionInspector(params.function || params.name);
+        
       case 'quiz':
         return await executor.executeQuizGenerator(
           params.topic || 'frontend',
@@ -1506,10 +2658,35 @@ async function executeJIT(args) {
           params.file_path || null
         );
         
+      case 'transpile':
+        return await executor.executeXMLTranspiler(params.xml || params.code || '');
+        
+      case 'ai_create_function':
+        return await executor.executeAIFunctionGenerator(params.description || params.prompt || '');
+        
+      case 'executive_request':
+        return await executor.executeExecutiveRequest(params.description || params.prompt || params.request || '');
+        
+      case 'prog':
+      case 'program':
+        return await executor.executeBasicProgram(params.code || params.program || params.basic || '');
+        
+      case 'lang':
+      case 'language':
+        return await executor.executeLanguageGeneration(params.language || 'javascript', params.task || '');
+        
+      case 'save':
+      case 'save_code':
+        return await executor.saveGeneratedCode(params.response || params.code || '');
+        
+      case 'run':
+      case 'execute':
+        return await executor.executeScript(params.filename || params.file || params.script || '');
+        
       default:
         return {
           success: false,
-          error: `Unknown JIT type: ${type}. Supported: calc, analyze, file, system, quiz, rfq`
+          error: `Unknown JIT type: ${type}. Supported: calc, analyze, file, system, quiz, rfq, transpile, ai_create_function, executive_request, prog, lang, save, run`
         };
     }
   } catch (error) {
@@ -1521,15 +2698,16 @@ async function executeJIT(args) {
 }
 
 module.exports = {
-  name: "jit",
+  execute: executeJIT,
+  name: "jit", 
   description: "Execute Just-In-Time applications for various tasks",
   parameters: {
     type: "object",
     properties: {
       type: {
-        type: "string",
-        description: "Type of JIT app to create: 'calc', 'analyze', 'file', 'system', 'quiz'",
-        enum: ["calc", "calculator", "analyze", "data", "file", "process", "system", "info", "quiz", "test", "exam", "rfq", "rfq-analysis", "proposal"]
+        type: "string", 
+        description: "Type of JIT app to create: 'calc', 'analyze', 'file', 'system', 'quiz', 'transpile', 'ai_create_function', 'executive_request'",
+        enum: ["calc", "calculator", "analyze", "data", "file", "process", "system", "info", "quiz", "test", "exam", "rfq", "rfq-analysis", "proposal", "transpile", "ai_create_function", "executive_request"]
       },
       expression: {
         type: "string", 

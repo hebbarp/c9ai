@@ -9,7 +9,7 @@ class LocalProvider {
     constructor(c9ai) {
         this.c9ai = c9ai;
         this.defaultModel = c9ai.localModel?.modelFile || 'local';
-        this.supportsGrammar = true; // llama.cpp with node-llama-cpp supports GBNF grammar
+        this.supportsGrammar = false; // Disable grammar constraints for node-llama-cpp (compatibility issues)
     }
 
     async call(options) {
@@ -40,16 +40,33 @@ class LocalProvider {
         prompt += '\n\n<assistant>\n';
 
         try {
-            // Note: Grammar constraints would be applied at the llama.cpp session level
-            // For now, we use the existing runLocalAI infrastructure
-            // TODO: Enhance runLocalAI to support grammar parameter
-            const response = await runLocalAI(this.c9ai.localModel, prompt);
+            // Try to use grammar constraints if provided, but fall back gracefully
+            let response;
+            if (grammar) {
+                try {
+                    // Attempt to use grammar constraints - this might not work with all node-llama-cpp versions
+                    response = await this.c9ai.localModel.session.prompt(prompt, {
+                        grammar: grammar,
+                        temperature: temperature,
+                        maxTokens: max_tokens,
+                        topP: top_p
+                    });
+                } catch (grammarError) {
+                    console.log(`⚠️  Grammar constraints not supported: ${grammarError.message}`);
+                    // Fall back to regular generation without grammar
+                    response = await runLocalAI(this.c9ai.localModel, prompt);
+                }
+            } else {
+                // Fallback to existing runLocalAI
+                response = await runLocalAI(this.c9ai.localModel, prompt);
+            }
             
             // Clean up the response (remove assistant tags if present)
             const cleaned = response.replace(/^<assistant>\s*/, '').replace(/\s*<\/assistant>$/, '');
             
             return { text: cleaned.trim() };
         } catch (error) {
+            console.error(`🚨 LocalProvider error details:`, error);
             throw new Error(`Local model error: ${error.message}`);
         }
     }

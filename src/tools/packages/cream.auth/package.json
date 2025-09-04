@@ -1,0 +1,9 @@
+{
+  "name": "cream.auth",
+  "version": "1.0.0",
+  "description": "Authentication helper for Cream API services",
+  "main": "index.js",
+  "category": "social",
+  "author": "Cream Team",
+  "dependencies": []
+}

@@ -1,0 +1,216 @@
+{
+  "lastScan": "2025-08-13T15:19:47.755Z",
+  "totalPrograms": 13,
+  "programs": {
+    "system.pandoc": {
+      "id": "system.pandoc",
+      "name": "pandoc",
+      "type": "system",
+      "description": "Universal document converter",
+      "capabilities": [
+        "document-conversion",
+        "markdown",
+        "pdf",
+        "html"
+      ],
+      "version": "3.7.0",
+      "checkCommand": "pandoc --version",
+      "aliases": [],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:43.961Z"
+    },
+    "system.pdflatex": {
+      "id": "system.pdflatex",
+      "name": "pdflatex",
+      "type": "system",
+      "description": "LaTeX to PDF compiler",
+      "capabilities": [
+        "pdf-generation",
+        "latex",
+        "academic"
+      ],
+      "version": "6.3.4",
+      "checkCommand": "pdflatex --version",
+      "aliases": [],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:44.110Z"
+    },
+    "system.ffmpeg": {
+      "id": "system.ffmpeg",
+      "name": "ffmpeg",
+      "type": "system",
+      "description": "Complete multimedia processing",
+      "capabilities": [
+        "video-processing",
+        "audio-processing",
+        "media-conversion"
+      ],
+      "version": "7.1.1",
+      "checkCommand": "ffmpeg -version",
+      "aliases": [],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:46.408Z"
+    },
+    "system.imagemagick": {
+      "id": "system.imagemagick",
+      "name": "imagemagick",
+      "type": "system",
+      "description": "Image manipulation toolkit",
+      "capabilities": [
+        "image-processing",
+        "image-conversion",
+        "graphics"
+      ],
+      "version": "7.1.1",
+      "checkCommand": "magick --version || convert --version",
+      "aliases": [
+        "convert",
+        "magick"
+      ],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:46.604Z"
+    },
+    "system.jq": {
+      "id": "system.jq",
+      "name": "jq",
+      "type": "system",
+      "description": "JSON processor",
+      "capabilities": [
+        "json-processing",
+        "data-parsing",
+        "filtering"
+      ],
+      "version": "1.7.1",
+      "checkCommand": "jq --version",
+      "aliases": [],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:46.614Z"
+    },
+    "system.curl": {
+      "id": "system.curl",
+      "name": "curl",
+      "type": "system",
+      "description": "HTTP client and data transfer",
+      "capabilities": [
+        "http-requests",
+        "api-calls",
+        "web-scraping"
+      ],
+      "version": "8.7.1",
+      "checkCommand": "curl --version",
+      "aliases": [],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:46.650Z"
+    },
+    "system.wget": {
+      "id": "system.wget",
+      "name": "wget",
+      "type": "system",
+      "description": "Web file retrieval",
+      "capabilities": [
+        "web-scraping",
+        "file-download"
+      ],
+      "version": "1.24.5",
+      "checkCommand": "wget --version",
+      "aliases": [],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:46.690Z"
+    },
+    "system.git": {
+      "id": "system.git",
+      "name": "git",
+      "type": "system",
+      "description": "Version control system",
+      "capabilities": [
+        "version-control",
+        "repository-management"
+      ],
+      "version": "2.39.5",
+      "checkCommand": "git --version",
+      "aliases": [],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:46.765Z"
+    },
+    "system.python": {
+      "id": "system.python",
+      "name": "python",
+      "type": "system",
+      "description": "Python interpreter",
+      "capabilities": [
+        "scripting",
+        "data-science",
+        "automation"
+      ],
+      "version": "3.13.5",
+      "checkCommand": "python --version || python3 --version",
+      "aliases": [
+        "python3",
+        "py"
+      ],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:46.869Z"
+    },
+    "system.node": {
+      "id": "system.node",
+      "name": "node",
+      "type": "system",
+      "description": "Node.js JavaScript runtime",
+      "capabilities": [
+        "javascript",
+        "scripting",
+        "web-development"
+      ],
+      "version": "24.3.0",
+      "checkCommand": "node --version",
+      "aliases": [],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:46.975Z"
+    },
+    "system.ruby": {
+      "id": "system.ruby",
+      "name": "ruby",
+      "type": "system",
+      "description": "Ruby interpreter",
+      "capabilities": [
+        "scripting",
+        "automation"
+      ],
+      "version": "3.0.1",
+      "checkCommand": "ruby --version",
+      "aliases": [],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:47.132Z"
+    },
+    "system.rsync": {
+      "id": "system.rsync",
+      "name": "rsync",
+      "type": "system",
+      "description": "File synchronization tool",
+      "capabilities": [
+        "file-synchronization",
+        "backup"
+      ],
+      "version": "2.6.9",
+      "checkCommand": "rsync --version",
+      "aliases": [],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:47.145Z"
+    },
+    "system.zip": {
+      "id": "system.zip",
+      "name": "zip",
+      "type": "system",
+      "description": "Archive creation utility",
+      "capabilities": [
+        "compression",
+        "archiving"
+      ],
+      "version": "2.91",
+      "checkCommand": "zip --version",
+      "aliases": [],
+      "available": true,
+      "detectedAt": "2025-08-13T15:19:47.155Z"
+    }
+  }
+}

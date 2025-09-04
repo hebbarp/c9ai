@@ -1,0 +1,15 @@
+{
+  "//": "Example local provider config. Copy to config/local.json and edit.",
+  "provider": "llamacpp",
+  "llamacpp": {
+    "base_url": "http://127.0.0.1:8080",
+    "model": "llama-3.1-8b-instruct-q4"
+  },
+  "ollama": {
+    "base_url": "http://127.0.0.1:11434",
+    "model": "llama3.1:8b-instruct-q4_0"
+  },
+  "node-llama-cpp": {
+    "description": "Direct node-llama-cpp binding (current implementation)"
+  }
+}

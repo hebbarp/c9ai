@@ -1,0 +1,130 @@
+[
+  {
+    "id": "tx_1755101076551_2gjfjm5f",
+    "timestamp": "2025-08-13T16:04:36.551Z",
+    "userId": "workshop_1755101076544_ls9vn729i",
+    "type": "workshop_grant",
+    "credits": 500,
+    "amount": 0,
+    "description": "Workshop starter credits - WORKSHOP2025",
+    "workshopCode": "WORKSHOP2025"
+  },
+  {
+    "id": "tx_1755101076552_e3yoj3ll",
+    "timestamp": "2025-08-13T16:04:36.552Z",
+    "userId": "workshop_1755101076544_ls9vn729i",
+    "type": "usage",
+    "operation": "system.tool.execute",
+    "quantity": 5,
+    "credits": -5,
+    "description": "system.tool.execute × 5",
+    "metadata": {
+      "description": "Run pandoc command",
+      "workshop": "WORKSHOP2025"
+    }
+  },
+  {
+    "id": "tx_1755101076552_jp2dlx9f",
+    "timestamp": "2025-08-13T16:04:36.552Z",
+    "userId": "workshop_1755101076544_ls9vn729i",
+    "type": "usage",
+    "operation": "package.search",
+    "quantity": 10,
+    "credits": -10,
+    "description": "package.search × 10",
+    "metadata": {
+      "description": "Search for tools",
+      "workshop": "WORKSHOP2025"
+    }
+  },
+  {
+    "id": "tx_1755101076553_0t0a6qye",
+    "timestamp": "2025-08-13T16:04:36.553Z",
+    "userId": "workshop_1755101076544_ls9vn729i",
+    "type": "usage",
+    "operation": "package.install",
+    "quantity": 3,
+    "credits": -3,
+    "description": "package.install × 3",
+    "metadata": {
+      "description": "Install ffmpeg",
+      "workshop": "WORKSHOP2025"
+    }
+  },
+  {
+    "id": "tx_1755101076553_bh468cvu",
+    "timestamp": "2025-08-13T16:04:36.553Z",
+    "userId": "workshop_1755101076544_ls9vn729i",
+    "type": "usage",
+    "operation": "script.generate",
+    "quantity": 2,
+    "credits": -20,
+    "description": "script.generate × 2",
+    "metadata": {
+      "description": "Generate Python script",
+      "workshop": "WORKSHOP2025"
+    }
+  },
+  {
+    "id": "tx_1755101076554_hm4qk6ew",
+    "timestamp": "2025-08-13T16:04:36.554Z",
+    "userId": "workshop_1755101076544_ls9vn729i",
+    "type": "usage",
+    "operation": "ai.chat.message",
+    "quantity": 15,
+    "credits": -30,
+    "description": "ai.chat.message × 15",
+    "metadata": {
+      "description": "Ask AI questions",
+      "workshop": "WORKSHOP2025"
+    }
+  },
+  {
+    "id": "tx_1755101076554_fjs1ao19",
+    "timestamp": "2025-08-13T16:04:36.554Z",
+    "userId": "workshop_1755101076544_ls9vn729i",
+    "type": "usage",
+    "operation": "tool.recommend",
+    "quantity": 4,
+    "credits": -20,
+    "description": "tool.recommend × 4",
+    "metadata": {
+      "description": "Get tool suggestions",
+      "workshop": "WORKSHOP2025"
+    }
+  },
+  {
+    "id": "tx_1755101077559_t1fmh0kv",
+    "timestamp": "2025-08-13T16:04:37.559Z",
+    "userId": "workshop_1755101076544_ls9vn729i",
+    "credits": 3750,
+    "type": "purchase",
+    "packageId": "developer",
+    "amount": 20,
+    "paymentId": "pay_1755101077557_mwm6z07w",
+    "description": "developer package - 2500 credits + 1250 bonus"
+  },
+  {
+    "id": "tx_1755101077562_2ufyu6xh",
+    "timestamp": "2025-08-13T16:04:37.562Z",
+    "userId": "workshop_1755101076544_ls9vn729i",
+    "type": "usage",
+    "operation": "workflow.create",
+    "quantity": 50,
+    "credits": -750,
+    "description": "workflow.create × 50",
+    "metadata": {
+      "description": "Large workflow generation"
+    }
+  },
+  {
+    "id": "tx_1755101123823_r2vrdc4n",
+    "timestamp": "2025-08-13T16:05:23.823Z",
+    "userId": "workshop_1755101123819_t27k6f6q0",
+    "type": "workshop_grant",
+    "credits": 500,
+    "amount": 0,
+    "description": "Workshop starter credits - DEMO2025",
+    "workshopCode": "DEMO2025"
+  }
+]

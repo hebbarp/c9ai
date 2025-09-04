@@ -1,0 +1,50 @@
+{
+  "workshop_1755101076544_ls9vn729i": {
+    "userId": "workshop_1755101076544_ls9vn729i",
+    "email": "participant@company.com",
+    "createdAt": "2025-08-13T16:04:36.545Z",
+    "credits": {
+      "balance": 3412,
+      "totalPurchased": 4250,
+      "totalUsed": 838,
+      "lastActivity": "2025-08-13T16:04:37.561Z"
+    },
+    "autoRecharge": {
+      "enabled": true,
+      "threshold": 100,
+      "packageId": "starter",
+      "paymentMethod": "demo_card_1234"
+    },
+    "workshopCode": "WORKSHOP2025",
+    "source": "workshop",
+    "tier": "workshop-starter",
+    "settings": {
+      "notifications": true,
+      "lowBalanceWarning": 50
+    }
+  },
+  "workshop_1755101123819_t27k6f6q0": {
+    "userId": "workshop_1755101123819_t27k6f6q0",
+    "email": "demo@c9ai.com",
+    "createdAt": "2025-08-13T16:05:23.820Z",
+    "credits": {
+      "balance": 500,
+      "totalPurchased": 500,
+      "totalUsed": 0,
+      "lastActivity": "2025-08-13T16:05:23.822Z"
+    },
+    "autoRecharge": {
+      "enabled": false,
+      "threshold": 100,
+      "packageId": "starter",
+      "paymentMethod": null
+    },
+    "workshopCode": "DEMO2025",
+    "source": "workshop",
+    "tier": "workshop-starter",
+    "settings": {
+      "notifications": true,
+      "lowBalanceWarning": 50
+    }
+  }
+}

@@ -1,7 +1,7 @@
 const chalk = require('chalk');
 
 function showHelp() {
-    console.log(chalk.cyan.bold('\nC9AI - Your AI-Powered Productivity Assistant\n'));
+    console.log(chalk.cyan.bold('\nc9ai - Your AI-Powered Productivity Assistant\n'));
     
     console.log(chalk.yellow.bold('Usage:'));
     console.log('  Simply type your question or command and press Enter.');

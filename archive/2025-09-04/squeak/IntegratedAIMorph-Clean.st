@@ -1,0 +1,350 @@
+Morph subclass: #IntegratedAIMorph
+	instanceVariableNames: 'titleMorph queryInput responseDisplay localAIButton clearButton statusMorph lastQuery lastResponse renderButton'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'C9AI-Morphs'!
+
+!IntegratedAIMorph commentStamp: 'C9AI 8/25/2025 08:10' prior: 0!
+Working IntegratedAIMorph with Unicode renderer capability.
+Built on the simple working base.
+
+Usage:
+  IntegratedAIMorph demo.!
+
+!IntegratedAIMorph methodsFor: 'initialization'!
+initialize
+	super initialize.
+	lastQuery := ''.
+	lastResponse := ''.
+	self setupAppearance.
+	self buildInterface.
+	self enableDragging! !
+
+!IntegratedAIMorph methodsFor: 'initialization'!
+setupAppearance
+	self color: (Color r: 0.98 g: 0.98 b: 1.0).
+	self borderWidth: 3.
+	self borderColor: (Color r: 0.2 g: 0.4 b: 0.9).
+	self extent: 650@450.
+	self layoutPolicy: TableLayout new.
+	self listDirection: #topToBottom.
+	self cellPositioning: #topLeft.
+	self hResizing: #spaceFill.
+	self vResizing: #spaceFill.
+	self layoutInset: 12! !
+
+!IntegratedAIMorph methodsFor: 'interface'!
+buildInterface
+	| queryContainer buttonContainer |
+	self removeAllMorphs.
+	
+	titleMorph := self buildTitle.
+	statusMorph := self buildStatus.
+	queryContainer := self buildQueryContainer.
+	buttonContainer := self buildButtonContainer.
+	responseDisplay := self buildResponseDisplay.
+	
+	self addMorphBack: titleMorph.
+	self addMorphBack: (self buildSpacer: 8).
+	self addMorphBack: statusMorph.
+	self addMorphBack: (self buildSpacer: 8).
+	self addMorphBack: queryContainer.
+	self addMorphBack: (self buildSpacer: 8).
+	self addMorphBack: buttonContainer.
+	self addMorphBack: (self buildSpacer: 8).
+	self addMorphBack: responseDisplay! !
+
+!IntegratedAIMorph methodsFor: 'interface'!
+buildTitle
+	^ StringMorph new
+		contents: 'C9AI - Unicode Test';
+		color: (Color r: 0.2 g: 0.4 b: 0.9)! !
+
+!IntegratedAIMorph methodsFor: 'interface'!
+buildStatus
+	^ StringMorph new
+		contents: 'Ready - Test Unicode';
+		color: (Color r: 0.4 g: 0.4 b: 0.4)! !
+
+!IntegratedAIMorph methodsFor: 'interface'!
+buildQueryContainer
+	| container label |
+	container := Morph new
+		color: Color transparent;
+		layoutPolicy: TableLayout new;
+		listDirection: #topToBottom;
+		cellPositioning: #topLeft;
+		hResizing: #spaceFill;
+		vResizing: #shrinkWrap;
+		extent: 600@80.
+	
+	label := StringMorph new
+		contents: 'Enter text (try Kannada):';
+		color: (Color r: 0.3 g: 0.3 b: 0.3).
+	
+	queryInput := PluggableTextMorph new
+		extent: 600@50;
+		color: Color white;
+		borderWidth: 2;
+		borderColor: (Color r: 0.7 g: 0.7 b: 0.7);
+		wrapFlag: true.
+	
+	container addMorphBack: label.
+	container addMorphBack: (self buildSpacer: 5).
+	container addMorphBack: queryInput.
+	
+	^ container! !
+
+!IntegratedAIMorph methodsFor: 'interface'!
+buildButtonContainer
+	| container |
+	container := Morph new
+		color: Color transparent;
+		layoutPolicy: TableLayout new;
+		listDirection: #leftToRight;
+		cellPositioning: #center;
+		hResizing: #spaceFill;
+		vResizing: #shrinkWrap;
+		extent: 600@35.
+	
+	localAIButton := SimpleButtonMorph new
+		label: 'Test Response';
+		target: self;
+		actionSelector: #testResponse;
+		color: (Color r: 0.3 g: 0.9 b: 0.3);
+		extent: 120@25.
+	
+	renderButton := SimpleButtonMorph new
+		label: 'Render Better';
+		target: self;
+		actionSelector: #renderBetter;
+		color: (Color r: 0.2 g: 0.7 b: 0.9);
+		extent: 120@25.
+	
+	clearButton := SimpleButtonMorph new
+		label: 'Clear';
+		target: self;
+		actionSelector: #clearAll;
+		color: (Color r: 0.7 g: 0.7 b: 0.7);
+		extent: 80@25.
+	
+	container addMorphBack: localAIButton.
+	container addMorphBack: (self buildSpacer: 8).
+	container addMorphBack: renderButton.
+	container addMorphBack: (self buildSpacer: 8).
+	container addMorphBack: clearButton.
+	
+	^ container! !
+
+!IntegratedAIMorph methodsFor: 'interface'!
+buildResponseDisplay
+	^ PluggableTextMorph new
+		extent: 600@200;
+		setText: 'Enter text above and click Test Response or Render Better for Unicode display.';
+		color: (Color r: 0.99 g: 0.99 b: 0.99);
+		borderWidth: 2;
+		borderColor: (Color r: 0.8 g: 0.8 b: 0.8);
+		readOnly: true;
+		wrapFlag: true! !
+
+!IntegratedAIMorph methodsFor: 'interface'!
+buildSpacer: height
+	^ Morph new
+		color: Color transparent;
+		extent: 1@height;
+		hResizing: #rigid;
+		vResizing: #rigid! !
+
+!IntegratedAIMorph methodsFor: 'actions'!
+testResponse
+	| queryText response |
+	queryText := queryInput text asString.
+	queryText isEmpty ifTrue: [
+		^ self showStatus: 'Please enter some text first'
+	].
+	
+	self showStatus: 'Generating test response...'.
+	lastQuery := queryText.
+	
+	response := self generateTestResponse: queryText.
+	lastResponse := response.
+	
+	self showResponse: response.
+	self showStatus: 'Response generated - try Render Better for Unicode'! !
+
+!IntegratedAIMorph methodsFor: 'actions'!
+generateTestResponse: queryText
+	"Generate a test response about the input text"
+	| response |
+	response := 'TEST RESPONSE
+=============
+
+Input: ', queryText, '
+
+Analysis:
+- Length: ', queryText size printString, ' characters
+- Contains Kannada: ', (self containsKannada: queryText) printString, '.
+
+'.
+	
+	"Add Kannada sample if input has Kannada"
+	(self containsKannada: queryText) ifTrue: [
+		response := response, 'Sample Kannada Response:
+Kannada is a beautiful Dravidian language from Karnataka state in India.
+
+Note: Use Render Better button for proper ligature display.'
+	].
+	
+	^ response! !
+
+!IntegratedAIMorph methodsFor: 'actions'!
+containsKannada: text
+	"Check if text contains Kannada characters"
+	text do: [:char |
+		| codePoint |
+		codePoint := char asInteger.
+		"Kannada Unicode range: 0C80–0CFF (3200-3327 decimal)"
+		((codePoint >= 3200) and: [codePoint <= 3327]) ifTrue: [^ true]
+	].
+	^ false! !
+
+!IntegratedAIMorph methodsFor: 'actions'!
+renderBetter
+	| textToRender |
+	textToRender := lastResponse ifEmpty: [queryInput text asString].
+	textToRender isEmpty ifTrue: [
+		^ self showStatus: 'No text to render - enter text or generate response first'
+	].
+	
+	self showStatus: 'Opening Unicode renderer...'.
+	
+	[self openUnicodeRenderer: textToRender.
+	 self showStatus: 'Unicode renderer opened - check browser']
+		fork! !
+
+!IntegratedAIMorph methodsFor: 'actions'!
+openUnicodeRenderer: textContent
+	"Open text in browser with proper Unicode rendering"
+	| html fileName filePath |
+	
+	"Generate HTML"
+	html := self generateHTML: textContent title: 'C9AI Unicode Renderer'.
+	
+	"Create temp file"
+	fileName := 'c9ai_unicode_', DateAndTime now asString copyReplaceAll: ':' with: '_', '.html'.
+	filePath := '/tmp/', fileName.
+	
+	"Write HTML file"
+	[FileStream newFileNamed: filePath do: [:file |
+		file nextPutAll: html.
+	].
+	
+	"Open in browser"
+	OSProcess command: 'open "', filePath, '"'.
+	
+	Transcript show: 'Unicode renderer opened: ', filePath; cr]
+		on: Error
+		do: [:ex |
+			Transcript show: 'Renderer error: ', ex messageText; cr.
+			self showStatus: 'Renderer error - check Transcript']! !
+
+!IntegratedAIMorph methodsFor: 'html-generation'!
+generateHTML: textContent title: titleText
+	"Generate proper HTML - ultra safe version"
+	| html doctype |
+	
+	"Build DOCTYPE safely"
+	doctype := String streamContents: [:stream |
+		stream nextPut: $<.
+		stream nextPut: $!.
+		stream nextPutAll: 'DOCTYPE html>'.
+	].
+	
+	html := doctype, '<html><head><meta charset="UTF-8"><title>', (self escapeHTML: titleText), '</title>'.
+	html := html, '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;700&display=swap" rel="stylesheet">'.
+	html := html, '<style>body{font-family:"Noto Sans Kannada",Arial,sans-serif;margin:20px;padding:20px;background:#f8f9fa;line-height:1.6;}'. 
+	html := html, 'h1{background:#667eea;color:white;padding:20px;border-radius:10px;text-align:center;margin-bottom:20px;}'.
+	html := html, 'pre{background:white;padding:30px;border-radius:10px;white-space:pre-wrap;font-size:18px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}'.
+	html := html, '.kannada{font-weight:400;letter-spacing:0.5px;text-rendering:optimizeLegibility;}'.
+	html := html, '</style></head><body>'.
+	html := html, '<h1>', (self escapeHTML: titleText), '</h1>'.
+	html := html, '<pre class="kannada">', (self escapeHTML: textContent), '</pre>'.
+	html := html, '<p><small>Generated from Squeak with Unicode support</small></p>'.
+	html := html, '</body></html>'.
+	
+	^ html! !
+
+!IntegratedAIMorph methodsFor: 'html-generation'!
+escapeHTML: text
+	"Escape HTML special characters"
+	| result |
+	result := text copyReplaceAll: '&' with: '&amp;'.
+	result := result copyReplaceAll: '<' with: '&lt;'.
+	result := result copyReplaceAll: '>' with: '&gt;'.
+	result := result copyReplaceAll: '"' with: '&quot;'.
+	^ result! !
+
+!IntegratedAIMorph methodsFor: 'actions'!
+clearAll
+	queryInput setText: ''.
+	responseDisplay setText: 'Enter text above and click buttons to test.'.
+	lastQuery := ''.
+	lastResponse := ''.
+	self showStatus: 'Cleared'! !
+
+!IntegratedAIMorph methodsFor: 'feedback'!
+showResponse: responseText
+	responseDisplay setText: responseText.
+	responseDisplay changed! !
+
+!IntegratedAIMorph methodsFor: 'feedback'!
+showStatus: messageText
+	statusMorph contents: messageText.
+	statusMorph color: Color blue.
+	
+	[(Delay forSeconds: 3) wait.
+	 statusMorph contents: 'Ready - Test Unicode'.
+	 statusMorph color: (Color r: 0.4 g: 0.4 b: 0.4)]
+		fork! !
+
+!IntegratedAIMorph methodsFor: 'interaction'!
+enableDragging
+	self on: #mouseDown send: #startDrag: to: self.
+	self on: #mouseMove send: #drag: to: self.
+	self on: #mouseUp send: #endDrag: to: self! !
+
+!IntegratedAIMorph methodsFor: 'interaction'!
+startDrag: event
+	self isDragging: true.
+	self dragOffset: event position - self position! !
+
+!IntegratedAIMorph methodsFor: 'interaction'!
+drag: event
+	self isDragging ifTrue: [
+		self position: event position - self dragOffset
+	]! !
+
+!IntegratedAIMorph methodsFor: 'interaction'!
+endDrag: event
+	self isDragging: false! !
+
+!IntegratedAIMorph methodsFor: 'accessing'!
+isDragging
+	^ self valueOfProperty: #isDragging ifAbsent: [false]! !
+
+!IntegratedAIMorph methodsFor: 'accessing'!
+isDragging: aBoolean
+	self setProperty: #isDragging toValue: aBoolean! !
+
+!IntegratedAIMorph methodsFor: 'accessing'!
+dragOffset
+	^ self valueOfProperty: #dragOffset ifAbsent: [0@0]! !
+
+!IntegratedAIMorph methodsFor: 'accessing'!
+dragOffset: aPoint
+	self setProperty: #dragOffset toValue: aPoint! !
+
+!IntegratedAIMorph class methodsFor: 'instance creation'!
+demo
+	"Create and show working IntegratedAIMorph with Unicode renderer"
+	^ self new openInWorld! !

@@ -1,0 +1,11 @@
+{
+  "//": "Optional defaults for c9ai agent. You can edit or delete this file.",
+  "provider": "llamacpp",
+  "allowedTools": [
+    "shell.run", "script.run", "fs.read", "fs.write",
+    "web.search", "tex.compile", "ffmpeg.run", "image.convert",
+    "gh.issues.list", "gh.issues.create", "gh.issues.comment",
+    "mail.send", "whatsapp.send", "command.run"
+  ],
+  "confirmThreshold": 0.6
+}

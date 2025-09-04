@@ -1,0 +1,36 @@
+{
+  "//": "Example settings configuration. This file shows how to configure C9AI.",
+  "//": "Settings are automatically stored in ~/.c9ai/settings.json when changed via UI",
+  
+  "provider": "llamacpp",
+  "confirmThreshold": 0.6,
+  "allowedTools": [
+    "shell.run",
+    "script.run", 
+    "fs.read",
+    "fs.write",
+    "web.search"
+  ],
+  
+  "apiKeys": {
+    "//": "API keys for external services. Configure these via the Settings UI or directly here.",
+    "ANTHROPIC_API_KEY": "",
+    "GEMINI_API_KEY": "",  
+    "OPENAI_API_KEY": "",
+    "DEEPSEEK_API_KEY": "",
+    "SERPAPI_KEY": ""
+  },
+  
+  "style": {
+    "//": "UI and response styling options",
+    "conciseness": 0.6,
+    "bulletMax": 8
+  },
+  
+  "//": "How to get API keys:",
+  "//": "• Claude: https://console.anthropic.com/",
+  "//": "• Gemini: https://makersuite.google.com/app/apikey", 
+  "//": "• OpenAI: https://platform.openai.com/api-keys",
+  "//": "• DeepSeek: https://platform.deepseek.com/api_keys",
+  "//": "• SerpAPI: https://serpapi.com/dashboard"
+}

@@ -21,12 +21,12 @@
       --sidebar: #000000;
     }
     
-    /* Light mode - can be toggled with data-theme="light" on body */
+    /* Light mode - clean and minimal like your test page */
     [data-theme="light"] {
-      --bg: #f7f7f8;
+      --bg: #ffffff;
       --panel: #ffffff;
-      --muted: #f0f0f0;
-      --text: #1a1a1a;
+      --muted: #f5f5f5;
+      --text: #000000;
       --sub: #666666;
       --primary: #7c83ff;
       --primary-ink: #ffffff;
@@ -34,8 +34,8 @@
       --user: #7c83ff;
       --danger: #ff4d6d;
       --ok: #2ecc71;
-      --border: #e1e1e1;
-      --sidebar: #f0f0f0;
+      --border: #dddddd;
+      --sidebar: #fafafa;
     }
     
     @keyframes pulse {
@@ -342,10 +342,168 @@
       flex-shrink: 0;
     }
     
+    /* Debug Panel Styles */
+    .debug-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 400px;
+      max-height: 600px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+    }
+    
+    .debug-header {
+      padding: 12px 16px;
+      background: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 8px 8px 0 0;
+    }
+    
+    .debug-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+    }
+    
+    .debug-close {
+      background: none;
+      border: none;
+      color: var(--sub);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    
+    .debug-close:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+    
+    .debug-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    
+    .debug-entry {
+      margin-bottom: 8px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      border-left: 3px solid var(--border);
+    }
+    
+    .debug-entry.info { 
+      background: rgba(124, 131, 255, 0.1); 
+      border-left-color: var(--primary);
+    }
+    .debug-entry.success { 
+      background: rgba(46, 204, 113, 0.1); 
+      border-left-color: var(--ok);
+    }
+    .debug-entry.warning { 
+      background: rgba(255, 193, 7, 0.1); 
+      border-left-color: #ffc107;
+    }
+    .debug-entry.error { 
+      background: rgba(255, 77, 109, 0.1); 
+      border-left-color: var(--danger);
+    }
+    .debug-entry.tool { 
+      background: rgba(156, 39, 176, 0.1); 
+      border-left-color: #9c27b0;
+    }
+    
+    .debug-timestamp {
+      color: var(--sub);
+      font-size: 10px;
+      margin-right: 8px;
+    }
+    
+    .debug-icon {
+      margin-right: 6px;
+    }
+    
+    .debug-message {
+      color: var(--text);
+    }
+    
+    .debug-toggle {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      right: auto;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      z-index: 999;
+      transition: all 0.3s ease;
+    }
+    
+    .debug-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    
+    .debug-toggle.active {
+      background: var(--ok);
+    }
+    
+    /* Progress indicator for executive requests */
+    .progress-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+
     /* Mobile responsive adjustments */
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
+      }
+      
+      .debug-panel {
+        width: 300px;
+        right: 10px;
+        top: 10px;
+        max-height: 400px;
+      }
+      
+      .debug-toggle {
+        width: 45px;
+        height: 45px;
+        bottom: 15px;
+        right: 15px;
       }
       .sidebar.show {
         transform: translateX(0);
@@ -605,9 +763,139 @@
         display: none;
       }
     }
+    
+    /* Code action buttons styling */
+    .code-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    
+    .save-code-btn, .run-code-btn, .copy-code-btn {
+      background: var(--muted);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    
+    .save-code-btn:hover {
+      background: var(--primary);
+      color: var(--primary-ink);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+    
+    .run-code-btn:hover {
+      background: var(--ok);
+      color: white;
+      border-color: var(--ok);
+      transform: translateY(-1px);
+    }
+    
+    .copy-code-btn:hover {
+      background: var(--border);
+      transform: translateY(-1px);
+    }
+    
+    .save-code-btn:active, .run-code-btn:active, .copy-code-btn:active {
+      transform: translateY(0);
+    }
+    
+    /* Theme toggle button */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 28px;
+      background: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 2px;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    .theme-toggle:hover {
+      background: var(--border);
+    }
+    
+    .theme-toggle-slider {
+      width: 24px;
+      height: 24px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      transition: all 0.3s ease;
+      color: white;
+    }
+    
+    [data-theme="light"] .theme-toggle-slider {
+      transform: translateX(22px);
+    }
+    /* Make header links readable in both themes */
+    .message .message-content h1 a,
+    .message .message-content h2 a,
+    .message .message-content h3 a {
+      color: var(--text);
+      text-decoration: none;
+    }
+    .message .message-content h1 a:hover,
+    .message .message-content h2 a:hover,
+    .message .message-content h3 a:hover {
+      text-decoration: underline;
+    }
+
+    
+    /* Smooth transitions for theme switching */
+    body, .sidebar, .main-content, .chat-messages, .chat-input, .btn, .nav-item, .debug-panel {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+  </style>
+  <style>
+    /* Context menu */
+    .context-menu { position: fixed; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.4); display: none; z-index: 1200; min-width: 160px; }
+    .context-menu .item { padding: 8px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid var(--border); }
+    .context-menu .item:last-child { border-bottom: none; }
+    .context-menu .item:hover { background: var(--muted); }
   </style>
 </head>
 <body>
+  <style>
+    /* Floating chat panel */
+    .float-chat-btn { position: fixed; right: 20px; bottom: 20px; z-index: 1100; }
+    .float-chat-panel { position: fixed; right: 20px; bottom: 70px; width: 360px; max-height: 60vh; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: none; flex-direction: column; overflow: hidden; z-index: 1100; }
+    .float-chat-panel.expanded { left: 20px; right: 20px; top: 70px; bottom: 70px; width: auto; max-height: none; }
+    .float-chat-header { padding: 10px 12px; border-bottom: 1px solid var(--border); display:flex; justify-content: space-between; align-items:center; font-weight: 600; gap: 8px; }
+    .float-chat-header .actions { display:flex; gap:8px; }
+    .float-chat-messages { padding: 10px 12px; overflow-y: auto; flex: 1; font-size: 13px; }
+    .float-chat-input { display:flex; gap:6px; padding: 8px; border-top:1px solid var(--border); }
+    .float-chat-input input { flex:1; }
+    .bubble { margin: 6px 0; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bubble); }
+    .bubble.user { background: var(--muted); }
+  </style>
+  <!-- Theme Toggle Button -->
+  <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+    <div class="theme-toggle-slider">🌙</div>
+  </div>
+
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -621,25 +909,25 @@
     <div class="nav-section">
       <div class="nav-section-title">Navigation</div>
       <div class="nav-item active" data-view="chat">
-        <span>💬</span> Chat
+        <span>💬</span> Smart Chat
       </div>
-      <div class="nav-item" data-view="agent">
-        <span>🚀</span> Agentic Tools
-      </div>
-      <div class="nav-item" data-view="cli">
-        <span>⌨️</span> CLI Access
-      </div>
-      <div class="nav-item" data-view="tools">
-        <span>🔧</span> Tools
-      </div>
-      <div class="nav-item" data-view="vibe">
-        <span>🎭</span> Vibe Sessions
-      </div>
-      <div class="nav-item" data-view="help">
+            <div class="nav-item" data-view="help">
         <span>❓</span> Help
       </div>
       <div class="nav-item" data-view="settings">
         <span>⚙️</span> Settings
+      </div>
+      <div class="nav-item" data-view="system">
+        <span>🛠️</span> System
+      </div>
+      <div class="nav-item" data-view="calculators">
+        <span>🧮</span> Calculators
+      </div>
+      <div class="nav-item" data-view="workflows">
+        <span>🔀</span> Workflows
+      </div>
+      <div class="nav-item" data-view="terminal">
+        <span>💻</span> Terminal
       </div>
     </div>
     
@@ -664,40 +952,31 @@
         <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
         <h2 id="viewTitle">AI Chat</h2>
       </div>
-      <div class="header-right">
-        <div class="provider-switcher">
-          <button class="btn pill active" data-provider="llamacpp">LLama.cpp</button>
-          <button class="btn pill" data-provider="claude">Claude</button>
-          <button class="btn pill" data-provider="gemini">Gemini</button>
-          <button class="btn pill" data-provider="openai">OpenAI</button>
-        </div>
-        <button class="btn secondary" id="btnHealth">Connections</button>
-        <button class="btn secondary" onclick="showSettings()">Settings</button>
-      </div>
+      <div class="header-right"></div>
     </div>
     
-    <!-- Chat View -->
+    <!-- Smart Chat View -->
     <div class="view-content" id="chatView">
       <div class="chat-container">
         <div class="chat-messages" id="chatMessages">
           <div class="welcome-screen" id="welcomeScreen">
-            <h1 class="welcome-title">Welcome to c9ai Hub</h1>
-            <p class="welcome-subtitle">Your central command center for AI-powered conversations and task automation. Choose between casual chat or powerful agentic tools for complex tasks.</p>
+            <h1 class="welcome-title">Welcome to Smart Chat</h1>
+            <p class="welcome-subtitle">Enhanced execution environment with XML-Lisp transpiler. Create functions, run calculations, and build your personal function library.</p>
             <div class="quick-actions">
-              <div class="quick-action" onclick="showView('vibe')" style="border: 2px solid var(--primary); background: var(--primary); color: var(--primary-ink);">
-                <div class="quick-action-icon">🎭</div>
-                <div class="quick-action-title">Vibe Sessions</div>
-                <div class="quick-action-desc">AI workflows that match your mood</div>
-              </div>
-              <div class="quick-action" onclick="startNewConversation()">
+              <div class="quick-action" onclick="startNewConversation()" style="border: 2px solid var(--primary); background: var(--primary); color: var(--primary-ink);">
                 <div class="quick-action-icon">💬</div>
-                <div class="quick-action-title">Quick Chat</div>
-                <div class="quick-action-desc">Ask anything, get instant help</div>
+                <div class="quick-action-title">Start Chatting</div>
+                <div class="quick-action-desc">Begin a new conversation</div>
               </div>
-              <div class="quick-action" onclick="showView('agent')">
-                <div class="quick-action-icon">🚀</div>
-                <div class="quick-action-title">Agentic Tools</div>
-                <div class="quick-action-desc">Complex tasks with local AI</div>
+              <div class="quick-action" onclick="showView('calculators')">
+                <div class="quick-action-icon">🧮</div>
+                <div class="quick-action-title">Open Calculators</div>
+                <div class="quick-action-desc">Deterministic business calculators</div>
+              </div>
+              <div class="quick-action" onclick="showView('workflows')">
+                <div class="quick-action-icon">🔀</div>
+                <div class="quick-action-title">Open Workflows</div>
+                <div class="quick-action-desc">Run or build task pipelines</div>
               </div>
               <div class="quick-action" onclick="loadQuickAction('Help me write a professional email')">
                 <div class="quick-action-icon">✉️</div>
@@ -727,7 +1006,7 @@
             <textarea 
               class="chat-input" 
               id="chatInput" 
-              placeholder="Type your message here... (Ctrl+Enter to send)"
+              placeholder="Chat naturally or use @calc, @todo, @email, @search for tasks... (Ctrl+Enter to send)"
               rows="1"
             ></textarea>
             <div class="input-actions">
@@ -1011,6 +1290,35 @@
           <div class="form-hint">Choose your preferred AI model provider</div>
         </div>
         <div class="form-group">
+          <label class="form-label">Mode</label>
+          <select class="form-select" id="settingsMode">
+            <option value="local">Local Only</option>
+            <option value="hybrid" selected>Hybrid (default)</option>
+            <option value="cloud">Cloud Only</option>
+          </select>
+          <div class="form-hint">Route tasks between local llama.cpp and cloud</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Privacy Profile</label>
+          <select class="form-select" id="settingsPrivacy">
+            <option value="strict_local">Strict Local (never use cloud)</option>
+            <option value="ask_before_cloud" selected>Ask Before Cloud</option>
+            <option value="cloud_preferred">Cloud Preferred</option>
+          </select>
+          <div class="form-hint">Controls cloud escalation behavior</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Coding Provider</label>
+          <select class="form-select" id="settingsCodingProvider">
+            <option value="llamacpp">Local (llama.cpp)</option>
+            <option value="claude">Claude</option>
+            <option value="openai">OpenAI</option>
+            <option value="gemini">Gemini</option>
+            <option value="deepseek">DeepSeek</option>
+          </select>
+          <div class="form-hint">Preferred model for code tasks</div>
+        </div>
+        <div class="form-group">
           <label class="form-label">Confirmation Threshold</label>
           <input type="number" class="form-input" id="settingsThreshold" min="0" max="1" step="0.1" value="0.6">
           <div class="form-hint">Threshold for automatic task execution (0-1)</div>
@@ -1067,6 +1375,214 @@
         </div>
         <button class="btn" id="saveSettingsBtn" onclick="saveSettings()">Save Settings</button>
         <div style="height: 40px;"></div> <!-- Spacer for scroll -->
+      </div>
+    </div>
+
+    <!-- Workflows View -->
+    <div class="view-content" id="workflowsView" style="display:none;">
+      <div style="padding: 20px; max-width: 1100px; margin: 0 auto;">
+        <h2 style="margin-bottom:16px;">Workflow Builder</h2>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:16px;">
+          <!-- Analyze Document -->
+          <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel);">
+            <h3 style="margin:0 0 10px 0;">Analyze Document/Spreadsheet</h3>
+            <div class="form-group"><label class="form-label">Path</label><input id="wfAnalyzePath" class="form-input" type="text" placeholder="/path/to/file.csv"/></div>
+            <button class="btn" onclick="runWorkflowAnalyze(document.getElementById('wfAnalyzePath').value)">Run</button>
+            <div id="workflowAnalyzeResult" style="margin-top:10px; font-size:13px; max-height:220px; overflow:auto;"></div>
+          </div>
+          <!-- Build Document -->
+          <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel);">
+            <h3 style="margin:0 0 10px 0;">Build New Document</h3>
+            <div class="form-group"><label class="form-label">Title</label><input id="wfBuildTitle" class="form-input" type="text" placeholder="Quarterly Summary"/></div>
+            <div class="form-group"><label class="form-label">Sections (bullets)</label><textarea id="wfBuildSections" class="form-input" style="min-height:100px;" placeholder="• Revenue trends\n• Key risks\n• Next steps"></textarea></div>
+            <div class="form-group"><label class="form-label">Format</label><select id="wfBuildFormat" class="form-select"><option>markdown</option><option>latex</option></select></div>
+            <button class="btn" onclick="runWorkflowBuild(document.getElementById('wfBuildTitle').value, document.getElementById('wfBuildSections').value, document.getElementById('wfBuildFormat').value)">Run</button>
+            <div id="workflowBuildResult" style="margin-top:10px; font-size:13px; max-height:220px; overflow:auto;"></div>
+          </div>
+          <!-- Convert Document -->
+          <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel);">
+            <h3 style="margin:0 0 10px 0;">Convert Document</h3>
+            <div class="form-group"><label class="form-label">Source Path</label><input id="wfConvSource" class="form-input" type="text" placeholder="/path/to/main.tex"/></div>
+            <div class="form-group"><label class="form-label">Target Format</label><input id="wfConvTarget" class="form-input" type="text" placeholder="pdf"/></div>
+            <button class="btn" onclick="runWorkflowConvert(document.getElementById('wfConvSource').value, document.getElementById('wfConvTarget').value)">Run</button>
+            <div id="workflowConvertResult" style="margin-top:10px; font-size:13px; max-height:220px; overflow:auto;"></div>
+          </div>
+
+          <!-- Custom Workflow Builder -->
+          <div style="grid-column: 1 / -1; border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel);">
+            <h3 style="margin:0 0 10px 0;">Custom Workflow</h3>
+            <div class="form-group"><label class="form-label">Name</label><input id="wfName" class="form-input" type="text" placeholder="My Workflow"/></div>
+            <div style="display:flex; gap:8px; align-items:flex-start; flex-wrap:wrap;">
+              <div style="min-width:220px; flex:1;">
+                <label class="form-label">Step Type</label>
+                <select id="wfStepType" class="form-select">
+                  <option>shell.run</option>
+                  <option>fs.read</option>
+                  <option>fs.write</option>
+                  <option>web.search</option>
+                  <option>jit</option>
+                  <option>tex.compile</option>
+                </select>
+              </div>
+              <div style="min-width:220px; flex:1;">
+                <label class="form-label">OS (optional)</label>
+                <select id="wfStepOs" class="form-select">
+                  <option value="any">Any</option>
+                  <option value="linux">Linux</option>
+                  <option value="darwin">macOS</option>
+                  <option value="win32">Windows</option>
+                </select>
+              </div>
+              <div style="min-width:320px; flex:2;">
+                <label class="form-label">Args (JSON)</label>
+                <textarea id="wfStepArgs" class="form-input" style="min-height:80px;" placeholder='{"cmd":"ls -la"}'></textarea>
+                <div class="form-hint">Use "$prev" or "$prev.stdout" to pass output from previous step.</div>
+              </div>
+              <div style="min-width:220px; flex:1;">
+                <label class="form-label">Shell (shell.run)</label>
+                <select id="wfStepShell" class="form-select">
+                  <option value="">Default</option>
+                  <option value="bash">bash</option>
+                  <option value="zsh">zsh</option>
+                  <option value="sh">sh</option>
+                  <option value="powershell">powershell</option>
+                  <option value="cmd">cmd</option>
+                </select>
+              </div>
+              <div style="align-self:flex-end;">
+                <button class="btn" onclick="wfAddStep()">+ Add Step</button>
+              </div>
+            </div>
+            <div id="wfSteps" style="margin-top:12px; display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:10px;"></div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+              <button class="btn" onclick="wfRun(false)">Run</button>
+              <button class="btn secondary" onclick="wfRun(true)">Dry Run</button>
+              <button class="btn" onclick="wfSave()">Save</button>
+            </div>
+            <pre id="wfRunOut" style="margin-top:12px; background:var(--muted); border:1px solid var(--border); padding:10px; border-radius:8px; max-height:300px; overflow:auto;"></pre>
+            <div style="margin-top:14px;">
+              <h4>Saved Workflows</h4>
+              <div id="wfSaved" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:10px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- System View -->
+    <div class="view-content" id="systemView" style="display:none;">
+      <div style="padding: 20px; max-width: 700px; margin: 0 auto;">
+        <h2>System</h2>
+        <p style="color:var(--sub);">Model connectivity and environment checks.</p>
+        <button class="btn" onclick="loadSystemStatus()">Refresh Status</button>
+        <div id="systemStatus" style="margin-top:12px; font-size:13px;"></div>
+
+        <div style="margin-top:24px; border-top:1px solid var(--border); padding-top:16px;">
+          <h3 style="margin:0 0 10px 0;">Cream API Quick Actions</h3>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
+            <!-- Fetch Posts -->
+            <div style="border:1px solid var(--border); border-radius:10px; padding:12px; background:var(--panel);">
+              <h4 style="margin:0 0 8px 0;">Fetch Recent Posts</h4>
+              <div class="form-group"><label class="form-label">Limit</label><input id="creamFetchLimit" class="form-input" type="number" value="5"/></div>
+              <div class="form-group"><label class="form-label"><input type="checkbox" id="creamFetchRaw"/> Show raw JSON</label></div>
+              <button class="btn" onclick="systemCreamFetch()">Fetch</button>
+            </div>
+            <!-- Send Test Email -->
+            <div style="border:1px solid var(--border); border-radius:10px; padding:12px; background:var(--panel);">
+              <h4 style="margin:0 0 8px 0;">Send Test Email</h4>
+              <div class="form-group"><label class="form-label">From Email</label><input id="creamMailFrom" class="form-input" type="email" placeholder="me@example.com"/></div>
+              <div class="form-group"><label class="form-label">To Email</label><input id="creamMailTo" class="form-input" type="email" placeholder="you@example.com"/></div>
+              <div class="form-group"><label class="form-label">Subject</label><input id="creamMailSubject" class="form-input" type="text" placeholder="Hello"/></div>
+              <div class="form-group"><label class="form-label">Body</label><textarea id="creamMailBody" class="form-input" style="min-height:70px;" placeholder="Hi there"></textarea></div>
+              <button class="btn" onclick="systemCreamMail()">Send</button>
+            </div>
+            <!-- Create Post -->
+            <div style="border:1px solid var(--border); border-radius:10px; padding:12px; background:var(--panel);">
+              <h4 style="margin:0 0 8px 0;">Create Post</h4>
+              <div class="form-group"><label class="form-label">Content</label><textarea id="creamPostContent" class="form-input" style="min-height:70px;" placeholder="Hello from C9AI"></textarea></div>
+              <div class="form-group"><label class="form-label">Visibility</label><select id="creamPostVisibility" class="form-select"><option>public</option><option>private</option></select></div>
+              <button class="btn" onclick="systemCreamPost()">Post</button>
+            </div>
+          </div>
+          <pre id="creamOut" style="margin-top:12px; background:var(--muted); border:1px solid var(--border); padding:10px; border-radius:8px; max-height:300px; overflow:auto;"></pre>
+          <div style="margin-top:12px;">
+            <button class="btn secondary" onclick="systemCreamDiagnose()">Diagnose Cream APIs</button>
+            <button class="btn secondary" onclick="systemCreamDiagMail()">Diagnose Mail</button>
+            <button class="btn secondary" onclick="systemCreamDiagPost()">Diagnose Post</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terminal View -->
+    <div class="view-content" id="terminalView" style="display:none;">
+      <div style="padding: 20px; max-width: 900px; margin: 0 auto;">
+        <h2>System Terminal (Quick Runner)</h2>
+        <div class="form-group"><label class="form-label">Command</label><input id="termCmd" class="form-input" type="text" placeholder="claude --help or gemini --help"/></div>
+        <button class="btn" onclick="runTerminalCmd()">Run</button>
+        <pre id="termOut" style="margin-top:12px; background:var(--muted); border:1px solid var(--border); padding:10px; border-radius:8px; max-height:400px; overflow:auto;"></pre>
+      </div>
+    </div>
+
+    <!-- Calculators View -->
+    <div class="view-content" id="calculatorsView" style="display: none;">
+      <div style="padding: 20px; max-width: 1000px; margin: 0 auto;">
+        <h2 style="margin-bottom:8px;">Executive Calculators</h2>
+        <div style="margin-bottom:16px; font-size:13px;">
+          <a href="#savedCalcsAnchor">Jump to Saved Calculators ↓</a>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
+          <!-- Investment -->
+          <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel);">
+            <h3 style="margin:0 0 10px 0;">Investment</h3>
+            <div class="form-group"><label class="form-label">Amount</label><input id="calcInvAmount" class="form-input" type="text" placeholder="250000"/></div>
+            <div class="form-group"><label class="form-label">Upside %</label><input id="calcInvUpside" class="form-input" type="text" placeholder="12%"/></div>
+            <div class="form-group"><label class="form-label">Downside % (optional)</label><input id="calcInvDown" class="form-input" type="text" placeholder="0%"/></div>
+            <div class="form-group"><label class="form-label">Years</label><input id="calcInvYears" class="form-input" type="number" placeholder="2"/></div>
+            <div class="form-group"><label class="form-label">Probability % (optional)</label><input id="calcInvProb" class="form-input" type="text" placeholder="50%"/></div>
+            <button class="btn" onclick="runInvestmentCalc()">Calculate</button>
+            <div id="calcInvResult" style="margin-top:10px; font-size:13px;"></div>
+          </div>
+          <!-- Vendor Discount -->
+          <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel);">
+            <h3 style="margin:0 0 10px 0;">Vendor Discount</h3>
+            <div class="form-group"><label class="form-label">Amount</label><input id="calcVDAmount" class="form-input" type="text" placeholder="50000"/></div>
+            <div class="form-group"><label class="form-label">Discount %</label><input id="calcVDDisc" class="form-input" type="text" placeholder="2%"/></div>
+            <div class="form-group"><label class="form-label">Days Early (optional)</label><input id="calcVDDays" class="form-input" type="number" placeholder="20"/></div>
+            <button class="btn" onclick="runVendorDiscountCalc()">Calculate</button>
+            <div id="calcVDResult" style="margin-top:10px; font-size:13px;"></div>
+          </div>
+          <!-- Depreciation -->
+          <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel);">
+            <h3 style="margin:0 0 10px 0;">Depreciation</h3>
+            <div class="form-group"><label class="form-label">Cost</label><input id="calcDepCost" class="form-input" type="text" placeholder="100000"/></div>
+            <div class="form-group"><label class="form-label">Method</label><select id="calcDepMethod" class="form-select"><option value="SLM">SLM</option><option value="WDV">WDV</option></select></div>
+            <div class="form-group"><label class="form-label">Useful Life (years, optional for WDV)</label><input id="calcDepLife" class="form-input" type="number" placeholder="15"/></div>
+            <div class="form-group"><label class="form-label">Residual Value % (optional)</label><input id="calcDepResidual" class="form-input" type="text" placeholder="5%"/></div>
+            <div class="form-group"><label class="form-label">Rate % (WDV optional)</label><input id="calcDepRate" class="form-input" type="text" placeholder="(derive)"/></div>
+            <div class="form-group"><label class="form-label">Date Ready (YYYY-MM-DD)</label><input id="calcDepReady" class="form-input" type="text" placeholder="2025-06-01"/></div>
+            <div class="form-group"><label class="form-label">Year End (YYYY-MM-DD)</label><input id="calcDepYE" class="form-input" type="text" placeholder="2026-03-31"/></div>
+            <button class="btn" onclick="runDepreciationCalc()">Calculate</button>
+            <div id="calcDepResult" style="margin-top:10px; font-size:13px;"></div>
+          </div>
+          <!-- Custom (Expression) -->
+          <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel);">
+            <h3 style="margin:0 0 10px 0;">Custom (Expression)</h3>
+            <div class="form-group"><label class="form-label">Expression</label><input id="calcExpr" class="form-input" type="text" placeholder="amount * (1 + rate)^years"/></div>
+            <div class="form-group"><label class="form-label">Variables (key=value, comma separated)</label><input id="calcVars" class="form-input" type="text" placeholder="amount=100000, rate=0.12, years=2"/></div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn" onclick="runCustomCalc()">Calculate</button>
+              <button class="btn secondary" onclick="saveCustomCalcDialog()">Save…</button>
+            </div>
+            <div id="calcExprResult" style="margin-top:10px; font-size:13px;"></div>
+          </div>
+          <!-- Saved Calculators -->
+          <div style="grid-column: 1 / -1;">
+            <a id="savedCalcsAnchor"></a>
+            <h3>Saved Calculators</h3>
+            <div id="savedCalcs" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px;"></div>
+          </div>
+        </div>
       </div>
     </div>
     
@@ -1248,56 +1764,163 @@
 
     <!-- Help View -->
     <div class="view-content" id="helpView" style="display: none;">
-      <div style="padding: 40px; max-width: 800px; margin: 0 auto;">
+      <div style="padding: 40px; max-width: 900px; margin: 0 auto;">
         <h2 style="margin-bottom: 20px;">Help & Documentation</h2>
-        
-        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
           <h3 style="margin-bottom: 12px;">🚀 Getting Started</h3>
-          <p style="color: var(--sub); line-height: 1.6;">
-            c9ai is your AI-powered development assistant. You can interact with it through chat or use the advanced Agent UI for complex tasks.
-          </p>
-        </div>
-        
-        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-          <h3 style="margin-bottom: 12px;">💬 Chat Interface</h3>
-          <ul style="color: var(--sub); line-height: 1.6; padding-left: 20px;">
-            <li>Type naturally and ask questions</li>
-            <li>Request code generation, debugging, or explanations</li>
-            <li>Use Ctrl+Enter to send messages quickly</li>
-            <li>Switch between different AI providers</li>
+          <ul style="color: var(--sub); line-height: 1.6; padding-left: 18px;">
+            <li>Chat: ask anything; use sigils (e.g., <code>@email</code>, <code>@post</code>, <code>@calc</code>) for actions.</li>
+            <li>AskAI (floating): quick Q&A with provider dropdown and expand.</li>
+            <li>Calculators: deterministic business calculators + custom expressions.</li>
+            <li>Workflows: chain steps (shell.run, fs.read/write, jit, tex.compile, cream.*).</li>
+            <li>System: connectivity + Cream API quick actions and diagnostics.</li>
+            <li>Terminal: run one-off system commands (non-interactive).</li>
           </ul>
         </div>
-        
-        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-          <h3 style="margin-bottom: 12px;">🤖 Agent Interface</h3>
-          <ul style="color: var(--sub); line-height: 1.6; padding-left: 20px;">
-            <li>Advanced task execution with tool access</li>
-            <li>Real-time execution timeline</li>
-            <li>File system operations and shell commands</li>
-            <li>Configurable tool permissions</li>
-          </ul>
-        </div>
-        
-        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-          <h3 style="margin-bottom: 12px;">⚙️ Available Tools</h3>
-          <div id="toolsList" style="color: var(--sub); line-height: 1.6;">
-            Loading tools...
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:16px;">
+          <div style="background: var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px;">
+            <h3>💬 Chat & Sigils</h3>
+            <ul style="color: var(--sub); line-height:1.6; padding-left:18px;">
+              <li>Send: Ctrl/Cmd + Enter</li>
+              <li><code>@email</code> <em>"to@example.com"</em> subject: <em>Text</em> content: <em>Body</em></li>
+              <li><code>@post</code> <em>"Hello world"</em> visibility: public</li>
+              <li><code>@calc</code> <em>22/7</em> or saved function calls</li>
+              <li><code>@executive</code> domains (Investment, Vendor Discount, Depreciation...)</li>
+            </ul>
+          </div>
+
+          <div style="background: var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px;">
+            <h3>🧮 Calculators</h3>
+            <ul style="color: var(--sub); line-height:1.6; padding-left:18px;">
+              <li>Built-ins: Investment, Vendor Discount, Depreciation, SaaS Breakeven, Finance.</li>
+              <li>Custom (Expression): enter formula + variables, Calculate; Save to reuse.</li>
+              <li>Saved Calculators: collapsible list; Run/Edit/Rename/Delete.</li>
+            </ul>
+          </div>
+
+          <div style="background: var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px;">
+            <h3>🔀 Workflows</h3>
+            <ul style="color: var(--sub); line-height:1.6; padding-left:18px;">
+              <li>Steps: shell.run, fs.read/write, web.search, jit, tex.compile, cream.*</li>
+              <li>Data flow: use <code>"$prev"</code> or <code>"$prev.stdout"</code> in step args.</li>
+              <li>Portability: set OS filter (Any/Linux/macOS/Windows), choose shell (bash/zsh/sh/powershell/cmd).</li>
+              <li>Save/Load/Run/Dry Run from the Workflows tab.</li>
+            </ul>
+          </div>
+
+          <div style="background: var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px;">
+            <h3>🛠️ System & Cream API</h3>
+            <ul style="color: var(--sub); line-height:1.6; padding-left:18px;">
+              <li>Set API keys in Settings (Cream token/key, OpenAI, Gemini, etc.).</li>
+              <li>Quick Actions: fetch posts, send mail, create post.</li>
+              <li>Diagnostics: <em>Diagnose Cream APIs/Mail/Post</em> to see status/elapsed/sample.</li>
+              <li>RSS/Stream handle slow endpoints with long timeouts + retries.</li>
+            </ul>
+          </div>
+
+          <div style="background: var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px;">
+            <h3>💾 Conversations</h3>
+            <ul style="color: var(--sub); line-height:1.6; padding-left:18px;">
+              <li>Right‑click a conversation → Rename / Save / Delete.</li>
+              <li>Local autosave to browser; optional server save for persistence.</li>
+            </ul>
           </div>
         </div>
-        
-        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
-          <h3 style="margin-bottom: 12px;">🔧 Keyboard Shortcuts</h3>
-          <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px; color: var(--sub);">
-            <div><kbd style="background: var(--muted); padding: 4px 8px; border-radius: 4px;">Ctrl+Enter</kbd></div>
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-top:16px;">
+          <h3>⌨️ Shortcuts</h3>
+          <div style="display:grid; grid-template-columns: 1fr 2fr; gap:10px; color: var(--sub);">
+            <div><kbd style="background: var(--muted); padding: 4px 8px; border-radius: 4px;">Ctrl/Cmd + Enter</kbd></div>
             <div>Send message</div>
-            <div><kbd style="background: var(--muted); padding: 4px 8px; border-radius: 4px;">Ctrl+N</kbd></div>
+            <div><kbd style="background: var(--muted); padding: 4px 8px; border-radius: 4px;">Ctrl/Cmd + N</kbd></div>
             <div>New conversation</div>
-            <div><kbd style="background: var(--muted); padding: 4px 8px; border-radius: 4px;">Ctrl+,</kbd></div>
-            <div>Open settings</div>
+          </div>
+        </div>
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-top:16px;">
+          <h3>🧰 Available Tools</h3>
+          <div id="toolsList" style="color: var(--sub); line-height: 1.6;">Loading tools...</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Functions View -->
+    <div class="view-content" id="functionsView" style="display: none;">
+      <div style="padding: 40px; max-width: 1000px; margin: 0 auto;">
+        <h2 style="margin-bottom: 20px;">📝 Function Library</h2>
+        
+        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+          <h3 style="margin-bottom: 12px;">🚀 Quick Actions</h3>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn" onclick="showCreateFunction()">✨ Create Function</button>
+            <button class="btn secondary" onclick="refreshFunctions()">🔄 Refresh</button>
+            <button class="btn secondary" onclick="openFunctionsDirectory()">📁 Open Directory</button>
+          </div>
+        </div>
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+          <h3 style="margin-bottom: 12px;">📊 Function Statistics</h3>
+          <div id="functionStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: var(--primary);" id="totalFunctions">-</div>
+              <div style="color: var(--sub); font-size: 14px;">Total Functions</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: var(--ok);" id="activeFunctions">-</div>
+              <div style="color: var(--sub); font-size: 14px;">Active</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: var(--sub);" id="storageUsed">-</div>
+              <div style="color: var(--sub); font-size: 14px;">Storage Used</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+          <h3 style="margin-bottom: 12px;">📚 Function List</h3>
+          <div id="functionsList" style="min-height: 200px;">
+            <div style="text-align: center; color: var(--sub); padding: 40px;">
+              Loading functions...
+            </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Floating Chat -->
+  <button class="btn float-chat-btn" onclick="toggleFloatChat()">💡 Ask AI</button>
+  <div class="float-chat-panel" id="floatChat">
+    <div class="float-chat-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div>AskAI</div>
+        <select id="floatChatProvider" class="form-select" style="height:28px; padding:2px 6px; font-size:12px;">
+          <option value="llamacpp">llamacpp</option>
+          <option value="claude">claude</option>
+          <option value="gemini">gemini</option>
+          <option value="openai">openai</option>
+          <option value="deepseek">deepseek</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button class="btn secondary" onclick="toggleFloatChatExpand()" title="Expand/Collapse">⤢</button>
+        <button class="btn secondary" onclick="toggleFloatChat()" title="Close">✕</button>
+      </div>
+    </div>
+    <div class="float-chat-messages" id="floatChatMessages"></div>
+    <div class="float-chat-input">
+      <input id="floatChatInput" class="form-input" type="text" placeholder="Ask for a formula…" onkeydown="if(event.key==='Enter'){sendFloatChat()}" />
+      <button class="btn" onclick="sendFloatChat()">Send</button>
+    </div>
+  </div>
+
+  <!-- Conversation Context Menu -->
+  <div class="context-menu" id="convMenu">
+    <div class="item" onclick="convMenuRename()">✏️ Rename</div>
+    <div class="item" onclick="convMenuSave()">💾 Save</div>
+    <div class="item" onclick="convMenuDelete()">🗑️ Delete</div>
   </div>
 
   <script>
@@ -1324,6 +1947,7 @@
       loadConversations();
       setupEventListeners();
       updateProviderButtons();
+      loadSavedTheme(); // Load the saved theme preference
     });
     
     // Settings management
@@ -1337,6 +1961,9 @@
         const providerSelect = document.getElementById('settingsProvider');
         const thresholdInput = document.getElementById('settingsThreshold');
         const toolsInput = document.getElementById('settingsTools');
+        const modeSelect = document.getElementById('settingsMode');
+        const privacySelect = document.getElementById('settingsPrivacy');
+        const codingProviderSelect = document.getElementById('settingsCodingProvider');
         const claudeApiInput = document.getElementById('settingsClaudeApi');
         const geminiApiInput = document.getElementById('settingsGeminiApi');
         const openAIApiInput = document.getElementById('settingsOpenAIApi');
@@ -1348,6 +1975,9 @@
         if (providerSelect) providerSelect.value = settings.provider || 'llamacpp';
         if (thresholdInput) thresholdInput.value = settings.confirmThreshold || 0.6;
         if (toolsInput) toolsInput.value = (settings.allowedTools || []).join(',');
+        if (modeSelect) modeSelect.value = settings.defaultMode || 'hybrid';
+        if (privacySelect) privacySelect.value = settings.privacyProfile || 'ask_before_cloud';
+        if (codingProviderSelect) codingProviderSelect.value = settings.codingProvider || 'claude';
         if (claudeApiInput) claudeApiInput.value = settings.apiKeys?.ANTHROPIC_API_KEY || '';
         if (geminiApiInput) geminiApiInput.value = settings.apiKeys?.GEMINI_API_KEY || '';
         if (openAIApiInput) openAIApiInput.value = settings.apiKeys?.OPENAI_API_KEY || '';
@@ -1375,6 +2005,9 @@
       const providerSelect = document.getElementById('settingsProvider');
       const thresholdInput = document.getElementById('settingsThreshold');
       const toolsInput = document.getElementById('settingsTools');
+      const modeSelect = document.getElementById('settingsMode');
+      const privacySelect = document.getElementById('settingsPrivacy');
+      const codingProviderSelect = document.getElementById('settingsCodingProvider');
       const claudeApiInput = document.getElementById('settingsClaudeApi');
       const geminiApiInput = document.getElementById('settingsGeminiApi');
       const openAIApiInput = document.getElementById('settingsOpenAIApi');
@@ -1387,6 +2020,9 @@
         provider: providerSelect.value,
         confirmThreshold: parseFloat(thresholdInput.value),
         allowedTools: toolsInput.value.split(',').map(s => s.trim()).filter(Boolean),
+        defaultMode: modeSelect.value,
+        privacyProfile: privacySelect.value,
+        codingProvider: codingProviderSelect.value,
         apiKeys: {
           ANTHROPIC_API_KEY: document.getElementById('settingsClaudeApi').value || '',
           GEMINI_API_KEY: document.getElementById('settingsGeminiApi').value || '',
@@ -1440,6 +2076,57 @@
     }
     
     // Status management
+    function renderMarkdown(text) {
+      if (!text) return '';
+      
+      // Extract and preserve code action buttons before escaping
+      const codeActionRegex = /<div class="code-actions"[^>]*>.*?<\/div>/gs;
+      const codeActions = [];
+      let textWithPlaceholders = text.replace(codeActionRegex, (match) => {
+        const placeholder = `__CODE_ACTIONS_${codeActions.length}__`;
+        codeActions.push(match);
+        return placeholder;
+      });
+      
+      // Escape HTML to prevent XSS (but preserve our placeholders)
+      const escaped = textWithPlaceholders
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+      
+      // Simple markdown rendering
+      let rendered = escaped
+        // Images: ![alt](url)
+        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:160px; width:160px; height:auto; border-radius:8px; margin:8px 0; display:block;"/>')
+        // Links: [text](url)
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1<\/a>')
+        // Bold text: **text** -> <strong>text</strong>
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        // Italic text: *text* -> <em>text</em>
+        .replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, '<em>$1</em>')
+        // Code blocks: ```code``` -> <pre><code>code</code></pre>
+        .replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>')
+        // Inline code: `code` -> <code>code</code>
+        .replace(/`([^`]+?)`/g, '<code>$1</code>')
+        // Headers: ## text -> <h2>text</h2>
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        // Bullet points: • text -> <li>text</li>
+        .replace(/^• (.+)$/gm, '<li>$1</li>')
+        // Line breaks
+        .replace(/\n/g, '<br>');
+        
+      // Restore code action buttons
+      codeActions.forEach((codeAction, index) => {
+        rendered = rendered.replace(`__CODE_ACTIONS_${index}__`, codeAction);
+      });
+      
+      return rendered;
+    }
+
     function setStatus(type, message) {
       // Don't update status pane for progress messages - those go to chat now
       const progressMessages = [
@@ -1481,16 +2168,19 @@
       
       if (viewName === 'help') {
         loadToolsList();
+      } else if (viewName === 'calculators') {
+        loadSavedCalculators && loadSavedCalculators();
+      } else if (viewName === 'system') {
+        loadSystemStatus && loadSystemStatus();
+      } else if (viewName === 'workflows') {
+        if (typeof wfLoadSaved === 'function') wfLoadSaved();
       }
     }
     
     function updateViewTitle() {
       const titles = {
-        chat: 'c9ai Hub - AI Chat',
-        agent: 'Agentic Tools Launcher',
-        cli: 'CLI Access',
-        tools: 'Tool Package Manager',
-        vibe: 'Vibe Sessions',
+        chat: 'Smart Chat - Enhanced Execution',
+        functions: 'Function Library Manager',
         settings: 'Settings',
         help: 'Help & Documentation'
       };
@@ -1500,13 +2190,177 @@
     function toggleSidebar() {
       sidebar.classList.toggle('collapsed');
     }
+
+    // Theme Toggle Management
+    function toggleTheme() {
+      const body = document.body;
+      const slider = document.querySelector('.theme-toggle-slider');
+      const currentTheme = body.getAttribute('data-theme');
+      
+      if (currentTheme === 'light') {
+        // Switch to dark mode
+        body.removeAttribute('data-theme');
+        slider.textContent = '🌙';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        // Switch to light mode  
+        body.setAttribute('data-theme', 'light');
+        slider.textContent = '☀️';
+        localStorage.setItem('theme', 'light');
+      }
+    }
+    
+    // Load saved theme on page load
+    function loadSavedTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.setAttribute('data-theme', 'light');
+        document.querySelector('.theme-toggle-slider').textContent = '☀️';
+      }
+    }
+
+    // Debug Panel Management
+    let debugPanelVisible = false;
+
+    function toggleDebugPanel() {
+      const debugPanel = document.getElementById('debugPanel');
+      const debugToggle = document.getElementById('debugToggle');
+      
+      debugPanelVisible = !debugPanelVisible;
+      
+      if (debugPanelVisible) {
+        debugPanel.style.display = 'flex';
+        debugToggle.classList.add('active');
+        debugToggle.innerHTML = '🔬';
+        addDebugEntry('info', '👁️', 'Debug panel opened - monitoring executive requests');
+      } else {
+        debugPanel.style.display = 'none';
+        debugToggle.classList.remove('active');
+        debugToggle.innerHTML = '🔬';
+      }
+    }
+
+    function addDebugEntry(type, icon, message, data = null) {
+      const debugContent = document.getElementById('debugContent');
+      const entry = document.createElement('div');
+      entry.className = `debug-entry ${type}`;
+      
+      const timestamp = new Date().toLocaleTimeString();
+      let displayMessage = message;
+      
+      // Format data if provided
+      if (data && typeof data === 'object') {
+        displayMessage += '\n' + JSON.stringify(data, null, 2);
+      }
+      
+      entry.innerHTML = `
+        <span class="debug-timestamp">${timestamp}</span>
+        <span class="debug-icon">${icon}</span>
+        <span class="debug-message">${displayMessage}</span>
+      `;
+      
+      debugContent.appendChild(entry);
+      
+      // Auto-scroll to bottom
+      debugContent.scrollTop = debugContent.scrollHeight;
+      
+      // Keep only last 50 entries for performance
+      const entries = debugContent.querySelectorAll('.debug-entry');
+      if (entries.length > 50) {
+        entries[0].remove();
+      }
+    }
+
+    function clearDebugLog() {
+      const debugContent = document.getElementById('debugContent');
+      debugContent.innerHTML = `
+        <div class="debug-entry info">
+          <span class="debug-timestamp">Cleared</span>
+          <span class="debug-icon">🧹</span>
+          <span class="debug-message">Debug log cleared</span>
+        </div>
+      `;
+    }
+
+    // Progress tracking for multi-step executive requests
+    let currentWorkflowSteps = 0;
+    let completedWorkflowSteps = 0;
+
+    // Interpret calculation results for executive clarity
+    function interpretCalculationResult(expression, result) {
+      if (!expression) return '';
+      
+      // Vendor discount patterns
+      if (expression.includes('*') && expression.includes('0.01')) {
+        return `(Discount Amount: ₹${result} savings if paid immediately)`;
+      }
+      if (expression.includes('10000') && expression.includes('-')) {
+        return `(Final Amount to Pay: ₹${result} after discount)`;
+      }
+      
+      // Investment patterns  
+      if (expression.includes('365') && expression.includes('500')) {
+        return `(Total Maturity Value: ₹${result} after 1 year)`;
+      }
+      
+      // Compound interest patterns
+      if (expression.includes('^') && expression.includes('365')) {
+        return `(Compound Interest Calculation: ₹${result})`;
+      }
+      
+      // ROI patterns
+      if (expression.includes('/') && result < 100 && result > -100) {
+        return `(ROI: ${result}%)`;
+      }
+      
+      // Percentage patterns
+      if (result < 1 && result > 0) {
+        return `(${(result * 100).toFixed(2)}%)`;
+      }
+      
+      // Large amounts (likely currency)
+      if (result > 1000) {
+        return `(₹${result.toLocaleString('en-IN')})`;
+      }
+      
+      return '';
+    }
+
+    function startWorkflowProgress(totalSteps, description) {
+      currentWorkflowSteps = totalSteps;
+      completedWorkflowSteps = 0;
+      
+      addDebugEntry('info', '🎯', `Started workflow: ${description} (${totalSteps} steps)`);
+      
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
+      progressBar.id = 'workflowProgress';
+      progressBar.innerHTML = '<div class="progress-fill" style="width: 0%"></div>';
+      
+      document.getElementById('debugContent').appendChild(progressBar);
+    }
+
+    function updateWorkflowProgress(step, description) {
+      completedWorkflowSteps = step;
+      const percentage = (step / currentWorkflowSteps) * 100;
+      
+      const progressFill = document.querySelector('#workflowProgress .progress-fill');
+      if (progressFill) {
+        progressFill.style.width = `${percentage}%`;
+      }
+      
+      addDebugEntry('success', '✅', `Step ${step}/${currentWorkflowSteps}: ${description}`);
+      
+      if (step === currentWorkflowSteps) {
+        setTimeout(() => {
+          const progressBar = document.getElementById('workflowProgress');
+          if (progressBar) progressBar.remove();
+        }, 2000);
+      }
+    }
     
     function showSettings() {
       showView('settings');
-    }
-    
-    function switchToAgent() {
-      showView('agent');
     }
     
     // Provider management
@@ -1514,6 +2368,304 @@
       document.querySelectorAll('[data-provider]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.provider === currentProvider);
       });
+    }
+
+    // Calculators - client helpers
+    async function execCalc(domain, params) {
+      const r = await fetch('/api/calculators/execute', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain, params })
+      });
+      const j = await r.json();
+      if (!r.ok || j.success === false) throw new Error(j.error || 'Calculation failed');
+      return j;
+    }
+
+    function fmtNum(x) { if (x == null) return ''; return typeof x === 'number' ? x.toLocaleString() : String(x); }
+
+    async function runInvestmentCalc() {
+      const params = {
+        amount: document.getElementById('calcInvAmount').value,
+        upside: document.getElementById('calcInvUpside').value,
+        downside: document.getElementById('calcInvDown').value,
+        years: document.getElementById('calcInvYears').value,
+        probability: document.getElementById('calcInvProb').value,
+      };
+      const el = document.getElementById('calcInvResult');
+      el.textContent = 'Calculating…';
+      try {
+        const out = await execCalc('INVESTMENT', params);
+        const r = out.results || {};
+        el.innerHTML = `
+          <div>Expected Value: <strong>${fmtNum(r.expected)}</strong></div>
+          <div>ROI: <strong>${fmtNum(r.roiPercent)}%</strong></div>
+          <div style="margin-top:6px; color:var(--sub);">${out.explanation || ''}</div>
+        `;
+      } catch (e) { el.textContent = 'Error: ' + e.message; }
+    }
+
+    async function runVendorDiscountCalc() {
+      const params = {
+        amount: document.getElementById('calcVDAmount').value,
+        discount: document.getElementById('calcVDDisc').value,
+        days: document.getElementById('calcVDDays').value,
+      };
+      const el = document.getElementById('calcVDResult');
+      el.textContent = 'Calculating…';
+      try {
+        const out = await execCalc('VENDOR_DISCOUNT', params);
+        const r = out.results || {};
+        el.innerHTML = `
+          <div>Savings: <strong>${fmtNum(r.savings)}</strong></div>
+          <div>Pay Amount: <strong>${fmtNum(r.discountedPrice)}</strong></div>
+          ${r.effectiveAnnualRatePercent != null ? `<div>Effective Annualized Rate: <strong>${fmtNum(Number(r.effectiveAnnualRatePercent).toFixed(2))}%</strong></div>` : ''}
+          <div style="margin-top:6px; color:var(--sub);">${out.explanation || ''}</div>
+        `;
+      } catch (e) { el.textContent = 'Error: ' + e.message; }
+    }
+
+    async function runDepreciationCalc() {
+      const params = {
+        cost: document.getElementById('calcDepCost').value,
+        method: document.getElementById('calcDepMethod').value,
+        useful_life_years: document.getElementById('calcDepLife').value,
+        residual_percent: document.getElementById('calcDepResidual').value,
+        rate: document.getElementById('calcDepRate').value,
+        date_ready: document.getElementById('calcDepReady').value,
+        year_end: document.getElementById('calcDepYE').value,
+      };
+      const el = document.getElementById('calcDepResult');
+      el.textContent = 'Calculating…';
+      try {
+        const out = await execCalc('DEPRECIATION', params);
+        const r = out.results || {};
+        el.innerHTML = `
+          ${r.annualDepreciation != null ? `<div>Annual Depreciation: <strong>${fmtNum(r.annualDepreciation)}</strong></div>` : ''}
+          <div>First Period Depreciation: <strong>${fmtNum(r.firstPeriodDepreciation)}</strong></div>
+          <div>Closing Carrying Amount: <strong>${fmtNum(r.closingCarryingAmount)}</strong></div>
+          ${r.ratePercent != null ? `<div>Rate: <strong>${fmtNum(Number(r.ratePercent).toFixed(2))}%</strong></div>` : ''}
+          <div style="margin-top:6px; color:var(--sub);">${out.explanation || ''}</div>
+        `;
+      } catch (e) { el.textContent = 'Error: ' + e.message; }
+    }
+
+    async function runCustomCalc() {
+      const expr = document.getElementById('calcExpr').value;
+      const varsText = document.getElementById('calcVars').value || '';
+      const el = document.getElementById('calcExprResult');
+      el.textContent = 'Calculating…';
+      try {
+        const vars = {};
+        // Parse key=value pairs separated by comma
+        varsText.split(',').forEach(pair => {
+          const p = pair.trim();
+          if (!p) return;
+          const [k, v] = p.split('=');
+          if (k && v != null) vars[k.trim()] = v.trim();
+        });
+        const r = await fetch('/api/calculators/custom/execute', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ expression: expr, vars })
+        });
+        const j = await r.json();
+        if (!r.ok || j.success === false) throw new Error(j.error || 'Calculation failed');
+        el.innerHTML = `<div>Result: <strong>${fmtNum(j.result)}</strong></div>`;
+      } catch (e) { el.textContent = 'Error: ' + e.message; }
+    }
+
+    function saveCustomCalcDialog() {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+      const dialog = document.createElement('div');
+      dialog.style.cssText = 'background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:12px;width:420px;max-width:92vw;box-shadow:0 10px 30px rgba(0,0,0,0.4);';
+      dialog.innerHTML = `
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-weight:600;">Save Calculator</div>
+        <div style="padding:14px 16px;">
+          <div class="form-group"><label class="form-label">Name</label><input id="calcSaveName" class="form-input" type="text" placeholder="My ROI Calculator"/></div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--border);">
+          <button id="dlgCancel" class="btn secondary">Cancel</button>
+          <button id="dlgSave" class="btn">Save</button>
+        </div>`;
+      overlay.appendChild(dialog);
+      document.body.appendChild(overlay);
+      overlay.querySelector('#dlgCancel').addEventListener('click', () => document.body.removeChild(overlay));
+      overlay.querySelector('#dlgSave').addEventListener('click', async () => {
+        const name = document.getElementById('calcSaveName').value.trim();
+        const expression = document.getElementById('calcExpr').value.trim();
+        if (!name || !expression) { alert('Please provide a name and expression'); return; }
+        try {
+          const r = await fetch('/api/calculators/custom/save', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, expression })
+          });
+          const j = await r.json();
+          if (!r.ok || j.success === false) throw new Error(j.error || 'Save failed');
+          await loadSavedCalculators();
+          document.body.removeChild(overlay);
+        } catch (e) { alert('Error: ' + e.message); }
+      });
+    }
+
+    async function loadSavedCalculators() {
+      try {
+        const r = await fetch('/api/calculators/custom/list');
+        const j = await r.json();
+        const cont = document.getElementById('savedCalcs');
+        if (!r.ok || j.success === false) { cont.textContent = 'Failed to load saved calculators'; return; }
+        const items = j.items || [];
+        if (!items.length) { cont.innerHTML = '<div style="color:var(--sub);">No saved calculators yet</div>'; return; }
+        cont.innerHTML = items.map((it, idx) => {
+          const exprEsc = (it.expression || '').replace(/</g, '&lt;');
+          const nameEsc = (it.name || '').replace(/</g, '&lt;');
+          return `
+          <div style="border:1px solid var(--border); border-radius:10px; background:var(--panel);">
+            <button class="btn" style="width:100%; text-align:left; border:none; border-bottom:1px solid var(--border); border-radius:10px 10px 0 0; background:transparent; padding:12px;" onclick="toggleSavedCalc(${idx})">
+              ▸ ${nameEsc}
+            </button>
+            <div id="savedBody_${idx}" style="display:none; padding:12px;">
+              <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">${exprEsc}</div>
+              <div class="form-group"><label class="form-label">Variables</label><input id="savedVars_${idx}" class="form-input" type="text" placeholder="a=1, b=2"/></div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn" onclick="runSavedCalc(${idx}, ${JSON.stringify(it).replace(/"/g,'&quot;')})">Run</button>
+                <button class="btn secondary" onclick="editSavedCalc(${idx}, '${it.id}', '${it.name.replace(/'/g, "&#39;")}', ${JSON.stringify(it.expression).replace(/"/g,'&quot;')})">Edit</button>
+                <button class="btn secondary" onclick="renameSavedCalc('${it.id}', '${it.name.replace(/'/g, "&#39;")}')">Rename</button>
+                <button class="btn secondary" onclick="deleteSavedCalc('${it.id}')">Delete</button>
+              </div>
+              <div id="savedOut_${idx}" style="margin-top:10px; font-size:13px;"></div>
+            </div>
+          </div>`;
+        }).join('');
+      } catch (e) {
+        const cont = document.getElementById('savedCalcs');
+        cont.textContent = 'Error loading saved calculators';
+      }
+    }
+
+    async function runSavedCalc(idx, it) {
+      const el = document.getElementById('savedOut_' + idx);
+      const vst = document.getElementById('savedVars_' + idx).value || '';
+      el.textContent = 'Calculating…';
+      try {
+        const vars = {};
+        vst.split(',').forEach(pair => { const p = pair.trim(); if (!p) return; const [k,v] = p.split('='); if (k && v!=null) vars[k.trim()] = v.trim(); });
+        const r = await fetch('/api/calculators/custom/execute', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ expression: it.expression, vars }) });
+        const j = await r.json();
+        if (!r.ok || j.success === false) throw new Error(j.error || 'Calculation failed');
+        el.innerHTML = `<div>Result: <strong>${fmtNum(j.result)}</strong></div>`;
+      } catch (e) { el.textContent = 'Error: ' + e.message; }
+    }
+
+    function toggleSavedCalc(idx) {
+      const body = document.getElementById('savedBody_' + idx);
+      if (!body) return;
+      const isHidden = (body.style.display === 'none' || !body.style.display);
+      body.style.display = isHidden ? 'block' : 'none';
+      // Update arrow in button
+      const parent = body.parentElement;
+      if (parent) {
+        const btn = parent.querySelector('button.btn');
+        if (btn) btn.innerHTML = (isHidden ? '▾ ' : '▸ ') + btn.textContent.replace(/^▸\s|^▾\s/, '');
+      }
+    }
+
+    async function editSavedCalc(idx, id, name, expression) {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+      const dialog = document.createElement('div');
+      dialog.style.cssText = 'background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:12px;width:520px;max-width:92vw;box-shadow:0 10px 30px rgba(0,0,0,0.4);';
+      dialog.innerHTML = `
+        <div style=\"padding:14px 16px;border-bottom:1px solid var(--border);font-weight:600;\">Edit Calculator</div>
+        <div style=\"padding:14px 16px;\">
+          <div class=\"form-group\"><label class=\"form-label\">Name</label><input id=\"editCalcName\" class=\"form-input\" type=\"text\" value=\"${name}\"/></div>
+          <div class=\"form-group\"><label class=\"form-label\">Expression</label><textarea id=\"editCalcExpr\" class=\"form-input\" style=\"min-height:120px;\">${expression.replace(/</g,'&lt;')}</textarea></div>
+        </div>
+        <div style=\"display:flex;gap:10px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--border);\">
+          <button id=\"dlgCancel\" class=\"btn secondary\">Cancel</button>
+          <button id=\"dlgSave\" class=\"btn\">Save</button>
+        </div>`;
+      overlay.appendChild(dialog);
+      document.body.appendChild(overlay);
+      overlay.querySelector('#dlgCancel').addEventListener('click', () => document.body.removeChild(overlay));
+      overlay.querySelector('#dlgSave').addEventListener('click', async () => {
+        const newName = document.getElementById('editCalcName').value.trim();
+        const newExpr = document.getElementById('editCalcExpr').value.trim();
+        if (!newName || !newExpr) { alert('Please provide name and expression'); return; }
+        try {
+          const r = await fetch(`/api/calculators/custom/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: newName, expression: newExpr }) });
+          const j = await r.json();
+          if (!r.ok || j.success === false) throw new Error(j.error || 'Update failed');
+          await loadSavedCalculators();
+          document.body.removeChild(overlay);
+        } catch (e) { alert('Error: ' + e.message); }
+      });
+    }
+
+    async function renameSavedCalc(id, currentName) {
+      const name = prompt('New name for calculator', currentName || '');
+      if (!name) return;
+      try {
+        const r = await fetch(`/api/calculators/custom/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name }) });
+        const j = await r.json();
+        if (!r.ok || j.success === false) throw new Error(j.error || 'Rename failed');
+        await loadSavedCalculators();
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
+    async function deleteSavedCalc(id) {
+      if (!confirm('Delete this calculator?')) return;
+      try {
+        const r = await fetch(`/api/calculators/custom/${id}`, { method:'DELETE' });
+        const j = await r.json();
+        if (!r.ok || j.success === false) throw new Error(j.error || 'Delete failed');
+        await loadSavedCalculators();
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
+    function toggleFloatChat() {
+      const pane = document.getElementById('floatChat');
+      const show = (pane.style.display === 'none' || !pane.style.display);
+      pane.style.display = show ? 'flex' : 'none';
+      if (show) {
+        // Default provider to currentProvider
+        const sel = document.getElementById('floatChatProvider');
+        if (sel) sel.value = currentProvider;
+      }
+    }
+
+    function toggleFloatChatExpand() {
+      const pane = document.getElementById('floatChat');
+      pane.classList.toggle('expanded');
+    }
+
+    async function sendFloatChat() {
+      const input = document.getElementById('floatChatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+      const box = document.getElementById('floatChatMessages');
+      const add = (role, text) => {
+        const div = document.createElement('div');
+        div.className = 'bubble ' + (role === 'user' ? 'user' : 'assistant');
+        if (role === 'assistant') {
+          // Use existing markdown renderer for formatting
+          div.innerHTML = renderMarkdown(text);
+        } else {
+          div.textContent = text;
+        }
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+      };
+      add('user', msg);
+      try {
+        const providerOverride = (document.getElementById('floatChatProvider') && document.getElementById('floatChatProvider').value) || currentProvider;
+        const r = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ provider: providerOverride, messages: [{ role:'user', content: msg }], max_tokens: 512 }) });
+        const j = await r.json();
+        if (!r.ok || j.error) throw new Error(j.error || 'Chat failed');
+        add('assistant', j.text || '(no response)');
+      } catch (e) {
+        add('assistant', 'Error: ' + e.message);
+      }
     }
     
     // Conversation management
@@ -1528,24 +2680,22 @@
       conversations.forEach(conv => {
         const item = document.createElement('div');
         item.className = 'conversation-item';
-        if (conv.id === currentConversationId) {
-          item.classList.add('active');
-        }
-        
+        if (conv.id === currentConversationId) item.classList.add('active');
+
         const preview = conv.messages.length > 0 
           ? conv.messages[conv.messages.length - 1].content.substring(0, 50) + '...'
           : 'New conversation';
-        
         const sourceIcon = conv.source === 'cli' ? '⌨️' : '💬';
         const providerInfo = conv.provider ? ` (${getProviderDisplayName(conv.provider)})` : '';
-          
+
+        // Build inner content; actions via context menu (right-click)
         item.innerHTML = `
           <div class="conversation-title">${sourceIcon} ${conv.title}</div>
           <div class="conversation-preview">${preview}</div>
           <div class="conversation-time">${new Date(conv.updated).toLocaleDateString()}${providerInfo}</div>
         `;
-        
         item.onclick = () => loadConversation(conv.id);
+        item.oncontextmenu = (ev) => { ev.preventDefault(); openConversationMenu(ev, '${conv.id}'); };
         conversationsList.appendChild(item);
       });
     }
@@ -1601,6 +2751,81 @@
     function saveConversations() {
       localStorage.setItem('c9ai-conversations', JSON.stringify(conversations));
     }
+
+    async function saveConversationServer(id) {
+      try {
+        const conv = conversations.find(c => c.id === id);
+        if (!conv) return;
+        const r = await fetch('/api/conversations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(conv) });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'Save failed');
+        // store server id for future updates
+        if (j.conversation && j.conversation.id) {
+          conv.serverId = j.conversation.id;
+          saveConversations();
+        }
+        // Optional: show a small toast
+        alert('Conversation saved');
+      } catch (e) {
+        alert('Save failed: ' + e.message);
+      }
+    }
+
+    function renameConversation(id) {
+      const conv = conversations.find(c => c.id === id);
+      if (!conv) return;
+      const name = prompt('Rename conversation', conv.title || '');
+      if (!name) return;
+      conv.title = name.trim();
+      conv.updated = new Date().toISOString();
+      // Update on server if known there
+      if (conv.serverId) {
+        fetch('/api/conversations/' + encodeURIComponent(conv.serverId), {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: conv.title })
+        }).catch(() => {});
+      }
+      saveConversations();
+      loadConversations();
+      alert('Renamed');
+    }
+
+    function deleteConversation(id) {
+      if (!confirm('Delete this conversation?')) return;
+      const idx = conversations.findIndex(c => c.id === id);
+      if (idx === -1) return;
+      conversations.splice(idx, 1);
+      if (currentConversationId === id) {
+        currentConversationId = conversations[0]?.id || null;
+        clearChat();
+        if (currentConversationId) loadConversation(currentConversationId);
+      }
+      saveConversations();
+      loadConversations();
+    }
+
+    // Context menu logic
+    let convMenuTargetId = null;
+    function openConversationMenu(ev, id) {
+      convMenuTargetId = id;
+      const menu = document.getElementById('convMenu');
+      if (!menu) return;
+      // Position near cursor with viewport bounds check
+      const pad = 6;
+      const rect = { w: menu.offsetWidth || 200, h: menu.offsetHeight || 120 };
+      let x = ev.clientX, y = ev.clientY;
+      if (x + rect.w + pad > window.innerWidth) x = window.innerWidth - rect.w - pad;
+      if (y + rect.h + pad > window.innerHeight) y = window.innerHeight - rect.h - pad;
+      menu.style.left = x + 'px';
+      menu.style.top = y + 'px';
+      menu.style.display = 'block';
+      // Close on outside click
+      const close = (e) => { if (!menu.contains(e.target)) { menu.style.display = 'none'; document.removeEventListener('mousedown', close); } };
+      document.addEventListener('mousedown', close);
+    }
+    function convMenuRename() { if (convMenuTargetId) { renameConversation(convMenuTargetId); hideConvMenu(); } }
+    function convMenuSave() { if (convMenuTargetId) { saveConversationServer(convMenuTargetId); hideConvMenu(); } }
+    function convMenuDelete() { if (convMenuTargetId) { deleteConversation(convMenuTargetId); hideConvMenu(); } }
+    function hideConvMenu() { const menu = document.getElementById('convMenu'); if (menu) menu.style.display = 'none'; }
     
     function updateCurrentConversation(role, content) {
       if (!currentConversationId) {
@@ -1642,7 +2867,7 @@
       
       const messageContent = document.createElement('div');
       messageContent.className = 'message-content';
-      messageContent.textContent = content;
+      messageContent.innerHTML = renderMarkdown(content);
       
       const messageTime = document.createElement('div');
       messageTime.className = 'message-time';
@@ -1700,19 +2925,121 @@
       return messageId;
     }
     
+    // Cloud escalation confirmation helpers
+    function detectIntentLocal(text) {
+      const t = String(text || '').toLowerCase();
+      if (t.startsWith('@executive') || t.startsWith('@business')) return 'exec';
+      if (t.includes('```') || /(refactor|compile|build|test|unit test|patch|pr|typescript|python|javascript|java|golang|rust|function\s|class\s|import\s)/i.test(t)) return 'code';
+      if (/(calc|calculate|sum|average|percent|roi|breakeven|interest)/i.test(t)) return 'math';
+      return 'simple';
+    }
+
+    function predictCloudUse(message) {
+      try {
+        const mode = (settings && settings.defaultMode) ? settings.defaultMode : 'hybrid';
+        const privacy = (settings && settings.privacyProfile) ? settings.privacyProfile : 'ask_before_cloud';
+        const coding = (settings && settings.codingProvider) ? settings.codingProvider : 'claude';
+        const defaultProv = (settings && settings.provider) ? settings.provider : 'llamacpp';
+        const userOverrode = currentProvider !== defaultProv;
+        const intent = detectIntentLocal(message);
+
+        // Strict local blocks any cloud
+        if (privacy === 'strict_local' || mode === 'local') {
+          return { willUse: false, provider: 'llamacpp', reason: 'Strict local mode' };
+        }
+
+        // If user manually chose a cloud/hybrid provider, ask
+        if (userOverrode) {
+          const p = currentProvider;
+          const isCloudy = ['claude','openai','gemini','deepseek'].some(x => p === x || p.startsWith(x));
+          const isHybrid = /-hybrid$/.test(p);
+          if (isCloudy || isHybrid) {
+            return { willUse: true, provider: p, reason: isHybrid ? 'Hybrid planning via cloud' : 'User-selected cloud provider' };
+          }
+        }
+
+        // Auto routing: Hybrid + code intent → cloud-hybrid unless codingProvider is local
+        if (mode === 'cloud') {
+          return { willUse: true, provider: coding, reason: 'Cloud-only mode' };
+        }
+        if (mode === 'hybrid' && intent === 'code' && coding !== 'llamacpp') {
+          return { willUse: true, provider: coding + '-hybrid', reason: 'Code task in Hybrid mode' };
+        }
+        return { willUse: false, provider: 'llamacpp', reason: 'Local-first routing' };
+      } catch (e) {
+        return { willUse: false, provider: 'llamacpp', reason: 'Routing error' };
+      }
+    }
+
+    function showCloudConfirm(provider, reason, message) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+        const dialog = document.createElement('div');
+        dialog.style.cssText = 'background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:12px;width:520px;max-width:92vw;box-shadow:0 10px 30px rgba(0,0,0,0.4);';
+        dialog.innerHTML = `
+          <div style="padding:16px 18px;border-bottom:1px solid var(--border);font-weight:600;">Confirm Cloud Escalation</div>
+          <div style="padding:16px 18px;">
+            <div style="margin-bottom:10px;">
+              <div style="font-size:14px;color:var(--sub);margin-bottom:6px;">Provider</div>
+              <div style="font-size:14px;">${provider}</div>
+            </div>
+            <div style="margin-bottom:10px;">
+              <div style="font-size:14px;color:var(--sub);margin-bottom:6px;">Reason</div>
+              <div style="font-size:14px;">${reason}</div>
+            </div>
+            <div>
+              <div style="font-size:14px;color:var(--sub);margin-bottom:6px;">Snippet to be sent</div>
+              <pre style="white-space:pre-wrap;background:var(--muted);border:1px solid var(--border);padding:10px;border-radius:8px;max-height:180px;overflow:auto;">${message.slice(0,300).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]))}${message.length>300?'…':''}</pre>
+              <div style="font-size:12px;color:var(--sub);margin-top:8px;">Only minimal task text is sent for planning; tools execute locally.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--border);">
+            <button id="cloudCancel" class="btn secondary">Cancel</button>
+            <button id="cloudProceed" class="btn">Proceed</button>
+          </div>`;
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        const cleanup = () => { try { document.body.removeChild(overlay); } catch {} };
+        overlay.querySelector('#cloudCancel').addEventListener('click', () => { cleanup(); resolve(false); });
+        overlay.querySelector('#cloudProceed').addEventListener('click', () => { cleanup(); resolve(true); });
+      });
+    }
+
     async function sendMessage() {
       const message = chatInput.value.trim();
       if (!message) return;
 
       const toAgentEl = document.getElementById('toAgent');
       const isChecked = toAgentEl.checked;
-      // New: auto-detect if it's a task
-      const agentKeywords = [
-        'search', 'find', 'create', 'write', 'read', 'compile', 'convert',
-        'send', 'email', 'github', 'issue', 'run', 'execute', 'build',
-        'latex', 'tex', 'pdf', 'image', 'video', 'ffmpeg', 'whatsapp'
+      // Sigil-based task detection - clean and explicit
+      const trimmedMessage = message.trim();
+      const hasSigil = trimmedMessage.startsWith('@');
+
+      // Debug logging for message tracking
+      if (hasSigil) {
+        if (trimmedMessage.startsWith('@executive') || trimmedMessage.startsWith('@business')) {
+          addDebugEntry('info', '🎯', 'Executive request detected', { message: trimmedMessage });
+          // Show debug panel automatically for executive requests
+          if (!debugPanelVisible) {
+            toggleDebugPanel();
+          }
+        } else {
+          addDebugEntry('info', '🔧', 'Sigil command detected', { sigil: trimmedMessage.split(' ')[0] });
+        }
+      } else {
+        addDebugEntry('info', '💭', 'Regular chat message sent');
+      }
+      
+      // Supported sigils for different task types
+      const taskSigils = [
+        '@calc', '@todo', '@task', '@email', '@search', '@compile', '@tex', 
+        '@file', '@run', '@shell', '@pdf', '@image', '@video', '@github', 
+        '@whatsapp', '@sms', '@create', '@write', '@read', '@convert', '@build',
+        '@executive', '@business', '@generate', '@transpile', '@xml', '@xmljs'
       ];
-      const isTask = isChecked || agentKeywords.some(k => message.toLowerCase().includes(k));
+      
+      const isTask = isChecked || hasSigil;
       
       chatInput.value = '';
       sendBtn.disabled = true;
@@ -1722,21 +3049,91 @@
       try {
         const api = 'http://127.0.0.1:8787';
         if (isTask) {
+          // Ask-before-cloud confirmation (client-side prediction)
+          const privacy = (settings && settings.privacyProfile) ? settings.privacyProfile : 'ask_before_cloud';
+          if (privacy === 'ask_before_cloud') {
+            const pred = predictCloudUse(message);
+            if (pred.willUse) {
+              const ok = await showCloudConfirm(pred.provider, pred.reason, message);
+              if (!ok) {
+                // user cancelled
+                addMessage('assistant', '❎ Cloud escalation cancelled. You can switch to Local mode in Settings.');
+                sendBtn.disabled = false;
+                return;
+              }
+            }
+          }
           // Agent SSE via GET query
-          const allow = encodeURIComponent(JSON.stringify(["shell.run","script.run","fs.read","fs.write","web.search"]));
-          const url = `${api}/api/agent?prompt=${encodeURIComponent(message)}&provider=${encodeURIComponent(currentProvider)}&allow=${allow}`;
+          const allow = encodeURIComponent(JSON.stringify(["shell.run","script.run","fs.read","fs.write","web.search","jit"]));
+          // Smart routing: if user hasn't manually overridden provider and mode allows,
+          // omit provider to let server route by intent
+          let providerToSend = currentProvider;
+          try {
+            const userSelectedProvider = currentProvider;
+            const defaultProvider = (settings && settings.provider) ? settings.provider : 'llamacpp';
+            const mode = (settings && settings.defaultMode) ? settings.defaultMode : 'hybrid';
+            const privacy = (settings && settings.privacyProfile) ? settings.privacyProfile : 'ask_before_cloud';
+            const userOverrode = userSelectedProvider !== defaultProvider;
+            if (!userOverrode && mode !== 'local' && privacy !== 'strict_local') {
+              providerToSend = '';
+            }
+          } catch (e) { /* ignore */ }
+          const url = `${api}/api/agent?prompt=${encodeURIComponent(message)}${providerToSend ? `&provider=${encodeURIComponent(providerToSend)}` : ''}&allow=${allow}`;
           const es = new EventSource(url);
           let progressMessageId = null;
           
-          es.onmessage = (ev) => addMessage('assistant', ev.data);
+          es.onmessage = (ev) => {
+            addDebugEntry('info', '💬', 'SSE Message received', ev.data);
+            addMessage('assistant', ev.data);
+          };
+          
           es.addEventListener("status", (ev) => {
+            addDebugEntry('info', '🔄', 'SSE Status update', ev.data);
             if (progressMessageId) {
               const prevMsg = document.getElementById(progressMessageId);
               if (prevMsg) prevMsg.remove();
             }
             progressMessageId = addProgressMessage(ev.data);
+            
+            // Parse status for executive request tracking
+            try {
+              const statusText = ev.data;
+              if (statusText.includes('🧠 Generating function')) {
+                addDebugEntry('tool', '🧠', 'AI Function Generation started');
+              } else if (statusText.includes('🔧 Running tool:')) {
+                const toolMatch = statusText.match(/🔧 Running tool: (\w+)/);
+                if (toolMatch) {
+                  addDebugEntry('tool', '🔧', `Tool execution: ${toolMatch[1]}`);
+                }
+              } else if (statusText.includes('Calculator execution for:')) {
+                const exprMatch = statusText.match(/Calculator execution for: (.+)/);
+                if (exprMatch) {
+                  addDebugEntry('success', '🧮', `Calculator: ${exprMatch[1]}`);
+                }
+              } else if (statusText.includes('Calculator result:')) {
+                const resultMatch = statusText.match(/Calculator result: (.+)/);
+                if (resultMatch) {
+                  try {
+                    const resultData = JSON.parse(resultMatch[1]);
+                    const interpretation = interpretCalculationResult(resultData.expression, resultData.result);
+                    addDebugEntry('success', '✅', `Result: ${resultData.formatted} ${interpretation}`);
+                  } catch (e) {
+                    addDebugEntry('success', '✅', `Result: ${resultMatch[1]}`);
+                  }
+                }
+              } else if (statusText.includes('functions to registry')) {
+                const funcMatch = statusText.match(/(\d+) functions to registry/);
+                if (funcMatch) {
+                  addDebugEntry('success', '💾', `Saved ${funcMatch[1]} functions to registry`);
+                }
+              }
+            } catch (e) {
+              // Silent fail for status parsing
+            }
           });
+          
           es.addEventListener("final", (ev) => { 
+            addDebugEntry('success', '🎉', 'SSE Final result received');
             if (progressMessageId) {
               const prevMsg = document.getElementById(progressMessageId);
               if (prevMsg) prevMsg.remove();
@@ -1744,13 +3141,20 @@
             try {
               const j = JSON.parse(ev.data); 
               addMessage('assistant', j.text || ev.data);
+              
+              // Track executive request completion
+              if (j.text && j.text.includes('Executive request processed')) {
+                addDebugEntry('success', '🎯', 'Executive request completed successfully');
+              }
             } catch { 
               addMessage('assistant', ev.data); 
             } 
             es.close();
             setStatus('ready', 'Ready');
           });
+          
           es.addEventListener("error", (ev) => {
+            addDebugEntry('error', '❌', 'SSE Error occurred', ev?.data);
             if (progressMessageId) {
               const prevMsg = document.getElementById(progressMessageId);
               if (prevMsg) prevMsg.remove();
@@ -1827,6 +3231,89 @@
       }
     }
     
+    // Functions view
+    async function loadFunctionsList() {
+      try {
+        // Load function statistics
+        document.getElementById('totalFunctions').textContent = '-';
+        document.getElementById('activeFunctions').textContent = '-';
+        document.getElementById('storageUsed').textContent = '-';
+        
+        // For now, show placeholder until we create the API endpoints
+        document.getElementById('functionsList').innerHTML = `
+          <div style="text-align: center; color: var(--sub); padding: 40px;">
+            <div style="margin-bottom: 16px;">📝</div>
+            <div style="margin-bottom: 8px;">Function management interface coming soon!</div>
+            <div style="font-size: 14px;">Functions are currently managed through Smart Chat with @transpile commands.</div>
+          </div>
+        `;
+        
+        updateFunctionStats();
+      } catch (error) {
+        console.error('Failed to load functions:', error);
+        document.getElementById('functionsList').innerHTML = '<div style="color: var(--danger); text-align: center;">Failed to load functions</div>';
+      }
+    }
+    
+    async function updateFunctionStats() {
+      try {
+        // This would make an API call to get function stats
+        // For now, show placeholder data
+        document.getElementById('totalFunctions').textContent = '2';
+        document.getElementById('activeFunctions').textContent = '2';
+        document.getElementById('storageUsed').textContent = '1.2KB';
+      } catch (error) {
+        console.error('Failed to update function stats:', error);
+      }
+    }
+    
+    function showCreateFunction() {
+      // Switch to Smart Chat view and show a helpful message
+      showView('chat');
+      addMessage('assistant', `
+        🚀 **Create a new function with XML-Lisp**
+        
+        Use the @transpile command to create functions. Here's an example:
+        
+        \`\`\`
+        @transpile <function name="square">
+          <params>
+            <param name="n" type="number"/>
+          </params>
+          <body>
+            <multiply>
+              <ref>n</ref>
+              <ref>n</ref>
+            </multiply>
+          </body>
+        </function>
+        \`\`\`
+        
+        After transpiling, you can use it with: \`@calc square(5)\`
+      `);
+    }
+    
+    function refreshFunctions() {
+      if (currentView === 'functions') {
+        loadFunctionsList();
+      }
+    }
+    
+    function openFunctionsDirectory() {
+      addMessage('assistant', `📁 Functions are stored at: \`~/.c9ai/functions/\`
+      
+You can access them directly with:
+\`\`\`bash
+ls ~/.c9ai/functions/
+cat ~/.c9ai/functions/test.xmlp
+\`\`\`
+
+Each function consists of:
+- \`.xmlp\` file (XML-Lisp source)
+- \`.js\` file (transpiled JavaScript)
+- \`registry.json\` (metadata)`);
+    }
+    
     // Event listeners
     function setupEventListeners() {
       // Quick health check
@@ -1881,7 +3368,21 @@
               e.preventDefault();
               showSettings();
               break;
+            case 'd':
+              e.preventDefault();
+              toggleDebugPanel();
+              addDebugEntry('info', '⌨️', 'Debug panel toggled via keyboard shortcut (Ctrl+D)');
+              break;
           }
+        }
+        
+        // Function key shortcuts
+        switch(e.key) {
+          case 'F12':
+            e.preventDefault();
+            toggleDebugPanel();
+            addDebugEntry('info', '🔧', 'Debug panel toggled via F12');
+            break;
         }
       });
     }
@@ -3909,6 +5410,621 @@
       const container = document.getElementById('embeddedAgentContainer');
       container.style.display = 'none';
     }
+
+    // Cloud AI Action Confirmation System
+    let pendingActions = [];
+    let currentExecutionSession = null;
+
+    function showActionConfirmation(actions, executionPlan) {
+      pendingActions = actions;
+      currentExecutionSession = {
+        sessionId: executionPlan.sessionId || generateSessionId(),
+        actions: actions,
+        executionPlan: executionPlan,
+        approvedActions: new Set(),
+        results: {}
+      };
+
+      const modal = document.getElementById('actionConfirmationModal');
+      const content = document.getElementById('actionConfirmationContent');
+      
+      // Build action list
+      let actionsHtml = `
+        <div style="margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0;">🎯 Confirm Actions</h3>
+            <div style="font-size: 12px; color: var(--sub);">
+              ${actions.length} action${actions.length !== 1 ? 's' : ''} • 
+              Est. ${executionPlan.estimatedDuration || 'unknown'} • 
+              Risk: <span style="color: ${getRiskColor(executionPlan.riskAssessment?.overallRiskLevel || 'low')}">${executionPlan.riskAssessment?.overallRiskLevel || 'low'}</span>
+            </div>
+          </div>
+          
+          <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+      `;
+
+      actions.forEach((action, index) => {
+        const riskColor = getRiskColor(action.risk_level || 'low');
+        const isChecked = true; // Default to selected
+        
+        actionsHtml += `
+          <div class="action-item" style="padding: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px;">
+            <input type="checkbox" id="action-${action.id}" ${isChecked ? 'checked' : ''} style="margin-top: 4px;" />
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <strong>${action.sigil}</strong>
+                <span style="background: ${riskColor}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 500;">
+                  ${action.risk_level || 'low'}
+                </span>
+                <span style="color: var(--sub); font-size: 12px;">~${action.estimated_time || '10s'}</span>
+              </div>
+              <div style="color: var(--sub); font-size: 13px; margin-bottom: 6px;">${action.description}</div>
+              ${action.args ? `<div style="font-family: monospace; font-size: 12px; background: var(--muted); padding: 4px 8px; border-radius: 4px; color: var(--primary);">${action.args}</div>` : ''}
+            </div>
+          </div>
+        `;
+      });
+
+      actionsHtml += `</div></div>`;
+
+      // Add execution options
+      actionsHtml += `
+        <div style="margin-bottom: 20px;">
+          <h4 style="margin-bottom: 10px;">Execution Options</h4>
+          <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <label style="display: flex; align-items: center; gap: 6px;">
+              <input type="radio" name="executionMode" value="sequential" checked />
+              <span>Sequential (safer)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px;">
+              <input type="radio" name="executionMode" value="parallel" />
+              <span>Parallel (faster)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px;">
+              <input type="checkbox" id="dryRunMode" />
+              <span>Dry run (preview only)</span>
+            </label>
+          </div>
+        </div>
+      `;
+
+      content.innerHTML = actionsHtml;
+      modal.style.display = 'flex';
+    }
+
+    function executeApprovedActions() {
+      const selectedActions = [];
+      const checkboxes = document.querySelectorAll('#actionConfirmationContent input[type="checkbox"]:checked');
+      
+      checkboxes.forEach(cb => {
+        if (cb.id.startsWith('action-')) {
+          const actionId = cb.id.replace('action-', '');
+          const action = pendingActions.find(a => a.id === actionId);
+          if (action) selectedActions.push(action);
+        }
+      });
+
+      if (selectedActions.length === 0) {
+        alert('No actions selected');
+        return;
+      }
+
+      const executionMode = document.querySelector('input[name="executionMode"]:checked').value;
+      const dryRun = document.getElementById('dryRunMode').checked;
+
+      // Close modal and show progress
+      closeActionConfirmation();
+      showExecutionProgress(selectedActions, executionMode, dryRun);
+
+      // Execute actions
+      executeActionsWithProgress(selectedActions, executionMode, dryRun);
+    }
+
+    function closeActionConfirmation() {
+      document.getElementById('actionConfirmationModal').style.display = 'none';
+      pendingActions = [];
+      currentExecutionSession = null;
+    }
+
+    function showExecutionProgress(actions, mode, dryRun) {
+      const modal = document.getElementById('executionProgressModal');
+      const content = document.getElementById('executionProgressContent');
+      
+      let progressHtml = `
+        <div style="margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0;">⚡ ${dryRun ? 'Dry Run' : 'Executing'} Actions</h3>
+            <div style="font-size: 12px; color: var(--sub);">
+              ${actions.length} action${actions.length !== 1 ? 's' : ''} • Mode: ${mode}
+            </div>
+          </div>
+          
+          <div class="progress-list" style="max-height: 500px; overflow-y: auto;">
+      `;
+
+      actions.forEach((action, index) => {
+        progressHtml += `
+          <div class="progress-item" id="progress-${action.id}" style="padding: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;">
+            <div class="progress-status" style="width: 20px; height: 20px; border-radius: 50%; background: var(--sub); display: flex; align-items: center; justify-content: center; font-size: 10px;">
+              ${index + 1}
+            </div>
+            <div style="flex: 1;">
+              <div style="font-weight: 500;">${action.sigil} ${action.description}</div>
+              <div class="progress-details" style="font-size: 12px; color: var(--sub); margin-top: 4px;">Waiting...</div>
+            </div>
+          </div>
+        `;
+      });
+
+      progressHtml += `
+          </div>
+          <div style="margin-top: 20px;">
+            <button class="btn secondary" onclick="cancelExecution()" style="margin-right: 10px;">Cancel</button>
+            <button class="btn secondary" onclick="closeExecutionProgress()" style="display: none;" id="closeProgressBtn">Close</button>
+          </div>
+        </div>
+      `;
+
+      content.innerHTML = progressHtml;
+      modal.style.display = 'flex';
+    }
+
+    async function executeActionsWithProgress(actions, mode, dryRun) {
+      try {
+        for (let i = 0; i < actions.length; i++) {
+          const action = actions[i];
+          updateActionProgress(action.id, 'running', 'Executing...');
+
+          // Simulate execution time for demo
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          // Mock execution result
+          const result = {
+            success: true,
+            output: `Mock result for ${action.sigil}`,
+            dryRun: dryRun
+          };
+
+          updateActionProgress(action.id, 'completed', result.output);
+          currentExecutionSession.results[action.id] = result;
+        }
+
+        // Show completion
+        document.getElementById('closeProgressBtn').style.display = 'inline-block';
+        updateProgressStatus('✅ All actions completed successfully');
+
+      } catch (error) {
+        updateProgressStatus('❌ Execution failed: ' + error.message);
+        document.getElementById('closeProgressBtn').style.display = 'inline-block';
+      }
+    }
+
+    function updateActionProgress(actionId, status, details) {
+      const progressItem = document.getElementById(`progress-${actionId}`);
+      if (!progressItem) return;
+
+      const statusIcon = progressItem.querySelector('.progress-status');
+      const detailsEl = progressItem.querySelector('.progress-details');
+
+      switch (status) {
+        case 'running':
+          statusIcon.style.background = 'var(--primary)';
+          statusIcon.textContent = '⚡';
+          statusIcon.style.animation = 'pulse 1.5s infinite';
+          break;
+        case 'completed':
+          statusIcon.style.background = 'var(--ok)';
+          statusIcon.textContent = '✓';
+          statusIcon.style.animation = 'none';
+          break;
+        case 'failed':
+          statusIcon.style.background = 'var(--danger)';
+          statusIcon.textContent = '✗';
+          statusIcon.style.animation = 'none';
+          break;
+      }
+
+      detailsEl.textContent = details;
+    }
+
+    function updateProgressStatus(message) {
+      const existingStatus = document.querySelector('.execution-status');
+      if (existingStatus) {
+        existingStatus.textContent = message;
+      } else {
+        const content = document.getElementById('executionProgressContent');
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'execution-status';
+        statusDiv.style.cssText = 'text-align: center; padding: 15px; background: var(--panel); border-radius: 8px; margin-top: 15px; font-weight: 500;';
+        statusDiv.textContent = message;
+        content.appendChild(statusDiv);
+      }
+    }
+
+    function closeExecutionProgress() {
+      document.getElementById('executionProgressModal').style.display = 'none';
+    }
+
+    function cancelExecution() {
+      closeExecutionProgress();
+    }
+
+    function getRiskColor(riskLevel) {
+      switch (riskLevel?.toLowerCase()) {
+        case 'high': return 'var(--danger)';
+        case 'medium': return '#f39c12';
+        case 'low': return 'var(--ok)';
+        default: return 'var(--sub)';
+      }
+    }
+
+    function generateSessionId() {
+      return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // Test function for development
+    function testActionConfirmation() {
+      const mockActions = [
+        {
+          id: 'test-1',
+          sigil: '@calc',
+          args: '22/7',
+          description: 'Calculate mathematical expression',
+          risk_level: 'low',
+          estimated_time: '5s'
+        },
+        {
+          id: 'test-2', 
+          sigil: '@write',
+          args: 'result.txt -> Result: ${test-1.result}',
+          description: 'Save calculation result to file',
+          risk_level: 'medium',
+          estimated_time: '3s'
+        },
+        {
+          id: 'test-3',
+          sigil: '@email',
+          args: 'user@example.com "Results" "The calculation is complete"',
+          description: 'Email results to user',
+          risk_level: 'high',
+          estimated_time: '10s'
+        }
+      ];
+
+      const mockPlan = {
+        sessionId: 'test-session-123',
+        estimatedDuration: '18s',
+        riskAssessment: {
+          overallRiskLevel: 'medium'
+        }
+      };
+
+      showActionConfirmation(mockActions, mockPlan);
+    }
+
+    // Code Block Button Handlers
+    function setupCodeButtonHandlers() {
+      document.addEventListener('click', async function(e) {
+        if (e.target.classList.contains('save-code-btn')) {
+          e.preventDefault();
+          await handleSaveCode(e.target);
+        } else if (e.target.classList.contains('run-code-btn')) {
+          e.preventDefault();
+          await handleRunCode(e.target);
+        } else if (e.target.classList.contains('copy-code-btn')) {
+          e.preventDefault();
+          await handleCopyCode(e.target);
+        }
+      });
+    }
+
+    async function handleSaveCode(button) {
+      const language = button.dataset.language;
+      const filename = button.dataset.filename;
+      const code = decodeURIComponent(button.dataset.code);
+
+      try {
+        const response = await fetch('/api/command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            command: 'save',
+            args: { language, code, filename }
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.result.savedFiles && result.result.savedFiles[0]) {
+            const actualFilename = result.result.savedFiles[0].filename;
+            // Update the run button with the actual saved filename
+            const runButton = button.parentElement.querySelector('.run-code-btn');
+            if (runButton) {
+              runButton.dataset.filename = actualFilename;
+            }
+            button.innerHTML = `✅ Saved as ${actualFilename}!`;
+          } else {
+            button.innerHTML = '✅ Saved!';
+          }
+          button.disabled = true;
+          setTimeout(() => {
+            button.innerHTML = `💾 Save as ${filename}`;
+            button.disabled = false;
+          }, 2000);
+        } else {
+          throw new Error('Save failed');
+        }
+      } catch (error) {
+        button.innerHTML = '❌ Failed';
+        setTimeout(() => {
+          button.innerHTML = `💾 Save as ${filename}`;
+        }, 2000);
+      }
+    }
+
+    async function handleRunCode(button) {
+      const filename = button.dataset.filename;
+
+      try {
+        button.innerHTML = '🚀 Running...';
+        button.disabled = true;
+
+        const response = await fetch('/api/command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            command: 'run',
+            args: { filename }
+          })
+        });
+
+        if (response.ok) {
+          button.innerHTML = '✅ Executed!';
+          // The result will appear in the chat
+        } else {
+          throw new Error('Execution failed');
+        }
+      } catch (error) {
+        button.innerHTML = '❌ Failed';
+      }
+
+      setTimeout(() => {
+        button.innerHTML = '🚀 Run Code';
+        button.disabled = false;
+      }, 2000);
+    }
+
+    async function handleCopyCode(button) {
+      const code = decodeURIComponent(button.dataset.code);
+
+      try {
+        await navigator.clipboard.writeText(code);
+        button.innerHTML = '✅ Copied!';
+        setTimeout(() => {
+          button.innerHTML = '📋 Copy';
+        }, 2000);
+      } catch (error) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = code;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        button.innerHTML = '✅ Copied!';
+        setTimeout(() => {
+          button.innerHTML = '📋 Copy';
+        }, 2000);
+      }
+    }
+
+    // Initialize code button handlers
+    setupCodeButtonHandlers();
   </script>
+
+  <!-- Action Confirmation Modal -->
+  <div id="actionConfirmationModal" style="
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  ">
+    <div style="
+      background: var(--panel);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    ">
+      <div id="actionConfirmationContent" style="padding: 24px;">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+      <div style="padding: 0 24px 24px 24px; display: flex; gap: 12px; justify-content: flex-end;">
+        <button class="btn secondary" onclick="closeActionConfirmation()">Cancel</button>
+        <button class="btn primary" onclick="executeApprovedActions()">Execute Selected</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Execution Progress Modal -->
+  <div id="executionProgressModal" style="
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  ">
+    <div style="
+      background: var(--panel);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      max-width: 700px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    ">
+      <div id="executionProgressContent" style="padding: 24px;">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Debug Panel -->
+  <div class="debug-panel" id="debugPanel">
+    <div class="debug-header">
+      <div class="debug-title">🔬 Debug Console</div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button class="debug-close" onclick="clearDebugLog()" title="Clear Log" style="font-size: 14px;">🧹</button>
+        <button class="debug-close" onclick="toggleDebugPanel()" title="Close">&times;</button>
+      </div>
+    </div>
+    <div class="debug-content" id="debugContent">
+      <div class="debug-entry info">
+        <span class="debug-timestamp">Ready</span>
+        <span class="debug-icon">🎯</span>
+        <span class="debug-message">Debug console initialized. Waiting for executive requests...</span>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <script src="/workflows.js"></script>
+  <script>
+    async function runTerminalCmd() {
+      const cmd = document.getElementById('termCmd').value;
+      const out = document.getElementById('termOut');
+      out.textContent = 'Running…';
+      try {
+        const r = await fetch('/api/terminal/run', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ cmd }) });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'Failed');
+        out.textContent = (j.stdout || '') + (j.stderr ? ('\n[stderr]\n' + j.stderr) : '');
+      } catch (e) { out.textContent = 'Error: ' + e.message; }
+    }
+    async function loadSystemStatus() {
+      const el = document.getElementById('systemStatus');
+      if (!el) return;
+      el.textContent = 'Loading…';
+      try {
+        const r = await fetch('/api/health');
+        const j = await r.json();
+        if (!r.ok) throw new Error('Failed to load');
+        const rows = [
+          ['llama.cpp', j.llama],
+          ['Claude', j.claude],
+          ['Gemini', j.gemini],
+          ['OpenAI', j.openai]
+        ];
+        el.innerHTML = rows.map(function(row){
+          var name=row[0], ok=row[1];
+          return '<div>' + (ok ? '✅' : '❌') + ' ' + name + '</div>';
+        }).join('');
+      } catch (e) { el.textContent = 'Error: ' + e.message; }
+    }
+  
+
+    // Cream API quick actions via workflow executor
+    async function systemCreamFetch() {
+      const limitEl = document.getElementById('creamFetchLimit');
+      const limit = parseInt(limitEl && limitEl.value || '5', 10) || 5;
+      const out = document.getElementById('creamOut');
+      if (out) out.textContent = 'Fetching…';
+      try {
+        const r = await fetch('/api/workflows/custom/execute', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ steps: [ { type: 'cream.fetch', args: { limit: limit, raw: raw } } ] })
+        });
+        const j = await r.json();
+        if (!r.ok || j.success === false) throw new Error(j.error || 'Failed');
+        if (out) out.textContent = typeof j.final === 'string' ? j.final : JSON.stringify(j.final, null, 2);
+      } catch (e) { if (out) out.textContent = 'Error: ' + e.message; }
+    }
+
+    async function systemCreamMail() {
+      const from_email = (document.getElementById('creamMailFrom')||{}).value || '';
+      const to_email = (document.getElementById('creamMailTo')||{}).value || '';
+      const subject = (document.getElementById('creamMailSubject')||{}).value || '';
+      const body = (document.getElementById('creamMailBody')||{}).value || '';
+      const out = document.getElementById('creamOut');
+      if (out) out.textContent = 'Sending…';
+      try {
+        const r = await fetch('/api/workflows/custom/execute', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ steps: [ { type: 'cream.mail', args: { from_email, to_email, subject, body } } ] })
+        });
+        const j = await r.json();
+        if (!r.ok || j.success === false) throw new Error(j.error || 'Failed');
+        if (out) out.textContent = typeof j.final === 'string' ? j.final : JSON.stringify(j.final, null, 2);
+      } catch (e) { if (out) out.textContent = 'Error: ' + e.message; }
+    }
+
+    async function systemCreamPost() {
+      const content = (document.getElementById('creamPostContent')||{}).value || '';
+      const visibility = (document.getElementById('creamPostVisibility')||{}).value || 'public';
+      const out = document.getElementById('creamOut');
+      if (out) out.textContent = 'Posting…';
+      try {
+        const r = await fetch('/api/workflows/custom/execute', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ steps: [ { type: 'cream.post', args: { content, visibility } } ] })
+        });
+        const j = await r.json();
+        if (!r.ok || j.success === false) throw new Error(j.error || 'Failed');
+        if (out) out.textContent = typeof j.final === 'string' ? j.final : JSON.stringify(j.final, null, 2);
+      } catch (e) { if (out) out.textContent = 'Error: ' + e.message; }
+    }
+</script>
+<script>
+  async function systemCreamDiagnose() {
+    const out = document.getElementById('creamOut');
+    if (out) out.textContent = 'Diagnosing…';
+    try {
+      const r = await fetch('/api/cream/debug');
+      const j = await r.json();
+      if (!r.ok) throw new Error('Failed to diagnose');
+      if (out) out.textContent = JSON.stringify(j, null, 2);
+    } catch (e) { if (out) out.textContent = 'Error: ' + e.message; }
+  }
+  async function systemCreamDiagMail() {
+    const out = document.getElementById('creamOut');
+    if (out) out.textContent = 'Diagnosing mail…';
+    try {
+      const r = await fetch('/api/cream/diag-mail');
+      const j = await r.json();
+      if (!r.ok) throw new Error('Failed to diagnose mail');
+      if (out) out.textContent = JSON.stringify(j, null, 2);
+    } catch (e) { if (out) out.textContent = 'Error: ' + e.message; }
+  }
+  async function systemCreamDiagPost() {
+    const out = document.getElementById('creamOut');
+    if (out) out.textContent = 'Diagnosing posts…';
+    try {
+      const r = await fetch('/api/cream/diag-post');
+      const j = await r.json();
+      if (!r.ok) throw new Error('Failed to diagnose posts');
+      if (out) out.textContent = JSON.stringify(j, null, 2);
+    } catch (e) { if (out) out.textContent = 'Error: ' + e.message; }
+  }
+</script>
+
 </body>
 </html>

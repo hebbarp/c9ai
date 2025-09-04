@@ -1,27 +1,72 @@
 {
   "name": "c9ai",
-  "version": "1.0.0",
-  "description": "AI-powered development assistant",
+  "version": "2.2.3",
+  "description": "Universal AI assistant with vibe-based workflows, hybrid cloud+local AI, and comprehensive tool integration",
   "main": "src/index.js",
   "bin": {
-    "c9ai": "./src/index.js"
+    "c9ai": "./src/index.js",
+    "c9ai-agent": "bin/c9ai-agent",
+    "c9ai-stack": "scripts/start-local-stack.js"
   },
+  "files": [
+    "src/",
+    "bin/",
+    "scripts/",
+    "server/",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "start": "node src/index.js",
+    "agent:start": "bash scripts/start_local_agent.sh",
+    "agent:cli": "node bin/c9ai-agent",
+    "agent:inject": "node scripts/inject-agent-subcommand.js",
+    "agent:demo": "c9ai agent --file ./test-subcommand.txt",
+    "agent:api": "node server/agent-api.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "link": "npm link"
+    "link": "npm link",
+    "local:stack": "node scripts/start-local-stack.js",
+    "start:local": "node scripts/start-local-stack.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hebbarp/c9ai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hebbarp/c9ai/issues"
+  },
+  "homepage": "https://github.com/hebbarp/c9ai#readme",
+  "keywords": [
+    "ai",
+    "cli",
+    "assistant",
+    "llm",
+    "local-ai",
+    "automation",
+    "agent"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "license": "MIT",
   "dependencies": {
+    "@octokit/rest": "^20.0.2",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
     "dotenv": "^17.2.1",
     "fs-extra": "^10.1.0",
     "inquirer": "^8.2.4",
+    "node-fetch": "^3.3.2",
     "node-llama-cpp": "^2.0.0",
+    "nodemailer": "^6.9.8",
+    "open": "^9.1.0",
     "ora": "^5.4.1",
-    "zod": "^4.0.16"
+    "twilio": "^4.19.3",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",

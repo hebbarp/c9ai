@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Quiz Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .question-container { display: none; padding: 20px; border: 1px solid #ccc; margin: 20px 0; }
+        .question-container.active { display: block; }
+        .btn { padding: 10px 20px; margin: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Debug Quiz Test</h1>
+    
+    <div class="question-container active" data-question="0">
+        <h2>Question 1</h2>
+        <div>What is 2 + 2?</div>
+        <div>
+            <input type="radio" id="q0_0" name="question0" value="0"> <label for="q0_0">3</label><br>
+            <input type="radio" id="q0_1" name="question0" value="1"> <label for="q0_1">4</label><br>
+            <input type="radio" id="q0_2" name="question0" value="2"> <label for="q0_2">5</label><br>
+        </div>
+        <button class="btn" onclick="nextQuestion()">Next</button>
+    </div>
+    
+    <div class="question-container" data-question="1">
+        <h2>Question 2</h2>
+        <div>What is 3 + 3?</div>
+        <div>
+            <input type="radio" id="q1_0" name="question1" value="0"> <label for="q1_0">5</label><br>
+            <input type="radio" id="q1_1" name="question1" value="1"> <label for="q1_1">6</label><br>
+            <input type="radio" id="q1_2" name="question1" value="2"> <label for="q1_2">7</label><br>
+        </div>
+        <button class="btn" onclick="nextQuestion()">Finish</button>
+    </div>
+    
+    <div id="results" style="display: none;">
+        <h2>Quiz Complete!</h2>
+        <p>Thanks for taking the quiz.</p>
+    </div>
+    
+    <script>
+        let currentQuestion = 0;
+        let userAnswers = [];
+        
+        function nextQuestion() {
+            console.log("nextQuestion called, currentQuestion:", currentQuestion);
+            
+            const selectedOption = document.querySelector('input[name="question' + currentQuestion + '"]:checked');
+            console.log("selectedOption:", selectedOption);
+            
+            if (!selectedOption) {
+                alert('Please select an answer before proceeding.');
+                return;
+            }
+            
+            const selectedValue = parseInt(selectedOption.value);
+            userAnswers[currentQuestion] = selectedValue;
+            console.log("userAnswers:", userAnswers);
+            
+            // Hide current question
+            document.querySelector('[data-question="' + currentQuestion + '"]').classList.remove('active');
+            
+            currentQuestion++;
+            
+            if (currentQuestion < 2) {
+                // Show next question
+                document.querySelector('[data-question="' + currentQuestion + '"]').classList.add('active');
+            } else {
+                // Show results
+                document.getElementById('results').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

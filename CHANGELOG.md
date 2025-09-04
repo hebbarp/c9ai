@@ -2,6 +2,17 @@
 
 All notable changes to C9 AI will be documented in this file.
 
+## [2.2.3] - 2025-09-04
+
+### Packaging
+- Added `files` whitelist in `package.json` to include only runtime code (`src/`, `bin/`, `scripts/`, `server/`, `README.md`, `CHANGELOG.md`).
+- Added metadata: `repository`, `bugs`, `homepage`, `keywords`, `engines`, and `license`.
+- Verified package with `npm pack`; reduced published tarball size by excluding dev artifacts and tests.
+- Published as `c9ai@2.2.3`. Previous versions remain available (no breaking changes).
+
+### Notes
+- No functional code changes in this release; safe upgrade for new installs.
+
 ## [2.0.0] - 2025-08-04
 
 ### 🚀 Major Features Added

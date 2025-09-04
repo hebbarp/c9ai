@@ -1,0 +1,105 @@
+{
+  "name": "pdf-generator",
+  "version": "1.2.0",
+  "description": "Convert HTML/Markdown to PDF using Puppeteer",
+  "author": "C9AI Team <tools@c9ai.com>",
+  "category": "documents",
+  "tags": ["pdf", "conversion", "documents", "html", "markdown"],
+  "keywords": ["pdf", "convert", "html2pdf", "markdown2pdf"],
+  
+  "dependencies": {
+    "puppeteer": "^21.0.0",
+    "markdown-it": "^13.0.0",
+    "fs-extra": "^11.0.0"
+  },
+  
+  "c9ai": {
+    "schema": {
+      "content": {
+        "type": "string",
+        "required": true,
+        "description": "Content to convert (HTML or Markdown)",
+        "examples": ["# Hello World\\n\\nThis is **bold** text.", "<h1>Hello</h1><p>HTML content</p>"]
+      },
+      "format": {
+        "type": "string",
+        "enum": ["html", "markdown"],
+        "default": "markdown",
+        "description": "Input format type"
+      },
+      "output": {
+        "type": "string", 
+        "description": "Output file path",
+        "default": "output.pdf",
+        "pattern": ".*\\.pdf$"
+      },
+      "options": {
+        "type": "object",
+        "required": false,
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": ["A4", "A3", "Letter"],
+            "default": "A4"
+          },
+          "margin": {
+            "type": "object",
+            "properties": {
+              "top": {"type": "string", "default": "1cm"},
+              "bottom": {"type": "string", "default": "1cm"},
+              "left": {"type": "string", "default": "1cm"},
+              "right": {"type": "string", "default": "1cm"}
+            }
+          },
+          "landscape": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "config": {
+      "headless": {
+        "type": "boolean",
+        "default": true,
+        "description": "Run Puppeteer in headless mode"
+      },
+      "timeout": {
+        "type": "number",
+        "default": 30000,
+        "description": "PDF generation timeout in milliseconds"
+      }
+    }
+  },
+  
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/c9ai/tools/tree/main/packages/pdf-generator"
+  },
+  
+  "homepage": "https://tools.c9ai.com/pdf-generator",
+  "bugs": {
+    "url": "https://github.com/c9ai/tools/issues"
+  },
+  
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  
+  "os": ["darwin", "linux", "win32"],
+  
+  "c9ai-meta": {
+    "verified": true,
+    "curated": true,
+    "popularity": 8.5,
+    "downloads": 15420,
+    "lastUpdated": "2025-08-13T14:00:00.000Z",
+    "maintainers": ["c9ai-team"],
+    "security": {
+      "signed": true,
+      "scanned": "2025-08-13T14:00:00.000Z",
+      "vulnerabilities": 0
+    }
+  }
+}

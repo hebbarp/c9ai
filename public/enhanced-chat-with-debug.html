@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Executive Chat - With Context & Debug</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #2c5282 0%, #2d3748 50%, #1a202c 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.6em;
+            font-weight: 600;
+            background: linear-gradient(45deg, #f7fafc, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .debug-toggle {
+            background: rgba(45, 55, 72, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e2e8f0;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .debug-toggle:hover {
+            background: rgba(45, 55, 72, 0.9);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .main-container {
+            flex: 1;
+            display: flex;
+            max-height: calc(100vh - 70px);
+        }
+        
+        .chat-container {
+            flex: 1;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            border-radius: 16px 0 0 16px;
+            overflow: hidden;
+            margin: 15px 0 15px 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .debug-container {
+            width: 420px;
+            background: linear-gradient(145deg, #1a202c 0%, #2d3748 100%);
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            border-radius: 0 16px 16px 0;
+            overflow: hidden;
+            margin: 15px 15px 15px 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .debug-container.hidden {
+            transform: translateX(100%);
+        }
+        
+        .debug-header {
+            background: linear-gradient(145deg, #2d3748 0%, #4a5568 100%);
+            padding: 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .debug-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #f7fafc;
+        }
+        
+        .clear-debug {
+            background: rgba(74, 85, 104, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .clear-debug:hover {
+            background: rgba(74, 85, 104, 1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .debug-output {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            max-height: calc(100vh - 120px);
+            scroll-behavior: smooth;
+        }
+        
+        .debug-output:hover {
+            background: #242424;
+        }
+        
+        .debug-entry {
+            padding: 4px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+            border-left: 3px solid transparent;
+            word-wrap: break-word;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .debug-entry:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-left-width: 4px;
+        }
+        
+        .debug-stats {
+            position: sticky;
+            top: 0;
+            background: linear-gradient(145deg, #2d3748 0%, #4a5568 100%);
+            padding: 6px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 10px;
+            color: #a0aec0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+        
+        .example-badge {
+            background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+            color: #0d9488;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(13, 148, 136, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .example-badge:hover {
+            background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(13, 148, 136, 0.2);
+        }
+        
+        .debug-entry-old {
+            padding: 4px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+            border-left: 3px solid transparent;
+            word-wrap: break-word;
+        }
+        
+        .debug-timestamp {
+            color: #888;
+            font-size: 10px;
+        }
+        
+        .debug-debug { color: #90a4ae; border-left-color: #90a4ae; }
+        .debug-status { color: #81c784; border-left-color: #81c784; }
+        .debug-context { color: #ffb74d; border-left-color: #ffb74d; background: rgba(255, 183, 77, 0.1); }
+        .debug-error { color: #e57373; border-left-color: #e57373; background: rgba(229, 115, 115, 0.1); }
+        .debug-final { color: #64b5f6; border-left-color: #64b5f6; }
+        
+        .messages {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: linear-gradient(145deg, #f7fafc 0%, #edf2f7 100%);
+        }
+        
+        .message {
+            margin-bottom: 24px;
+            padding: 18px 24px;
+            border-radius: 16px;
+            max-width: 85%;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .message.user {
+            background: linear-gradient(135deg, #2d5aa0 0%, #3182ce 100%);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 6px;
+            box-shadow: 0 4px 12px rgba(45, 90, 160, 0.3);
+        }
+        
+        .message.assistant {
+            background: linear-gradient(145deg, #ffffff 0%, #f7fafc 100%);
+            color: #2d3748;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .message.context-indicator {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 1px solid #f59e0b;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            margin: 15px auto;
+            max-width: 65%;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+        }
+        
+        .message-meta {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .math-indicator {
+            background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+            color: #0d9488;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(13, 148, 136, 0.1);
+        }
+        
+        .input-container {
+            background: linear-gradient(145deg, #ffffff 0%, #f7fafc 100%);
+            padding: 24px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+            backdrop-filter: blur(10px);
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 28px;
+            font-size: 16px;
+            resize: none;
+            max-height: 120px;
+            min-height: 52px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+        }
+        
+        .message-input:focus {
+            outline: none;
+            border-color: #3182ce;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+        
+        .send-button {
+            background: linear-gradient(135deg, #2d5aa0 0%, #3182ce 100%);
+            border: none;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 28px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(45, 90, 160, 0.3);
+        }
+        
+        .send-button:hover {
+            background: linear-gradient(135deg, #2c5282 0%, #2b6cb0 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(45, 90, 160, 0.4);
+        }
+        
+        .send-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .typing-indicator {
+            padding: 15px 20px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            border-bottom-left-radius: 4px;
+            max-width: 85%;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .typing-dots {
+            display: inline-block;
+            animation: typing 1.5s infinite;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 0; }
+            30% { opacity: 1; }
+        }
+        
+        .session-info {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .debug-container {
+                width: 100%;
+                height: 200px;
+                border-radius: 0;
+                margin: 0;
+            }
+            
+            .chat-container {
+                border-radius: 0;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Executive Calculator Pro</h1>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span style="font-size: 12px; opacity: 0.8;">AI-Powered • Context-Aware • Code Generation</span>
+            <button class="debug-toggle" id="debugToggle">
+                🔍 Debug Console
+            </button>
+        </div>
+    </div>
+    
+    <div class="session-info">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Session: <span id="sessionId">Initializing...</span></span>
+            <span style="font-size: 10px; opacity: 0.7;">Executive Calculator Pro v2.3 • C9AI Platform</span>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <div class="chat-container">
+            <div class="messages" id="messages">
+                <div class="message assistant">
+                    <div>🎯 <strong>Welcome to Executive Calculator Pro</strong></div>
+                    <div style="margin-top: 15px; font-size: 14px; color: #666; line-height: 1.5;">
+                        <strong>🚀 Intelligent Features:</strong><br>
+                        • <strong>Natural Language Processing</strong> - Ask questions in plain English<br>
+                        • <strong>Context Memory</strong> - Remembers incomplete problems and continues seamlessly<br>
+                        • <strong>Dynamic Code Generation</strong> - Creates custom functions when needed<br>
+                        • <strong>Transparent AI Process</strong> - See exactly how your problems are solved<br>
+                        • <strong>Executive Functions</strong> - Built-in financial, risk, and business calculations
+                    </div>
+                    <div class="message-meta" style="margin-top: 15px; font-weight: 500;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                            <span class="example-badge">💼 NPV Analysis</span>
+                            <span class="example-badge">📈 Risk Assessment</span>
+                            <span class="example-badge">🎯 ROI Calculations</span>
+                            <span class="example-badge">📊 Market Sizing</span>
+                        </div>
+                        <div style="margin-top: 12px; color: #3182ce; font-weight: 500;">
+                            Try: "Calculate NPV for $100k investment, 12% discount rate, 5 years"
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <textarea 
+                    class="message-input" 
+                    id="messageInput"
+                    placeholder="Ask any business calculation, financial analysis, or mathematical question..."
+                    rows="1"
+                ></textarea>
+                <button class="send-button" id="sendButton">Send</button>
+            </div>
+        </div>
+        
+        <div class="debug-container" id="debugContainer">
+            <div class="debug-header">
+                <div class="debug-title">🔍 Raw Debug Output</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="clear-debug" id="autoScrollToggle" title="Toggle auto-scroll (Space)">
+                        🌊
+                    </button>
+                    <button class="clear-debug" id="clearDebug" title="Clear debug output">
+                        Clear
+                    </button>
+                </div>
+            </div>
+            <div class="debug-stats" id="debugStats">
+                📊 Entries: 0 | 🎯 Active: - | 🌊 Flowing...
+            </div>
+            <div class="debug-output" id="debugOutput">
+                <div class="debug-entry debug-status">
+                    <div class="debug-timestamp">[System Ready]</div>
+                    <div>Debug window initialized - all AI processing will be shown here</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class EnhancedChatWithDebug {
+            constructor() {
+                this.sessionId = this.generateSessionId();
+                this.isProcessing = false;
+                this.currentEventSource = null;
+                this.debugEntryCount = 1; // Start with 1 for "System Ready" entry
+                this.activeStream = null;
+                this.autoScrollEnabled = true;
+                
+                this.initElements();
+                this.initEventListeners();
+                this.updateSessionId();
+                this.updateDebugStats();
+                this.initExampleBadges();
+            }
+            
+            generateSessionId() {
+                return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            }
+            
+            initElements() {
+                this.messagesContainer = document.getElementById('messages');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.debugContainer = document.getElementById('debugContainer');
+                this.debugOutput = document.getElementById('debugOutput');
+                this.debugToggle = document.getElementById('debugToggle');
+                this.clearDebug = document.getElementById('clearDebug');
+                this.sessionIdSpan = document.getElementById('sessionId');
+            }
+            
+            initEventListeners() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                
+                this.messageInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+                
+                this.debugToggle.addEventListener('click', () => this.toggleDebug());
+                this.clearDebug.addEventListener('click', () => this.clearDebugOutput());
+                
+                // Add scroll detection for auto-scroll control
+                this.debugOutput.addEventListener('scroll', () => {
+                    const { scrollTop, scrollHeight, clientHeight } = this.debugOutput;
+                    const isNearBottom = scrollHeight - scrollTop <= clientHeight + 50;
+                    this.autoScrollEnabled = isNearBottom;
+                    this.updateDebugStats();
+                });
+                
+                // Auto-scroll toggle button
+                document.getElementById('autoScrollToggle').addEventListener('click', () => {
+                    this.autoScrollEnabled = !this.autoScrollEnabled;
+                    if (this.autoScrollEnabled) {
+                        this.smoothScrollToBottom();
+                    }
+                    this.updateDebugStats();
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    // Space key toggles auto-scroll (when not typing in input)
+                    if (e.code === 'Space' && e.target !== this.messageInput && !e.ctrlKey && !e.altKey) {
+                        e.preventDefault();
+                        this.autoScrollEnabled = !this.autoScrollEnabled;
+                        if (this.autoScrollEnabled) {
+                            this.smoothScrollToBottom();
+                        }
+                        this.updateDebugStats();
+                    }
+                    
+                    // Escape key stops processing (if implemented)
+                    if (e.code === 'Escape' && this.isProcessing) {
+                        this.addDebugEntry('status', '⏹️ Stop requested by user');
+                        if (this.currentEventSource) {
+                            this.currentEventSource.close();
+                            this.finishProcessing();
+                        }
+                    }
+                });
+                
+                // Auto-resize textarea
+                this.messageInput.addEventListener('input', () => {
+                    this.messageInput.style.height = 'auto';
+                    this.messageInput.style.height = Math.min(this.messageInput.scrollHeight, 120) + 'px';
+                });
+            }
+            
+            updateSessionId() {
+                this.sessionIdSpan.textContent = this.sessionId;
+            }
+            
+            updateDebugStats() {
+                const statsElement = document.getElementById('debugStats');
+                const autoScrollButton = document.getElementById('autoScrollToggle');
+                
+                if (statsElement) {
+                    const activeIndicator = this.isProcessing ? '🔄' : (this.activeStream ? '🌊' : '-');
+                    const scrollIndicator = this.autoScrollEnabled ? '🌊 Flowing...' : '⏸️ Manual';
+                    statsElement.textContent = `📊 Entries: ${this.debugEntryCount} | 🎯 Active: ${activeIndicator} | ${scrollIndicator}`;
+                }
+                
+                if (autoScrollButton) {
+                    autoScrollButton.textContent = this.autoScrollEnabled ? '🌊' : '⏸️';
+                    autoScrollButton.title = this.autoScrollEnabled ? 
+                        'Auto-scroll ON (Space to toggle)' : 
+                        'Auto-scroll OFF (Space to toggle)';
+                }
+            }
+            
+            smoothScrollToBottom() {
+                const startTime = Date.now();
+                const startScrollTop = this.debugOutput.scrollTop;
+                const targetScrollTop = this.debugOutput.scrollHeight - this.debugOutput.clientHeight;
+                const duration = 200; // ms
+                
+                const animateScroll = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Easing function for smooth animation
+                    const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                    
+                    this.debugOutput.scrollTop = startScrollTop + (targetScrollTop - startScrollTop) * easeOutQuart;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animateScroll);
+                    }
+                };
+                
+                requestAnimationFrame(animateScroll);
+            }
+            
+            toggleDebug() {
+                this.debugContainer.classList.toggle('hidden');
+                const isHidden = this.debugContainer.classList.contains('hidden');
+                this.debugToggle.textContent = isHidden ? '🔍 Show Debug' : '🔍 Hide Debug';
+            }
+            
+            clearDebugOutput() {
+                this.debugOutput.innerHTML = '';
+                this.debugEntryCount = 0;
+                this.activeStream = null;
+                this.addDebugEntry('status', 'Debug output cleared');
+            }
+            
+            addDebugEntry(type, message) {
+                const entry = document.createElement('div');
+                entry.className = `debug-entry debug-${type}`;
+                
+                const timestamp = new Date().toLocaleTimeString();
+                entry.innerHTML = `
+                    <div class="debug-timestamp">[${timestamp}]</div>
+                    <div>${this.escapeHtml(message)}</div>
+                `;
+                
+                // Add entry with flowing animation
+                entry.style.opacity = '0';
+                entry.style.transform = 'translateY(10px)';
+                entry.style.transition = 'all 0.3s ease';
+                
+                this.debugOutput.appendChild(entry);
+                this.debugEntryCount++;
+                
+                // Trigger animation
+                requestAnimationFrame(() => {
+                    entry.style.opacity = '1';
+                    entry.style.transform = 'translateY(0)';
+                });
+                
+                // Update stats and auto-scroll
+                this.updateDebugStats();
+                if (this.autoScrollEnabled) {
+                    this.smoothScrollToBottom();
+                }
+                
+                // Keep only last 100 entries (performance)
+                const entries = this.debugOutput.querySelectorAll('.debug-entry');
+                if (entries.length > 100) {
+                    entries[0].remove();
+                    this.debugEntryCount = Math.max(0, this.debugEntryCount - 1);
+                }
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            formatMarkdown(text) {
+                return text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // **bold**
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')              // *italic*
+                    .replace(/`(.*?)`/g, '<code>$1</code>')            // `code`
+                    .replace(/\n/g, '<br>');                           // newlines
+            }
+            
+            handleUnknownFunction(data) {
+                const { functionName, parameters, message, expression } = data;
+                
+                // Create a permission dialog
+                const dialogDiv = document.createElement('div');
+                dialogDiv.className = 'message assistant';
+                dialogDiv.style.background = '#fff3cd';
+                dialogDiv.style.border = '1px solid #ffeaa7';
+                dialogDiv.style.color = '#856404';
+                
+                dialogDiv.innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        <strong>🤖 Function Generation Request</strong><br>
+                        ${message}
+                        <br><br>
+                        <code>${functionName}(${parameters})</code>
+                        <br><br>
+                        <small>The system will try local AI first, then cloud AI if needed.</small>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="this.parentElement.parentElement.querySelector('.approve-btn').click()" 
+                                class="approve-btn" 
+                                style="background: #4caf50; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                            ✅ Generate Function
+                        </button>
+                        <button onclick="this.parentElement.parentElement.querySelector('.deny-btn').click()" 
+                                class="deny-btn"
+                                style="background: #f44336; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                            ❌ Cancel
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listeners
+                const approveBtn = dialogDiv.querySelector('.approve-btn');
+                const denyBtn = dialogDiv.querySelector('.deny-btn');
+                
+                approveBtn.onclick = () => {
+                    dialogDiv.remove();
+                    this.generateAndExecuteFunction(functionName, parameters, expression);
+                };
+                
+                denyBtn.onclick = () => {
+                    dialogDiv.remove();
+                    this.addMessage('assistant', `Function generation cancelled. Cannot calculate ${expression}`);
+                    this.finishProcessing();
+                };
+                
+                this.messagesContainer.appendChild(dialogDiv);
+                this.scrollToBottom();
+            }
+            
+            async generateAndExecuteFunction(functionName, parameters, expression) {
+                this.addDebugEntry('status', `🔧 User approved function generation for ${functionName}`);
+                
+                try {
+                    // Show progress
+                    this.showTypingIndicator();
+                    this.addMessage('assistant', `🔧 Generating ${functionName} function...`, { isContextIndicator: true });
+                    
+                    // Call the dynamic JIT executor with user confirmation
+                    const response = await fetch('/api/agent', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prompt: `jit:generateFunction:${functionName}:${parameters}:confirmed`
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                    // Handle the streaming response
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\\n');
+                        buffer = lines.pop(); // Keep incomplete line in buffer
+                        
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const data = line.substring(6);
+                                try {
+                                    const parsed = JSON.parse(data);
+                                    this.addDebugEntry('debug', JSON.stringify(parsed, null, 2));
+                                    
+                                    if (parsed.success !== undefined) {
+                                        this.hideTypingIndicator();
+                                        if (parsed.success) {
+                                            const result = `${functionName}(${parameters}) = ${parsed.formatted}`;
+                                            this.addMessage('assistant', result, {
+                                                timestamp: Date.now(),
+                                                generated: true
+                                            });
+                                            
+                                            if (parsed.generatedFunction) {
+                                                this.addDebugEntry('status', 
+                                                    `✅ Generated by ${parsed.generatedFunction.source} AI (${parsed.generatedFunction.provider})`);
+                                                this.addDebugEntry('debug', 
+                                                    `Generated code: ${parsed.generatedFunction.code}`);
+                                            }
+                                        } else {
+                                            this.addMessage('assistant', `❌ Failed to generate ${functionName}: ${parsed.message}`);
+                                        }
+                                        this.finishProcessing();
+                                        return;
+                                    }
+                                } catch (e) {
+                                    // Ignore parse errors for streaming data
+                                }
+                            }
+                        }
+                    }
+                    
+                } catch (error) {
+                    this.hideTypingIndicator();
+                    this.addDebugEntry('error', `Function generation failed: ${error.message}`);
+                    this.addMessage('assistant', `❌ Failed to generate ${functionName} function.`);
+                    this.finishProcessing();
+                }
+            }
+            
+            addMessage(role, content, metadata = {}) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${role}`;
+                
+                // Handle special context indicator messages
+                if (metadata.isContextIndicator) {
+                    messageDiv.className = 'message context-indicator';
+                    messageDiv.innerHTML = `🔗 ${content}`;
+                    this.messagesContainer.appendChild(messageDiv);
+                    this.scrollToBottom();
+                    return;
+                }
+                
+                messageDiv.innerHTML = `<div>${this.formatMarkdown(content)}</div>`;
+                
+                if (Object.keys(metadata).length > 0) {
+                    const metaDiv = document.createElement('div');
+                    metaDiv.className = 'message-meta';
+                    
+                    const leftMeta = [];
+                    const rightMeta = [];
+                    
+                    if (metadata.timestamp) {
+                        leftMeta.push(new Date(metadata.timestamp).toLocaleTimeString());
+                    }
+                    
+                    if (metadata.mathConversion) {
+                        rightMeta.push('<span class="math-indicator">🧮 Math</span>');
+                    }
+                    
+                    if (metadata.contextual) {
+                        rightMeta.push('<span class="math-indicator">🔗 Context</span>');
+                    }
+                    
+                    metaDiv.innerHTML = `
+                        <span>${leftMeta.join(' • ')}</span>
+                        <span>${rightMeta.join(' ')}</span>
+                    `;
+                    
+                    messageDiv.appendChild(metaDiv);
+                }
+                
+                this.messagesContainer.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+            
+            showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'typing-indicator';
+                typingDiv.id = 'typingIndicator';
+                typingDiv.innerHTML = 'AI is thinking<span class="typing-dots">...</span>';
+                
+                this.messagesContainer.appendChild(typingDiv);
+                this.scrollToBottom();
+            }
+            
+            hideTypingIndicator() {
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+            
+            scrollToBottom() {
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
+            
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message || this.isProcessing) return;
+                
+                this.isProcessing = true;
+                this.sendButton.disabled = true;
+                
+                // Add user message
+                this.addMessage('user', message, { timestamp: Date.now() });
+                this.messageInput.value = '';
+                this.messageInput.style.height = 'auto';
+                
+                this.showTypingIndicator();
+                this.activeStream = 'user_input';
+                this.updateDebugStats();
+                this.addDebugEntry('debug', `🚀 Sending message: "${message}"`);
+                this.addDebugEntry('debug', `📡 Session ID: ${this.sessionId}`);
+                
+                try {
+                    // Create EventSource for streaming response
+                    const params = new URLSearchParams({
+                        prompt: message,
+                        sessionId: this.sessionId,
+                        provider: 'openai' // Use OpenAI for reliable processing
+                    });
+                    
+                    this.currentEventSource = new EventSource(`/api/agent?${params.toString()}`);
+                    
+                    let assistantMessage = '';
+                    let finalMetadata = {};
+                    
+                    this.currentEventSource.onmessage = (event) => {
+                        // Handle default messages
+                        this.addDebugEntry('debug', `📨 Default message: ${event.data}`);
+                    };
+                    
+                    // Handle specific event types
+                    ['status', 'debug', 'context', 'error', 'final', 'unknownFunction'].forEach(eventType => {
+                        this.currentEventSource.addEventListener(eventType, (event) => {
+                            const data = JSON.parse(event.data);
+                            
+                            // Update active stream based on event type
+                            if (eventType === 'status') {
+                                this.activeStream = 'processing';
+                            } else if (eventType === 'debug') {
+                                this.activeStream = 'analyzing';
+                            } else if (eventType === 'context') {
+                                this.activeStream = 'context';
+                            }
+                            
+                            this.addDebugEntry(eventType, typeof data === 'string' ? data : JSON.stringify(data, null, 2));
+                            
+                            if (eventType === 'final') {
+                                this.activeStream = null;
+                                assistantMessage = data.text || data;
+                                finalMetadata = {
+                                    timestamp: Date.now(),
+                                    mathConversion: data.mathConversion,
+                                    contextual: data.contextual
+                                };
+                            } else if (eventType === 'unknownFunction') {
+                                this.activeStream = 'user_confirmation';
+                                this.handleUnknownFunction(data);
+                            }
+                        });
+                    });
+                    
+                    this.currentEventSource.onerror = (error) => {
+                        console.error('EventSource error:', error);
+                        this.activeStream = null;
+                        this.addDebugEntry('error', 'Connection error occurred');
+                        this.finishProcessing(assistantMessage, finalMetadata);
+                    };
+                    
+                    this.currentEventSource.addEventListener('final', () => {
+                        this.activeStream = null;
+                        this.currentEventSource.close();
+                        this.finishProcessing(assistantMessage, finalMetadata);
+                    });
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.activeStream = null;
+                    this.addDebugEntry('error', `Request failed: ${error.message}`);
+                    this.addMessage('assistant', 'Sorry, I encountered an error processing your request.');
+                    this.finishProcessing();
+                }
+            }
+            
+            finishProcessing(assistantMessage = '', metadata = {}) {
+                this.hideTypingIndicator();
+                
+                if (assistantMessage) {
+                    this.addMessage('assistant', assistantMessage, metadata);
+                }
+                
+                this.isProcessing = false;
+                this.sendButton.disabled = false;
+                this.messageInput.focus();
+                this.updateDebugStats();
+                
+                this.addDebugEntry('debug', '✅ Processing complete');
+            }
+            
+            initExampleBadges() {
+                // Add click handlers for example badges
+                const exampleQueries = {
+                    '💼 NPV Analysis': 'Calculate NPV for $100k investment, 12% discount rate, 5 years with annual cash flow of $25k',
+                    '📈 Risk Assessment': 'What is the probability of loss if market drops 20% and our portfolio beta is 1.2?',
+                    '🎯 ROI Calculations': 'Calculate ROI for marketing campaign: spent $50k, generated $180k in revenue',
+                    '📊 Market Sizing': 'If the total addressable market is $2B and we can capture 0.5%, what is our market opportunity?'
+                };
+                
+                // Use setTimeout to ensure DOM is ready
+                setTimeout(() => {
+                    document.querySelectorAll('.example-badge').forEach(badge => {
+                        badge.addEventListener('click', () => {
+                            const query = exampleQueries[badge.textContent];
+                            if (query && !this.isProcessing) {
+                                this.messageInput.value = query;
+                                this.messageInput.style.height = 'auto';
+                                this.messageInput.style.height = Math.min(this.messageInput.scrollHeight, 120) + 'px';
+                                this.messageInput.focus();
+                                this.addDebugEntry('status', `🎯 Loaded example: ${badge.textContent}`);
+                            }
+                        });
+                    });
+                }, 100);
+            }
+        }
+        
+        // Initialize the chat
+        document.addEventListener('DOMContentLoaded', () => {
+            new EnhancedChatWithDebug();
+        });
+    </script>
+</body>
+</html>

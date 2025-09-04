@@ -3,20 +3,31 @@ const path = require('path');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 
-async function handleTodos(action = 'list', task) {
-    console.log(chalk.cyan('📋 Todo Management'));
+async function handleTodos(action = 'list', opts = {}) {
+    console.log(chalk.cyan('📋 Todo Management System'));
+    console.log(chalk.gray(`Action: ${action}`));
     
     switch (action) {
         case 'list':
-            return await listTodos();
-        case 'add':
-            return await addTodo(task);
+            return await listAllTodos();
+        case 'fetch-github':
+            return await fetchGitHubTodos(opts.repo, opts.labels);
+        case 'fetch-gdrive': 
+            return await fetchGDriveTodos(opts.query, opts.format);
         case 'execute':
-            return await executeTodos();
+            return await executeTodo(opts.id, !opts.dryRun);
         case 'sync':
-            return await syncTodos();
+            return await syncAllTodos();
+        case 'add':
+            return await addLocalTodo(opts.task || 'New task');
         default:
-            console.log(chalk.yellow('Available commands: list, add, execute, sync'));
+            console.log(chalk.yellow('Available commands:'));
+            console.log(chalk.white('  list           - Show all todos from all sources'));
+            console.log(chalk.white('  fetch-github   - Fetch todos from GitHub Issues'));
+            console.log(chalk.white('  fetch-gdrive   - Fetch todos from Google Drive'));
+            console.log(chalk.white('  execute <id>   - Execute a specific todo by ID'));
+            console.log(chalk.white('  sync           - Sync all todo sources'));
+            console.log(chalk.white('  add            - Add a new local todo'));
     }
 }
 

@@ -1,0 +1,6 @@
+Create a file called config.json with the following content:
+{
+  "name": "my-project",
+  "version": "1.0.0",
+  "features": ["streaming", "config", "file-input"]
+}

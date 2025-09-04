@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>🤖 c9ai Agent Test</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .container { background: #f8f9fa; padding: 30px; border-radius: 12px; }
+        input, textarea, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        #output { background: white; padding: 20px; border-radius: 6px; margin-top: 20px; border: 1px solid #ddd; min-height: 200px; font-family: monospace; white-space: pre-wrap; }
+        .status { color: #ffa500; }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .examples { margin-top: 20px; }
+        .example { background: #e9f7ff; padding: 10px; margin: 5px 0; border-radius: 4px; cursor: pointer; }
+        .example:hover { background: #d1ecf1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 c9ai Agent Tester</h1>
+        <p>Type a task below and watch the AI agent work in real-time!</p>
+        
+        <textarea id="prompt" placeholder="What would you like the AI agent to do? 
+
+Examples:
+• Create a shopping list file with 5 items
+• Write a simple HTML page about cats  
+• Show me what files are in this directory
+• Create a JSON config for a todo app"></textarea>
+        
+        <button onclick="runAgent()">🚀 Run Agent</button>
+        
+        <div class="examples">
+            <h3>💡 Quick Examples (click to use):</h3>
+            <div class="example" onclick="setPrompt('Create a file called hello.txt with a greeting message')">
+                📝 Create a text file with greeting
+            </div>
+            <div class="example" onclick="setPrompt('List all files in the current directory')">
+                📁 List files in directory  
+            </div>
+            <div class="example" onclick="setPrompt('Create a simple HTML page about space exploration')">
+                🌌 Create HTML page about space
+            </div>
+            <div class="example" onclick="setPrompt('Write a JSON configuration file for a music player app')">
+                🎵 Create JSON config file
+            </div>
+        </div>
+        
+        <div id="output">Click "Run Agent" to see the magic happen! ✨
+
+Make sure you started the server first:
+1. Open Terminal/Command Prompt
+2. Go to the c9ai folder: cd todo-management/c9ai  
+3. Run: npm run agent:api
+4. You should see: "🧩 Agent API listening at http://127.0.0.1:8787"</div>
+    </div>
+
+    <script>
+        function setPrompt(text) {
+            document.getElementById('prompt').value = text;
+        }
+
+        // robust SSE reader (works with multi-line data)
+        async function startAgent(prompt, opts = {}) {
+            const resp = await fetch("http://127.0.0.1:8787/api/agent", {
+                method: "POST",
+                headers: { "Content-Type": "application/json; charset=utf-8" },
+                body: JSON.stringify({
+                    prompt,
+                    provider: opts.provider || "llamacpp",
+                    allow: opts.allow || ["shell.run","script.run","fs.read","fs.write"]
+                })
+            });
+
+            const reader = resp.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let buffer = "";
+            let event = { type: "", dataLines: [] };
+
+            const flush = () => {
+                const dataStr = event.dataLines.join("\n");
+                let payload = null;
+                
+                // Try to parse as JSON, but fallback to string for events that send plain text
+                if (dataStr) {
+                  try { 
+                    payload = JSON.parse(dataStr);
+                  } catch (e) {
+                    // For status, detected, and token events, the data is often plain text
+                    if (event.type === "status" || event.type === "detected" || event.type === "token") {
+                      payload = dataStr; // Keep as string
+                    } else {
+                      // For other events, log the error as this might be a real JSON issue
+                      console.warn(`SSE JSON parse failed for event '${event.type}':`, e.message, "raw:", dataStr);
+                      payload = dataStr; // Fallback to string
+                    }
+                  }
+                }
+                
+                handleEvent(event.type, payload);
+                event = { type: "", dataLines: [] };
+            };
+
+            const output = document.getElementById('output');
+
+            const handleEvent = (type, payload) => {
+                if (type === "status")    output.innerHTML += `<span class="status">🟡 ${payload}...</span>\n`;
+                if (type === "detected")  output.innerHTML += `🔎 Detected tool: ${payload}\n`;
+                if (type === "plan")      output.innerHTML += `🧭 Planning: ${payload.tool} (confidence: ${payload.confidence})\n`;
+                if (type === "tool")      output.innerHTML += `🔧 Executing: ${payload.name}\n`;
+                if (type === "toolResult")output.innerHTML += `🛠️ Result: ${JSON.stringify(payload.out, null, 2)}\n`;
+                if (type === "final")     output.innerHTML += `\n<span class="success">✅ COMPLETED!</span>\n\n${payload.text}\n`;
+                if (type === "error")     output.innerHTML += `<span class="error">❌ Error: ${payload.error || JSON.stringify(payload)}</span>\n`;
+                
+                // Auto-scroll to bottom
+                output.scrollTop = output.scrollHeight;
+            };
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+
+                let idx;
+                while ((idx = buffer.indexOf("\n\n")) >= 0) {
+                    const chunk = buffer.slice(0, idx);
+                    buffer = buffer.slice(idx + 2);
+                    const lines = chunk.split(/\r?\n/);
+
+                    for (const line of lines) {
+                        if (line.startsWith("event:")) {
+                            // If a new event starts and we already had one accumulating, flush it
+                            if (event.type || event.dataLines.length) flush();
+                            event.type = line.slice(6).trim();
+                        } else if (line.startsWith("data:")) {
+                            event.dataLines.push(line.slice(5).trimStart());
+                        } else if (line.trim() === "") {
+                            // noop
+                        }
+                    }
+                    // End of message => flush
+                    if (event.type || event.dataLines.length) flush();
+                }
+            }
+        }
+
+        async function runAgent() {
+            const prompt = document.getElementById('prompt').value.trim();
+            if (!prompt) {
+                alert('Please enter a task for the agent!');
+                return;
+            }
+
+            const output = document.getElementById('output');
+            output.innerHTML = '🤖 Starting agent...\n\n';
+
+            try {
+                await startAgent(prompt, { provider: 'llamacpp' });
+            } catch (error) {
+                output.innerHTML += `<span class="error">❌ Connection failed: ${error.message}\n\nMake sure the agent server is running:\n1. Open terminal\n2. cd todo-management/c9ai\n3. npm run agent:api</span>`;
+            }
+        }
+    </script>
+</body>
+</html>

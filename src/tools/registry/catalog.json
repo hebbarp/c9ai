@@ -1,0 +1,328 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-13T10:00:00Z",
+  "categories": {
+    "core": {
+      "name": "Core Tools",
+      "description": "Essential built-in tools",
+      "icon": "🔧"
+    },
+    "social": {
+      "name": "Social Media",
+      "description": "Social media management and posting tools",
+      "icon": "📱"
+    },
+    "finance": {
+      "name": "Finance & Analytics",
+      "description": "Financial data, calculations, and reporting",
+      "icon": "💰"
+    },
+    "documents": {
+      "name": "Document Processing",
+      "description": "Create, convert, and manage documents",
+      "icon": "📄"
+    },
+    "communication": {
+      "name": "Communication",
+      "description": "Email, messaging, and notifications",
+      "icon": "✉️"
+    },
+    "data": {
+      "name": "Data & Analytics",
+      "description": "Data processing, visualization, and analysis",
+      "icon": "📊"
+    }
+  },
+  "tools": [
+    {
+      "id": "shell.run",
+      "name": "Shell Command",
+      "description": "Execute shell commands on the local system",
+      "version": "1.0.0",
+      "category": "core",
+      "status": "installed",
+      "builtin": true,
+      "dependencies": [],
+      "schema": {
+        "cmd": {
+          "type": "string",
+          "required": true,
+          "description": "Command to execute"
+        },
+        "timeout": {
+          "type": "number",
+          "required": false,
+          "description": "Timeout in milliseconds",
+          "default": 30000
+        }
+      }
+    },
+    {
+      "id": "fs.read",
+      "name": "File Reader",
+      "description": "Read contents of files from the filesystem",
+      "version": "1.0.0",
+      "category": "core",
+      "status": "installed", 
+      "builtin": true,
+      "dependencies": [],
+      "schema": {
+        "path": {
+          "type": "string",
+          "required": true,
+          "description": "Path to file to read"
+        }
+      }
+    },
+    {
+      "id": "fs.write",
+      "name": "File Writer", 
+      "description": "Write content to files on the filesystem",
+      "version": "1.0.0",
+      "category": "core",
+      "status": "installed",
+      "builtin": true,
+      "dependencies": [],
+      "schema": {
+        "path": {
+          "type": "string",
+          "required": true,
+          "description": "Path where to write the file"
+        },
+        "content": {
+          "type": "string",
+          "required": true,
+          "description": "Content to write"
+        }
+      }
+    },
+    {
+      "id": "web.search",
+      "name": "Web Search",
+      "description": "Search the web using SerpAPI",
+      "version": "1.0.0", 
+      "category": "data",
+      "status": "installed",
+      "builtin": true,
+      "dependencies": [],
+      "config": {
+        "api_key": {
+          "type": "string",
+          "required": true,
+          "description": "SerpAPI key for web search"
+        }
+      },
+      "schema": {
+        "query": {
+          "type": "string",
+          "required": true,
+          "description": "Search query"
+        }
+      }
+    },
+    {
+      "id": "cream.social.post",
+      "name": "Social Media Post",
+      "description": "Post content to social media platforms via Cream API",
+      "version": "1.0.0",
+      "category": "social",
+      "status": "available",
+      "builtin": false,
+      "source": "https://api.cream.dev/tools/social",
+      "author": "Cream Team",
+      "dependencies": ["cream.auth"],
+      "config": {
+        "api_key": {
+          "type": "string", 
+          "required": true,
+          "description": "Cream API key"
+        },
+        "base_url": {
+          "type": "string",
+          "required": false,
+          "description": "Cream API base URL",
+          "default": "https://api.cream.dev"
+        }
+      },
+      "schema": {
+        "platform": {
+          "type": "string",
+          "required": true,
+          "description": "Social media platform (twitter, linkedin, facebook)",
+          "enum": ["twitter", "linkedin", "facebook", "instagram"]
+        },
+        "content": {
+          "type": "string", 
+          "required": true,
+          "description": "Content to post"
+        },
+        "schedule": {
+          "type": "string",
+          "required": false,
+          "description": "ISO date string for scheduled posting"
+        },
+        "media": {
+          "type": "array",
+          "required": false,
+          "description": "Array of media URLs to attach"
+        }
+      }
+    },
+    {
+      "id": "cream.auth",
+      "name": "Cream Authentication",
+      "description": "Authentication helper for Cream API services",
+      "version": "1.0.0",
+      "category": "social",
+      "status": "available",
+      "builtin": false,
+      "source": "https://api.cream.dev/tools/auth",
+      "author": "Cream Team",
+      "dependencies": [],
+      "config": {
+        "api_key": {
+          "type": "string",
+          "required": true,
+          "description": "Cream API key"
+        }
+      }
+    },
+    {
+      "id": "finance.calculate",
+      "name": "Financial Calculator",
+      "description": "Perform financial calculations like NPV, IRR, loan payments",
+      "version": "1.0.0",
+      "category": "finance",
+      "status": "available",
+      "builtin": false,
+      "dependencies": [],
+      "schema": {
+        "type": {
+          "type": "string",
+          "required": true,
+          "description": "Calculation type",
+          "enum": ["npv", "irr", "pmt", "fv", "pv", "compound_interest"]
+        },
+        "values": {
+          "type": "object",
+          "required": true,
+          "description": "Calculation parameters (varies by type)"
+        }
+      }
+    },
+    {
+      "id": "document.pdf",
+      "name": "PDF Generator",
+      "description": "Convert content to PDF documents",
+      "version": "1.0.0",
+      "category": "documents", 
+      "status": "available",
+      "builtin": false,
+      "dependencies": [],
+      "schema": {
+        "content": {
+          "type": "string",
+          "required": true,
+          "description": "Content to convert to PDF (HTML or Markdown)"
+        },
+        "filename": {
+          "type": "string",
+          "required": false,
+          "description": "Output filename",
+          "default": "document.pdf"
+        },
+        "format": {
+          "type": "string",
+          "required": false,
+          "description": "Input format",
+          "enum": ["html", "markdown"],
+          "default": "markdown"
+        }
+      }
+    },
+    {
+      "id": "email.send",
+      "name": "Email Sender",
+      "description": "Send emails via SMTP or email service APIs",
+      "version": "1.0.0",
+      "category": "communication",
+      "status": "available",
+      "builtin": false,
+      "dependencies": [],
+      "config": {
+        "provider": {
+          "type": "string",
+          "required": true,
+          "description": "Email provider (smtp, sendgrid, mailgun)",
+          "enum": ["smtp", "sendgrid", "mailgun"]
+        },
+        "api_key": {
+          "type": "string",
+          "required": false,
+          "description": "API key for email service"
+        },
+        "smtp_config": {
+          "type": "object",
+          "required": false,
+          "description": "SMTP configuration"
+        }
+      },
+      "schema": {
+        "to": {
+          "type": "array",
+          "required": true,
+          "description": "Array of recipient email addresses"
+        },
+        "subject": {
+          "type": "string",
+          "required": true,
+          "description": "Email subject"
+        },
+        "body": {
+          "type": "string", 
+          "required": true,
+          "description": "Email body (HTML or plain text)"
+        },
+        "attachments": {
+          "type": "array",
+          "required": false,
+          "description": "Array of file paths to attach"
+        }
+      }
+    },
+    {
+      "id": "chart.generate",
+      "name": "Chart Generator", 
+      "description": "Generate charts and visualizations from data",
+      "version": "1.0.0",
+      "category": "data",
+      "status": "available",
+      "builtin": false,
+      "dependencies": [],
+      "schema": {
+        "type": {
+          "type": "string",
+          "required": true,
+          "description": "Chart type",
+          "enum": ["bar", "line", "pie", "scatter", "area", "histogram"]
+        },
+        "data": {
+          "type": "object",
+          "required": true,
+          "description": "Chart data (labels, datasets, etc.)"
+        },
+        "title": {
+          "type": "string",
+          "required": false,
+          "description": "Chart title"
+        },
+        "filename": {
+          "type": "string",
+          "required": false,
+          "description": "Output filename",
+          "default": "chart.png"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,206 @@
+"use strict";
+const { isRunaway, hardClamp, collapseRepeats } = require("../src/utils/text");
+const { StreamGuard } = require("../src/quality/stream-guard");
+const { streamBulletTally, cleanBullets } = require("../src/utils/bullets");
+const { readFileSync } = require("node:fs");
+const { join } = require("node:path");
+const { homedir } = require("node:os");
+
+async function agenticResponseSSE(req, res) {
+  // Always wrap the whole handler
+  try {
+    // 1) Read params from POST body or GET query
+    const src = req.method === "GET" ? req.query : (req.body || {});
+    const prompt = src.prompt;
+    const provider = src.provider;
+    const allow = Array.isArray(src.allow)
+      ? src.allow
+      : (typeof src.allow === "string" ? JSON.parse(src.allow) : undefined);
+    const threshold = src.threshold ? Number(src.threshold) : undefined;
+
+    // 2) SSE headers
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no"
+    });
+    const stream = res;
+    const send = (event, data) =>
+      stream.write(`event: ${event}\ndata: ${typeof data === "string" ? data : JSON.stringify(data)}\n\n`);
+
+    if (!prompt) throw new Error("Missing prompt");
+
+    // 3) Settings (bullet max)
+    let bulletMax = 8;
+    try {
+      const s = JSON.parse(readFileSync(join(homedir(), ".c9ai", "settings.json"), "utf-8"));
+      const m = Number(s?.style?.bulletMax);
+      if (m && m > 0 && m <= 20) bulletMax = m;
+    } catch {}
+    const modeBulletize = /bullet\s*points?|bulletize|bulleted/i.test(prompt || "");
+
+    // 4) Guards
+    let accText = "";
+    const sg = new StreamGuard({
+      sourceText: src.sourceText || src.pdfText || "",
+      windowChars: 600,
+      minNovelty: 0.18,
+      maxRepeatRate: 0.35,
+      minDriftOverlap: 0.07,
+      badWindowsToStop: 2
+    });
+
+    // 5) Run one agent step (tool router)
+    const { getProvider, isHybridProvider } = require("../src/providers");
+    const { agentStep } = require("../src/agent/runStep");
+    const { makeSynthesizer } = require("../src/agent/synthesize");
+    const { runTool } = require("../src/tools/runner");
+    
+    // Debug provider selection
+    const providerId = provider || "llamacpp";
+    console.log("[DEBUG] Provider selection:", { requestProvider: provider, providerId });
+    
+    // Get the provider using the new universal system
+    const p = getProvider(providerId);
+    
+    const getProviderDisplayName = (id) => {
+      if (id.endsWith('-hybrid')) {
+        const base = id.replace('-hybrid', '');
+        return `${base.charAt(0).toUpperCase() + base.slice(1)} AI + Local Tools`;
+      }
+      switch(id) {
+        case 'claude': return 'Claude AI';
+        case 'gemini': return 'Gemini AI';
+        case 'openai': return 'OpenAI';
+        case 'deepseek': return 'DeepSeek AI';
+        case 'llamacpp': return 'Local Model (llama.cpp)';
+        case 'ollama': return 'Local Model (Ollama)';
+        default: return id;
+      }
+    };
+    
+    const providerName = getProviderDisplayName(providerId);
+    send("status", `🤖 Using ${providerName}`);
+    console.log("[DEBUG] Using provider:", providerName, "| Provider object:", p.name);
+
+    const out = await agentStep(p, prompt, {
+      allowedTools: allow || ["shell.run", "script.run", "fs.read", "fs.write", "web.search"],
+      runTool: (n, a) => runTool(n, a),
+      synthesize: (prompt, toolName, toolResult, progressProvider) => {
+        const synthProvider = progressProvider || p;
+        return makeSynthesizer(synthProvider)(prompt, toolName, toolResult);
+      },
+      confirmThreshold: threshold ?? 0.6,
+      onToken: (tok) => {
+        const piece = typeof tok === "string" ? tok : tok?.content || "";
+        if (piece) {
+          send("token", piece);
+          accText += piece;
+        }
+        // repetition guard
+        if (accText.length > 800 && isRunaway(accText)) {
+          const cleaned = hardClamp(collapseRepeats(accText), 2000);
+          send("status", "⚠️ repetition detected — stopping");
+          send("final", { text: cleaned });
+          stream.end();
+        }
+        // bullet guard
+        if (modeBulletize) {
+          const tally = streamBulletTally(accText, { max: bulletMax, minLen: 3 });
+          if (tally.done) {
+            const cleaned = cleanBullets(accText, { max: bulletMax, minLen: 3 });
+            send("status", `✅ bullets complete (${tally.count})`);
+            send("final", { text: cleaned });
+            stream.end();
+          }
+        }
+      },
+      // Add missing status callbacks that the frontend expects
+      on: {
+        status: (status) => {
+          // Add visual indicators for different phases
+          if (status.includes("Local model unavailable")) {
+            send("status", "⚠️ " + status);
+          } else if (status.includes("switching to Claude")) {
+            send("status", "🔄 " + status);
+          } else if (status.includes("failed")) {
+            send("status", "❌ " + status);
+          } else if (status === "detect") {
+            send("status", "🔍 Analyzing request...");
+          } else if (status === "plan") {
+            send("status", "📋 Planning action...");
+          } else if (status === "execute") {
+            send("status", "⚡ Executing...");
+          } else if (status === "synthesize") {
+            send("status", "✨ Generating response...");
+          } else {
+            send("status", status);
+          }
+        },
+        detected: (detected) => send("detected", detected),
+        planned: (plan) => send("plan", plan),
+        toolStart: (name, args) => send("tool", { name, args }),
+        toolResult: (name, result) => send("toolResult", { name, out: result }),
+        error: (type, msg) => send("error", { type, message: msg }),
+        final: (text) => {
+          send("final", { text });
+        }
+      }
+    });
+
+    // 6) Finish
+    let finalText = String(out?.text || out?.content || "");
+    if (modeBulletize) finalText = cleanBullets(finalText, { max: bulletMax, minLen: 3 });
+    finalText = hardClamp(collapseRepeats(finalText), 2400);
+    
+    // Check if fallback was used and add a note
+    if (out && out.fallbackUsed) {
+      send("status", `✅ Response completed using ${out.fallbackProvider} (fallback)`);
+    }
+    
+    send("final", { text: finalText });
+    stream.end();
+  } catch (e) {
+    console.error("[/api/agent] error:", e?.stack || e);
+    
+    // Check if headers have already been sent (SSE connection established)
+    if (res.headersSent) {
+      // Use the existing SSE stream
+      try {
+        const send = (event, data) =>
+          res.write(`event: ${event}\ndata: ${typeof data === "string" ? data : JSON.stringify(data)}\n\n`);
+        
+        send("error", { error: "agent_failed", message: e?.message || String(e) });
+        send("final", { text: `❌ Agent failed: ${e?.message || "Unknown error"}` });
+        res.end();
+      } catch (streamError) {
+        // Stream might be closed, just log and end
+        console.error("Failed to send error via SSE stream:", streamError);
+        res.end();
+      }
+    } else {
+      // Headers not sent yet, try to establish SSE connection for error
+      try {
+        res.writeHead(200, {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+          "X-Accel-Buffering": "no"
+        });
+        res.write(`event: error\ndata: ${JSON.stringify({ error: "agent_failed", message: e?.message || String(e) })}\n\n`);
+        res.end();
+      } catch (headerError) {
+        // Last resort: try JSON response
+        try {
+          res.status(500).json({ error: "agent_failed", message: e?.message || String(e) });
+        } catch (jsonError) {
+          console.error("Complete failure to send error response:", jsonError);
+          res.end();
+        }
+      }
+    }
+  }
+}
+
+module.exports = { agenticResponseSSE };

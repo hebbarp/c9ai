@@ -1,0 +1,104 @@
+{
+  "platform": "darwin",
+  "detectedAt": "2025-09-03T14:09:54.859Z",
+  "managers": {
+    "npm": {
+      "name": "npm",
+      "version": "11.4.2",
+      "type": "language",
+      "ecosystem": "javascript",
+      "platform": "darwin",
+      "config": {
+        "platforms": [
+          "darwin",
+          "linux",
+          "win32"
+        ],
+        "checkCommand": "npm --version",
+        "searchCommand": "npm search {query}",
+        "installCommand": "npm install -g {package}",
+        "infoCommand": "npm info {package}",
+        "listCommand": "npm list -g --depth=0",
+        "updateCommand": "npm update -g {package}",
+        "removeCommand": "npm uninstall -g {package}",
+        "type": "language",
+        "ecosystem": "javascript"
+      },
+      "available": true,
+      "detectedAt": "2025-09-03T14:09:53.255Z"
+    },
+    "pip": {
+      "name": "pip",
+      "version": "25.1.1",
+      "type": "language",
+      "ecosystem": "python",
+      "platform": "darwin",
+      "config": {
+        "platforms": [
+          "darwin",
+          "linux",
+          "win32"
+        ],
+        "checkCommand": "pip --version",
+        "searchCommand": "pip search {query} || echo 'Search disabled'",
+        "installCommand": "pip install {package}",
+        "infoCommand": "pip show {package}",
+        "listCommand": "pip list",
+        "updateCommand": "pip install --upgrade {package}",
+        "removeCommand": "pip uninstall {package}",
+        "type": "language",
+        "ecosystem": "python"
+      },
+      "available": true,
+      "detectedAt": "2025-09-03T14:09:53.776Z"
+    },
+    "brew": {
+      "name": "brew",
+      "version": "4.6.8",
+      "type": "system",
+      "ecosystem": "homebrew",
+      "platform": "darwin",
+      "config": {
+        "platforms": [
+          "darwin"
+        ],
+        "checkCommand": "brew --version",
+        "searchCommand": "brew search {query}",
+        "installCommand": "brew install {package}",
+        "infoCommand": "brew info {package}",
+        "listCommand": "brew list",
+        "updateCommand": "brew upgrade {package}",
+        "removeCommand": "brew uninstall {package}",
+        "type": "system",
+        "ecosystem": "homebrew"
+      },
+      "available": true,
+      "detectedAt": "2025-09-03T14:09:54.228Z"
+    },
+    "gem": {
+      "name": "gem",
+      "version": "3.2.15",
+      "type": "language",
+      "ecosystem": "ruby",
+      "platform": "darwin",
+      "config": {
+        "platforms": [
+          "darwin",
+          "linux",
+          "win32"
+        ],
+        "checkCommand": "gem --version",
+        "searchCommand": "gem search {query}",
+        "installCommand": "gem install {package}",
+        "infoCommand": "gem info {package}",
+        "listCommand": "gem list",
+        "updateCommand": "gem update {package}",
+        "removeCommand": "gem uninstall {package}",
+        "type": "language",
+        "ecosystem": "ruby"
+      },
+      "available": true,
+      "detectedAt": "2025-09-03T14:09:54.858Z"
+    }
+  }
+}

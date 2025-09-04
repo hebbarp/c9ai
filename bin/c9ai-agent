@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+/* Standalone CLI for the agent loop.
+   Usage:
+     c9ai-agent "Create file foo.txt with hello, then read it."
+     echo "Run unit tests" | c9ai-agent
+     c9ai-agent --provider ollama --allow "shell.run,fs.read,fs.write" "pwd && ls"
+*/
+const { runAgentCommand } = require("../src/cli/agent");
+
+function parseArgs(argv) {
+  const out = { providerName: process.env.LOCAL_PROVIDER || "llamacpp", allowedTools: null, confirmThreshold: 0.6, prompt: null };
+  const rest = [];
+  for (let i=0;i<argv.length;i++) {
+    const a = argv[i];
+    if (a === "--provider" || a === "-p") { out.providerName = argv[++i]; continue; }
+    if (a === "--threshold" || a === "-t") { out.confirmThreshold = parseFloat(argv[++i]); continue; }
+    if (a === "--allow" || a === "-a") { out.allowedTools = String(argv[++i]).split(",").map(s=>s.trim()).filter(Boolean); continue; }
+    rest.push(a);
+  }
+  out.prompt = rest.join(" ").trim() || null;
+  return out;
+}
+
+(async () => {
+  try {
+    const args = parseArgs(process.argv.slice(2));
+    await runAgentCommand(args);
+  } catch (e) {
+    console.error("Agent error:", e && e.message ? e.message : e);
+    process.exit(1);
+  }
+})();

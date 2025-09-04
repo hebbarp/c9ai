@@ -1,0 +1,115 @@
+{
+  "id": "rapid-prototype",
+  "name": "Rapid Prototype Sprint",
+  "description": "Fast experimental building for quick validation",
+  "vibe": {
+    "energy": "high-experimental",
+    "mood": "creative-urgent",
+    "duration": "45-60min",
+    "bestTime": [
+      "10:00",
+      "16:00"
+    ],
+    "tags": [
+      "prototype",
+      "fast",
+      "experimental",
+      "validation"
+    ]
+  },
+  "flow": [
+    {
+      "step": "idea-capture",
+      "description": "Quickly capture and structure the concept",
+      "tools": [
+        "mindmap.create",
+        "ai.brainstorm",
+        "sketch.digital"
+      ],
+      "vibe": "capture",
+      "estimatedTime": "10-15min"
+    },
+    {
+      "step": "rapid-build",
+      "description": "Build minimum viable version rapidly",
+      "tools": [
+        "code.generate",
+        "ui.framework",
+        "api.mock"
+      ],
+      "vibe": "build",
+      "estimatedTime": "25-35min"
+    },
+    {
+      "step": "instant-deploy",
+      "description": "Get prototype live for immediate testing",
+      "tools": [
+        "vercel.deploy",
+        "netlify.publish",
+        "github.pages"
+      ],
+      "vibe": "launch",
+      "estimatedTime": "5-10min"
+    },
+    {
+      "step": "feedback-collect",
+      "description": "Gather initial user feedback quickly",
+      "tools": [
+        "survey.create",
+        "analytics.track",
+        "user.interview"
+      ],
+      "vibe": "validate",
+      "estimatedTime": "10-15min"
+    }
+  ],
+  "adaptations": {
+    "solo-sprint": {
+      "description": "Individual rapid prototyping session",
+      "modifications": [
+        "self-validation",
+        "personal testing",
+        "iteration planning"
+      ]
+    },
+    "team-hackathon": {
+      "description": "Collaborative rapid prototyping",
+      "modifications": [
+        "role assignment",
+        "parallel development",
+        "integration points"
+      ]
+    },
+    "client-demo": {
+      "description": "Prototype for client presentation",
+      "modifications": [
+        "polished UI",
+        "demo script",
+        "feedback forms"
+      ]
+    }
+  },
+  "triggers": {
+    "time": [
+      "mid-morning",
+      "afternoon"
+    ],
+    "energy": [
+      "high",
+      "creative"
+    ],
+    "context": [
+      "focused-time",
+      "experimental-mood"
+    ]
+  },
+  "credits": {
+    "estimated": 35,
+    "breakdown": {
+      "ai.brainstorm": 10,
+      "code.generate": 20,
+      "ui.framework": 0,
+      "survey.create": 5
+    }
+  }
+}

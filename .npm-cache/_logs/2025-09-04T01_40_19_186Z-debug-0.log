@@ -1,0 +1,187 @@
+0 verbose cli /opt/homebrew/Cellar/node/24.3.0/bin/node /opt/homebrew/bin/npm
+1 info using npm@11.4.2
+2 info using node@v24.3.0
+3 silly config load:file:/opt/homebrew/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/hebbarp/todo-management/c9ai/.npmrc
+5 silly config load:file:/Users/hebbarp/.npmrc
+6 silly config load:file:/opt/homebrew/etc/npmrc
+7 verbose title npm publish
+8 verbose argv "--cache" "./.npm-cache" "publish" "--access" "public"
+9 verbose logfile logs-max:10 dir:/Users/hebbarp/todo-management/c9ai/.npm-cache/_logs/2025-09-04T01_40_19_186Z-
+10 verbose logfile /Users/hebbarp/todo-management/c9ai/.npm-cache/_logs/2025-09-04T01_40_19_186Z-debug-0.log
+11 silly logfile done cleaning log files
+12 verbose publish [ '.' ]
+13 silly packumentCache heap:2348810240 maxSize:587202560 maxEntrySize:293601280
+14 warn publish npm auto-corrected some errors in your package.json when publishing.  Please run "npm pkg fix" to address these errors.
+15 warn publish errors corrected:
+15 warn publish "bin[c9ai]" script name was cleaned
+16 notice
+17 notice 📦  c9ai@2.2.3
+18 notice Tarball Contents
+19 notice 6.0kB CHANGELOG.md
+19 notice 15.7kB README.md
+19 notice 1.2kB bin/c9ai-agent
+19 notice 1.9kB package.json
+19 notice 1.9kB scripts/generate-interactive-html.sh
+19 notice 1.1kB scripts/generate-unicode-html.sh
+19 notice 2.6kB scripts/inject-agent-subcommand.js
+19 notice 1.8kB scripts/install.sh
+19 notice 2.9kB scripts/start_local_agent.sh
+19 notice 6.8kB scripts/start-local-stack.js
+19 notice 3.2kB server/agent-api.js
+19 notice 4.5kB server/auth.js
+19 notice 1.3kB server/bench.js
+19 notice 5.6kB server/calculators.js
+19 notice 7.9kB server/chat.js
+19 notice 4.1kB server/cream-debug.js
+19 notice 10.6kB server/credits-api.js
+19 notice 954B server/credits-router.js
+19 notice 3.6kB server/launch.js
+19 notice 10.2kB server/package-manager-api.js
+19 notice 702B server/package-manager-router.js
+19 notice 6.9kB server/payments.js
+19 notice 4.9kB server/settings.js
+19 notice 17.5kB server/sse-agent-handler.js
+19 notice 8.2kB server/sse-agent-handler.js.backup
+19 notice 709B server/terminal.js
+19 notice 5.1kB server/tool-registry-api.js
+19 notice 923B server/tool-registry-router.js
+19 notice 18.9kB server/workflow-api.js
+19 notice 5.1kB server/workflows-custom.js
+19 notice 16.7kB src/agent/action-validator.js
+19 notice 13.9kB src/agent/cloud-ai-bridge.js
+19 notice 6.9kB src/agent/context-manager.js
+19 notice 17.8kB src/agent/enhanced-math-processor.js
+19 notice 22.0kB src/agent/execution-planner.js
+19 notice 5.8kB src/agent/nl-math-preprocessor.js
+19 notice 3.9kB src/agent/pattern-first-preprocessor.js
+19 notice 834B src/agent/prompts.js
+19 notice 10.6kB src/agent/router.js
+19 notice 19.2kB src/agent/runStep.js
+19 notice 22.2kB src/agent/sigil-router.js
+19 notice 42.2kB src/agent/synthesize.js
+19 notice 1.6kB src/app-mappings.json
+19 notice 15.5kB src/billing/credit-system.js
+19 notice 3.1kB src/cli/agent-command.js
+19 notice 2.1kB src/cli/agent.js
+19 notice 1.7kB src/commands/aliases.js
+19 notice 2.1kB src/core/C9AICore.js
+19 notice 58B src/core/index.js
+19 notice 1.7kB src/failed-patterns.json
+19 notice 750B src/handlers/analyticsHandler.js
+19 notice 928B src/handlers/autonomousHandler.js
+19 notice 12.9kB src/handlers/commandHandler.js
+19 notice 861B src/handlers/contentHandler.js
+19 notice 2.4kB src/handlers/conversationHandler.js
+19 notice 1.8kB src/handlers/helpHandler.js
+19 notice 1.1kB src/handlers/issueHandler.js
+19 notice 4.2kB src/handlers/modelHandler.js
+19 notice 657B src/handlers/shellHandler.js
+19 notice 2.5kB src/handlers/todoHandler.js
+19 notice 996B src/handlers/toolHandler.js
+19 notice 6.5kB src/index.js
+19 notice 3.4kB src/integrations/api-config.js
+19 notice 9.5kB src/integrations/cream-api.js
+19 notice 7.3kB src/integrations/youtube-api.js
+19 notice 121.7kB src/knowledge-base.json
+19 notice 13.8kB src/knowledge-scanner.js
+19 notice 2.5kB src/models/localModel.js
+19 notice 12.4kB src/patch.js
+19 notice 2.1kB src/providers/claude.js
+19 notice 2.3kB src/providers/deepseek.js
+19 notice 2.3kB src/providers/gemini.js
+19 notice 8.0kB src/providers/hybrid.js
+19 notice 2.7kB src/providers/index.js
+19 notice 4.2kB src/providers/local-llamacpp.js
+19 notice 1.7kB src/providers/local-ollama.js
+19 notice 3.2kB src/providers/localProvider.js
+19 notice 2.4kB src/providers/math-calc-provider.js
+19 notice 1.7kB src/providers/openai.js
+19 notice 709B src/providers/types.js
+19 notice 3.3kB src/quality/stream-guard.js
+19 notice 6.7kB src/start_local_agent.sh
+19 notice 3.0kB src/tests/C9AI.test.js
+19 notice 1.3kB src/tests/core/C9AICore.test.js
+19 notice 2.2kB src/tests/handlers/commandHandler.test.js
+19 notice 615B src/tests/helpers/mockLlama.js
+19 notice 615B src/tests/helpers/mockLlama.js.new
+19 notice 412B src/tests/helpers/mocks.js
+19 notice 1.0kB src/tests/helpers/setup.js
+19 notice 14.8kB src/tools-registry-broken.json
+19 notice 14.1kB src/tools-registry.json
+19 notice 3.7kB src/tools/basic-interpreter.js
+19 notice 1.8kB src/tools/calcscript.js
+19 notice 8.6kB src/tools/code-parser.js
+19 notice 4.6kB src/tools/dynamic-jit-executor.js
+19 notice 10.7kB src/tools/executive-calculators.js
+19 notice 20.1kB src/tools/executive-request-processor.js
+19 notice 9.2kB src/tools/external-apis.js
+19 notice 1.4kB src/tools/filesystem.js
+19 notice 13.7kB src/tools/function-generator.js
+19 notice 6.7kB src/tools/function-registry.js
+19 notice 15.2kB src/tools/gdrive-fetcher.js
+19 notice 15.1kB src/tools/generator/script-generator.js
+19 notice 9.2kB src/tools/github-fetcher.js
+19 notice 15.3kB src/tools/hybrid-resolver.js
+19 notice 97.7kB src/tools/jit-executor.js
+19 notice 55.1kB src/tools/jit-executor.js.backup
+19 notice 2.1kB src/tools/packages/cream.auth/index.js
+19 notice 207B src/tools/packages/cream.auth/package.json
+19 notice 2.2kB src/tools/packages/cream.social.post/index.js
+19 notice 242B src/tools/packages/cream.social.post/package.json
+19 notice 2.1kB src/tools/packages/document.pdf/index.js
+19 notice 194B src/tools/packages/document.pdf/package.json
+19 notice 2.1kB src/tools/packages/email.send/index.js
+19 notice 206B src/tools/packages/email.send/package.json
+19 notice 13.8kB src/tools/packages/manager-detector.js
+19 notice 14.2kB src/tools/packages/universal-search.js
+19 notice 8.7kB src/tools/registry.js
+19 notice 9.2kB src/tools/registry/catalog.json
+19 notice 10.2kB src/tools/registry/enhanced-registry.js
+19 notice 4.8kB src/tools/registry/enhanced-runner.js
+19 notice 9.8kB src/tools/registry/index.js
+19 notice 8.2kB src/tools/registry/installer.js
+19 notice 6.7kB src/tools/registry/remote-client.js
+19 notice 3.8kB src/tools/runner.js
+19 notice 2.0kB src/tools/shell.js
+19 notice 10.3kB src/tools/system/detector.js
+19 notice 5.5kB src/tools/system/system-registry.json
+19 notice 2.3kB src/tools/web.js
+19 notice 229B src/util/zod.js
+19 notice 723B src/utils/agentConfig.js
+19 notice 2.1kB src/utils/bullets.js
+19 notice 522B src/utils/common.js
+19 notice 1.5kB src/utils/config.js
+19 notice 1.4kB src/utils/knowledgeBase.js
+19 notice 1.4kB src/utils/llamacpp.js
+19 notice 552B src/utils/logger.js
+19 notice 1.3kB src/utils/modelUtils.js
+19 notice 449B src/utils/sandbox.js
+19 notice 10.8kB src/utils/serverManager.js
+19 notice 390B src/utils/testRunner.js
+19 notice 2.7kB src/utils/text.js
+19 notice 19.1kB src/workflows/template-engine.js
+19 notice 2.5kB src/workflows/templates/data-detective.json
+19 notice 2.9kB src/workflows/templates/morning-content-creator.json
+19 notice 2.5kB src/workflows/templates/rapid-prototype.json
+19 notice 9.5kB src/workflows/tool-mapper.js
+19 notice 15.3kB src/workflows/vibe-matcher.js
+20 notice Tarball Details
+21 notice name: c9ai
+22 notice version: 2.2.3
+23 notice filename: c9ai-2.2.3.tgz
+24 notice package size: 289.6 kB
+25 notice unpacked size: 1.1 MB
+26 notice shasum: 594e00a2100541a9e42ca1ce579d300acce286d6
+27 notice integrity: sha512-WbsYOOC5UYl9r[...]qoAWYjSTDd3NA==
+28 notice total files: 148
+29 notice
+30 http fetch GET 200 https://registry.npmjs.org/c9ai 972ms (cache miss)
+31 notice Publishing to https://registry.npmjs.org/ with tag latest and public access
+32 http fetch PUT 200 https://registry.npmjs.org/c9ai 2965ms
+33 verbose cwd /Users/hebbarp/todo-management/c9ai
+34 verbose os Darwin 24.6.0
+35 verbose node v24.3.0
+36 verbose npm  v11.4.2
+37 verbose exit 0
+38 info ok

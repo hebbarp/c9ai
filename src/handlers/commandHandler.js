@@ -8,6 +8,7 @@ const { spawn } = require('child_process');
 const chalk = require('chalk');
 const config = require('../utils/config');
 const Logger = require('../utils/logger');
+const serverManager = require('../utils/serverManager');
 
 async function handleSigilMode(c9ai, input) {
     const [mode, ...rest] = input.trim().split(' ');
@@ -68,6 +69,8 @@ async function handleCommand(c9ai, input) {
                 return await c9ai.modelHandler.switchModel(args[0]);
             case 'config':
                 return await handleConfig(args);
+            case 'server':
+                return await handleServerCommands(c9ai, args);
             case 'help':
                 return showHelp(); // <-- Use the new help handler
             case 'exit':
@@ -230,6 +233,96 @@ async function setConfigValue(key, value) {
 function maskApiKey(apiKey) {
     if (!apiKey || apiKey.length < 8) return apiKey;
     return apiKey.substring(0, 4) + '*'.repeat(apiKey.length - 8) + apiKey.substring(apiKey.length - 4);
+}
+
+async function handleServerCommands(c9ai, args) {
+    const [action] = args;
+
+    if (!action) {
+        console.log(chalk.cyan('🖥️  Server Management'));
+        console.log(chalk.white('Usage: server <action>'));
+        console.log(chalk.gray(''));
+        console.log(chalk.white('Actions:'));
+        console.log(chalk.gray('  status      - Check server status'));
+        console.log(chalk.gray('  start       - Start llamacpp server'));
+        console.log(chalk.gray('  stop        - Stop llamacpp server'));
+        console.log(chalk.gray('  ui          - Open server UI in browser'));
+        console.log(chalk.gray(''));
+        console.log(chalk.white('Examples:'));
+        console.log(chalk.gray('  server status  - Check if llamacpp server is running'));
+        console.log(chalk.gray('  server start   - Start server with available model'));
+        console.log(chalk.gray('  server ui      - Open web interface'));
+        console.log(chalk.gray('  server gpu 8   - Restart with 8 GPU layers (ladder: 0,8,12,16,20)'));
+        console.log(chalk.gray('  server ladder  - Show GPU performance ladder'));
+        return;
+    }
+
+    switch (action.toLowerCase()) {
+        case 'status':
+            const status = await serverManager.getServerStatus();
+            console.log(chalk.cyan('🖥️  Server Status'));
+            console.log(chalk.gray('='.repeat(20)));
+            console.log(`  Status: ${status.running ? chalk.green('✅ Running') : chalk.red('❌ Stopped')}`);
+            console.log(`  URL: ${chalk.white(status.url)}`);
+            console.log(`  Managed: ${status.managed ? chalk.green('Yes') : chalk.gray('No')}`);
+            console.log(`  GPU Layers: ${chalk.white(status.gpuLayers)}`);
+            if (!status.running) {
+                console.log(chalk.gray('💡 Use "server start" to launch automatically'));
+            }
+            break;
+
+        case 'start':
+            console.log(chalk.cyan('🚀 Starting llamacpp server...'));
+            const started = await serverManager.startLlamacppServer(c9ai.modelsDir);
+            if (started) {
+                console.log(chalk.green('✅ Server started successfully'));
+                console.log(chalk.gray('💡 Use "server ui" to open the web interface'));
+            } else {
+                console.log(chalk.red('❌ Failed to start server'));
+                console.log(chalk.gray('💡 Check that llamacpp is installed: brew install llama.cpp'));
+            }
+            break;
+
+        case 'stop':
+            serverManager.stopLlamacppServer();
+            console.log(chalk.yellow('🛑 Server stop signal sent'));
+            break;
+
+        case 'ui':
+            const opened = await serverManager.openServerUI();
+            if (!opened) {
+                console.log(chalk.gray('💡 Start the server first with: server start'));
+            }
+            break;
+
+        case 'gpu':
+            const gpuLayers = args[2]; // server gpu 8
+            if (!gpuLayers) {
+                console.log(chalk.red('❌ Please specify GPU layers: server gpu <layers>'));
+                console.log(chalk.gray('Valid options: 0, 8, 12, 16, 20'));
+                break;
+            }
+            const adjusted = await serverManager.adjustGpuLayers(parseInt(gpuLayers));
+            if (!adjusted) {
+                console.log(chalk.gray('💡 Use "server ladder" to see performance recommendations'));
+            }
+            break;
+
+        case 'ladder':
+            const ladder = serverManager.getGpuLadder();
+            console.log(chalk.cyan('🧗 GPU Performance Ladder'));
+            console.log(chalk.gray('='.repeat(30)));
+            Object.entries(ladder).forEach(([layers, desc]) => {
+                const current = (process.env.LLAMACPP_GPU_LAYERS || '8') === layers ? chalk.green('← CURRENT') : '';
+                console.log(`  ${chalk.white(layers.padStart(2))} layers: ${chalk.gray(desc)} ${current}`);
+            });
+            console.log(chalk.gray(''));
+            console.log(chalk.gray('💡 Use "server gpu <layers>" to switch levels'));
+            break;
+
+        default:
+            Logger.warn(`Unknown server command: ${action}. Use 'server' for help.`);
+    }
 }
 
 module.exports = { handleCommand };

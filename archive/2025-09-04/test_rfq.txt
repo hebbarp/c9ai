@@ -1,0 +1,43 @@
+Request for Quotation - Customer Management System
+
+We are seeking a development partner to create a comprehensive customer management system for our growing business.
+
+REQUIREMENTS:
+
+1. The system must support user authentication and role-based access control for different user types (admin, sales, support).
+
+2. We require integration with our existing CRM database (Salesforce) and should provide real-time synchronization of customer data.
+
+3. The application must include a responsive web dashboard with the following features:
+   - Customer profile management
+   - Activity tracking and timeline
+   - Document storage and sharing
+   - Task and appointment scheduling
+
+4. We need secure API endpoints for third-party integrations with our billing system and marketing automation platform.
+
+5. The system should support automated email notifications for important events and reminders.
+
+6. We require comprehensive reporting capabilities including:
+   - Customer analytics and insights
+   - Sales pipeline reports
+   - User activity reports
+   - Data export functionality (CSV, PDF)
+
+7. The application must be scalable to handle 5,000+ customer records and 100+ concurrent users.
+
+8. Security requirements include:
+   - Data encryption at rest and in transit
+   - Regular backup and recovery procedures
+   - Audit logging for compliance
+   - GDPR compliance features
+
+9. We need mobile-responsive design and would prefer a progressive web app (PWA) approach.
+
+10. The system should include comprehensive user management with self-service password reset and profile management.
+
+TIMELINE: We need the system delivered within 12 weeks of project start.
+
+BUDGET: Our budget range is $40,000 - $65,000 for the complete solution.
+
+Please provide a detailed proposal with timeline, costs, and technical approach.

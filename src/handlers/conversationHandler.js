@@ -1,65 +1,73 @@
 const ora = require('ora');
 const chalk = require('chalk');
 const Logger = require('../utils/logger');
-const { initLocalModel, runLocalAI } = require('../models/localModel');
 
-async function handleConversation(c9ai, input) {
-    const model = c9ai.currentModel || 'claude'; // Default if not set
-    console.log(chalk.yellow(`Thinking with ${model}...`));
+const doFetch = async (...a) => {
+  if (typeof fetch === 'function') return fetch(...a);
+  const { default: f } = await import('node-fetch');
+  return f(...a);
+};
 
-    try {
-        // Handle local model specifically
-        if (model === 'local') {
-            return await handleLocalModel(c9ai, input);
-        }
-
-        // Basic math evaluation for simple expressions
-        if (/^[\d\+\-\*\/\(\)\s]+$/.test(input)) {
-            try {
-                const result = eval(input);
-                const response = `(${model}): ${input} = ${result}`;
-                console.log(chalk.green('✔ AI response:'));
-                console.log(chalk.cyanBright(response));
-                return response;
-            } catch {
-                // Fall through to default response
-            }
-        }
-        
-        // Default conversational response for non-local models
-        const response = `(${model}): I understand you said "${input}". This is a demo response.`;
-        console.log(chalk.green('✔ AI response:'));
-        console.log(chalk.cyanBright(response));
-        return response;
-    } catch (error) {
-        console.log(chalk.red('✖ Failed to get response.'));
-        Logger.error(error.message);
-        throw error;
-    }
+async function getLlamaModelId(baseUrl) {
+  const url = `${baseUrl.replace(/\/$/, '')}/v1/models`;
+  const r = await doFetch(url);
+  if (!r.ok) throw new Error(`llama.cpp /v1/models failed: ${r.status} ${r.statusText}`);
+  const data = await r.json();
+  const id = data?.data?.[0]?.id || data?.data?.[0]?.name;
+  if (!id) throw new Error('No models reported by llama.cpp');
+  return id;
 }
 
-async function handleLocalModel(c9ai, input) {
-    try {
-        // Check if local model is initialized
-        if (!c9ai.localModel) {
-            throw new Error('Local model not initialized. Please run "switch local" first.');
-        }
+async function askLlama(baseUrl, prompt) {
+  const model = await getLlamaModelId(baseUrl);
+  const url = `${baseUrl.replace(/\/$/, '')}/v1/chat/completions`;
+  const body = {
+    model,
+    messages: [
+      { role: 'system', content: 'You are a helpful assistant.' },
+      { role: 'user', content: prompt }
+    ],
+    temperature: 0.2,
+    stream: false
+  };
+  const r = await doFetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) {
+    let text = ''; try { text = await r.text(); } catch {}
+    throw new Error(`llama.cpp chat failed: ${r.status} ${r.statusText}${text ? ` — ${text}` : ''}`);
+  }
+  const data = await r.json();
+  const choice = data?.choices?.[0];
+  const content = choice?.message?.content || choice?.text;
+  if (!content) throw new Error('Empty response from llama.cpp');
+  return content.trim();
+}
 
-        const modelName = c9ai.localModel.modelFile.replace('.gguf', '').replace('.bin', '');
-        
-        // Use the core's agentic response method
-        const response = await c9ai.agenticResponse(input);
+async function handleConversation(c9ai, input) {
+  const model = c9ai.currentModel || 'claude'; // respect persisted selection
+  const spinner = ora(chalk.yellow(`Thinking with ${model}...`)).start();
 
-        console.log(chalk.green('✔ AI response:'));
-        console.log(chalk.cyanBright(`(${modelName}): ${response}`));
-        return `(${modelName}): ${response}`;
-    } catch (error) {
-        Logger.error('Local model error:', error.message);
-        console.log(chalk.red('✖ Local model failed, using fallback response'));
-        const fallback = `(local-fallback): I understand you said "${input}". Local model is currently unavailable.`;
-        console.log(chalk.cyanBright(fallback));
-        return fallback;
+  try {
+    let response = '';
+    if (model === 'local') {
+      const baseUrl = c9ai.llamacppBaseUrl || process.env.LLAMACPP_BASE_URL || 'http://127.0.0.1:8080';
+      response = await askLlama(baseUrl, input);
+    } else {
+      // placeholder for cloud providers
+      response = `(${model}) ${input}`;
     }
+
+    spinner.succeed(chalk.green('AI response:'));
+    console.log(chalk.cyanBright(response));
+    return response;
+  } catch (error) {
+    spinner.fail(chalk.red('Failed to get response.'));
+    Logger.error(error.message);
+    return null;
+  }
 }
 
 module.exports = { handleConversation };

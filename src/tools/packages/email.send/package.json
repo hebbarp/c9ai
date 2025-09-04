@@ -1,0 +1,9 @@
+{
+  "name": "email.send",
+  "version": "1.0.0",
+  "description": "Send emails via SMTP or email service APIs",
+  "main": "index.js",
+  "category": "communication",
+  "author": "C9AI",
+  "dependencies": []
+}

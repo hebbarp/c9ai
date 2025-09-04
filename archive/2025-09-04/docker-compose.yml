@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  c9ai:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - c9ai_settings:/root/.c9ai
+      - c9ai_data:/app/data
+      - c9ai_uploads:/app/uploads
+    environment:
+      - NODE_ENV=production
+      # Optional: Set API keys via environment
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - SERPAPI_KEY=${SERPAPI_KEY:-}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY:-}
+      - CREAM_API_KEY=${CREAM_API_KEY:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  c9ai_settings:
+  c9ai_data:
+  c9ai_uploads:

@@ -1,0 +1,9 @@
+{
+  "name": "document.pdf",
+  "version": "1.0.0",
+  "description": "Convert content to PDF documents",
+  "main": "index.js",
+  "category": "documents",
+  "author": "C9AI",
+  "dependencies": []
+}

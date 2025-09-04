@@ -1,5 +1,71 @@
 {
   "tools": {
+    "jit": {
+      "name": "jit",
+      "description": "Execute Just-In-Time applications for calculations, data analysis, file processing, system info, and quiz generation",
+      "module": "./tools/jit-executor.js",
+      "parameters": {
+        "type": {
+          "type": "string", 
+          "description": "JIT app type: calc, analyze, file, system",
+          "enum": ["calc", "calculator", "analyze", "data", "file", "process", "system", "info", "quiz", "test", "exam", "rfq", "rfq-analysis", "proposal"],
+          "required": true
+        },
+        "expression": {
+          "type": "string",
+          "description": "Math expression (for calc type)"
+        },
+        "file": {
+          "type": "string", 
+          "description": "File to analyze (for analyze type)"
+        },
+        "operation": {
+          "type": "string",
+          "description": "File operation: count-lines, uppercase, lowercase, extract-emails, word-frequency"
+        },
+        "input": {
+          "type": "string",
+          "description": "Input file path"
+        },
+        "output": {
+          "type": "string", 
+          "description": "Output file path"
+        },
+        "topic": {
+          "type": "string",
+          "description": "Quiz topic (for quiz type)"
+        },
+        "difficulty": {
+          "type": "string", 
+          "description": "Quiz difficulty: beginner, intermediate, advanced (for quiz type)",
+          "enum": ["beginner", "intermediate", "advanced"]
+        },
+        "questions": {
+          "type": "integer",
+          "description": "Number of questions (for quiz type)"
+        },
+        "rfq_text": {
+          "type": "string",
+          "description": "RFQ document text (for rfq type)"
+        },
+        "text": {
+          "type": "string", 
+          "description": "Document text to analyze (for rfq type)"
+        },
+        "hourly_rate": {
+          "type": "number",
+          "description": "Hourly rate for cost calculations (for rfq type)"
+        },
+        "margin_target": {
+          "type": "number",
+          "description": "Target profit margin percentage (for rfq type)"
+        },
+        "file_path": {
+          "type": "string",
+          "description": "Path to RFQ document file (for rfq type)"
+        }
+      }
+    },
     "list_files": {
       "name": "list_files",
       "description": "List files and directories in the current or specified directory",

@@ -11,8 +11,28 @@ C9 AI is a revolutionary command-line interface that brings **intelligent AI ass
 - ⚡ **Intelligent Task Execution** - From "compile my research paper" to automatic execution
 - 🔄 **Smart Model Switching** - Seamless local ↔ cloud AI based on task complexity
 - 🎯 **Context-Aware Processing** - AI that learns your patterns and preferences
+- 💼 **Executive Business Analysis** - Structured query system for business decision making
 
 ## 🚀 Revolutionary Features
+
+### 💼 Executive Business Analysis (NEW!)
+```bash
+# Structured executive queries for business decision making
+@executive INVESTMENT
+  - amount: 100000
+  - upside: 10%
+  - downside: 8%
+  - years: 5
+
+✨ Generated XML-Lisp function: investment_analysis
+🚀 Ready to execute: @calc investment_risk_analysis(100000, 0.1, 0.08, 5, 0.5)
+
+@executive VENDOR_DISCOUNT
+  - invoice amount: 10000
+  - discount offered: 2%
+  
+✨ Result: Save $200 with 2% early payment discount
+```
 
 ### 🗣️ Natural Language Interface
 ```bash
@@ -53,21 +73,63 @@ c9ai switch gemini   # Auto-switches based on task complexity (coming soon)
 - Node.js 16+ ([Download](https://nodejs.org))
 - Optional: Claude CLI for cloud fallback ([Setup guide](https://docs.anthropic.com/claude/docs/cli))
 
-### Quick Install
+### Quick Install (recommended)
+```bash
+npm install -g c9ai
+```
+
+### From source (optional)
 ```bash
 git clone https://github.com/c9ai/c9ai.git
 cd c9ai
 npm install
-npm run install-global
+npm link  # exposes `c9ai` locally
 ```
 
 ### Verify Installation
 ```bash
-c9ai --version   # Should show 2.0.0
-c9ai models list # Show available local AI models
+c9ai --help           # CLI loads and shows commands
+npm info c9ai version # Should show 2.2.3
+c9ai models list      # Show available local AI models
 ```
 
 ## 🎮 Getting Started
+
+### CLI vs Web UI
+- Primary: Command-line tool. The web UI is optional and visualizes the same agent loop the CLI runs.
+- Everything the UI does can be performed from the CLI.
+
+### CLI Usage Cheatsheet
+```bash
+# Interactive shell
+c9ai
+
+# One-shot tasks
+c9ai agent "create hello.txt and list it"
+echo "run tests" | c9ai agent
+c9ai agent -f prompt.txt
+
+# Providers
+c9ai agent -p llamacpp           # llama.cpp server
+c9ai agent -p ollama             # Ollama
+LOCAL_PROVIDER=ollama c9ai agent "..."  # set default for session
+
+# Tool allowlist and confirmation threshold
+c9ai agent -a "shell.run,fs.read,fs.write" -t 0.7
+
+# Start local stack (llama.cpp + API)
+c9ai stack -m /path/to/model.gguf -p 8080
+
+# Model control and todos
+c9ai switch local|claude|gemini
+c9ai models list
+c9ai todo list
+c9ai todo fetch-github
+c9ai todo execute -i <id> --no-dry-run
+
+# Shortcut binary
+c9ai-agent "…"
+```
 
 ### 1. Interactive Mode (Recommended)
 ```bash
@@ -119,6 +181,30 @@ c9ai models remove phi-3           # Free up disk space
 
 ## 🎯 Use Cases
 
+### 💼 Executive Business Analysis
+```bash
+# Investment Analysis
+@executive INVESTMENT
+  - amount: 250000
+  - upside: 15%
+  - downside: 12%
+  - years: 3
+  - probability: 60%
+
+# SaaS Business Metrics
+@executive SAAS_BREAKEVEN
+  - customer acquisition cost: 800
+  - monthly recurring revenue: 120
+  - churn rate: 3%
+
+# Financial Planning
+@executive FINANCE
+  - principal: 50000
+  - rate: 7.5%
+  - years: 10
+  - compounding: 12
+```
+
 ### Software Development
 ```bash
 c9ai> compile my TypeScript project
@@ -164,6 +250,107 @@ c9ai todos execute  # Select and run multiple todos
 - Learns successful action patterns
 - Adapts to your workflow over time
 
+## 💼 Executive Business Analysis System
+
+C9 AI features a revolutionary **structured query system** designed specifically for executives and business professionals. Unlike unreliable natural language processing, this system provides **deterministic, compiler-like precision** for business calculations.
+
+### ✨ Key Features
+
+- **🎯 Executive-Friendly Syntax** - Uses familiar bullet-point format
+- **⚡ Deterministic Results** - Reliable, predictable calculations every time
+- **🏗️ Domain Templates** - Pre-configured for common business scenarios
+- **🔧 Auto-Function Generation** - Creates reusable XML-Lisp functions
+- **📊 Type-Safe Parsing** - Automatic parameter validation and conversion
+- **🔄 Alias Support** - Multiple parameter names for flexibility
+
+### 📋 Available Business Domains
+
+#### INVESTMENT - Investment Risk Analysis
+```bash
+@executive INVESTMENT
+  - amount: 100000
+  - upside: 10%
+  - downside: 8%
+  - years: 5
+  - probability: 50%    # Optional, defaults to 50%
+
+# Generates: investment_risk_analysis function
+# Calculates: Risk-adjusted expected returns with time horizons
+```
+
+#### VENDOR_DISCOUNT - Procurement Analysis  
+```bash
+@executive VENDOR_DISCOUNT
+  - invoice amount: 50000
+  - discount offered: 2%
+  - payment terms: immediate    # Optional
+
+# Generates: vendor_discount_analysis function
+# Calculates: Actual savings from early payment discounts
+```
+
+#### SAAS_BREAKEVEN - SaaS Business Metrics
+```bash
+@executive SAAS_BREAKEVEN
+  - customer acquisition cost: 500
+  - monthly recurring revenue: 80
+  - churn rate: 5%
+  - fixed costs: 10000    # Optional
+
+# Generates: saas_breakeven_analysis function  
+# Calculates: Months to break even on customer acquisition
+```
+
+#### FINANCE - Financial Planning
+```bash
+@executive FINANCE
+  - principal: 100000
+  - rate: 6.5%
+  - years: 10
+  - compounding: 12    # Optional, defaults to annually
+
+# Generates: compound_interest function
+# Calculates: Future value with compound interest
+```
+
+### 🚀 How It Works
+
+1. **Structured Input** - Write business queries in bullet-point format
+2. **Domain Recognition** - System identifies business domain (INVESTMENT, SAAS, etc.)
+3. **Parameter Parsing** - Extracts and validates all parameters with type conversion
+4. **XML-Lisp Generation** - Creates business function using domain templates
+5. **Function Registration** - Stores function for future reuse
+6. **Execution Ready** - Provides ready-to-run calculation commands
+
+### 💡 Example Workflow
+
+```bash
+# 1. Executive writes structured query
+@executive INVESTMENT
+  - amount: 500000
+  - upside: 12%
+  - downside: 8%
+  - years: 7
+
+# 2. System responds with analysis
+✨ Generated INVESTMENT analysis function with structured parameters
+📊 Function: investment_analysis created and registered
+🚀 Ready to execute: @calc investment_risk_analysis(500000, 0.12, 0.08, 7, 0.5)
+
+# 3. Execute the generated calculation
+@calc investment_risk_analysis(500000, 0.12, 0.08, 7, 0.5)
+# Result: Expected value considering risk and time horizon
+```
+
+### 🎯 Benefits for Executives
+
+- **No Learning Curve** - Uses familiar bullet-point format
+- **Consistent Results** - Same input always produces same output
+- **Business Context** - Built specifically for executive decision making
+- **Reusable Functions** - Generated functions available for future use
+- **Parameter Flexibility** - Supports aliases (amount/investment amount/principal)
+- **Type Safety** - Automatic percentage to decimal conversion
+
 ## 📊 Privacy & Security
 
 ### Local Processing
@@ -205,7 +392,7 @@ c9ai switch claude            # Set default to Claude
 - **Performance metrics** - Local processing speed vs cloud latency
 - **Privacy story** - Zero external API calls in local mode
 
-## 🚀 Version 2.0.0 Features
+## 🚀 Version 2.2.0+ Features
 
 ### ✨ New in This Release
 - **🧠 Local LLM Support** - Phi-3, TinyLLaMA, and LLaMA integration
@@ -214,6 +401,9 @@ c9ai switch claude            # Set default to Claude
 - **⚡ Smart Model Switching** - Automatic local ↔ cloud routing
 - **🎯 Intelligent Todo Processing** - Plain English → executable actions
 - **🔧 System Command Understanding** - Natural language → shell commands
+- **💼 Executive Business Analysis** - Structured query system for business calculations
+- **📊 XML-Lisp Function Generation** - Auto-generates reusable business functions
+- **🏗️ Domain-Aware Templates** - Pre-configured for INVESTMENT, SAAS, FINANCE domains
 
 ### Coming Soon (Phase 2)
 - **🧠 Learning System** - AI that improves with your usage patterns

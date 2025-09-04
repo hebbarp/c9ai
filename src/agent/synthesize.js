@@ -358,6 +358,49 @@ Or if you want to make it executable:
       return output.trim();
     }
 
+    // RSS feed rendering
+    if (toolName === "rss.read") {
+      const strip = (s) => String(s || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      const escHtml = (s) => strip(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const escAttr = (s) => String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+      // If tool already returned formatted string, use it
+      if (typeof toolResult === 'string') return toolResult.trim();
+      const arr = Array.isArray(toolResult?.articles) ? toolResult.articles
+                : (Array.isArray(toolResult) ? toolResult : []);
+      if (!arr.length) return 'No articles found.';
+      const cards = arr.slice(0, 5).map(a => {
+        const title = escHtml(a.title || 'Untitled');
+        const descr = escHtml(a.description || '');
+        const date  = escHtml(a.date || a.published_at || '');
+        const url   = escAttr(a.url || '');
+        const img   = escAttr(a.image || a.thumbnail || '');
+        const imgTag = img ? `<img class="rss-thumb" src="${img}" alt="thumbnail">` : '';
+        const titleLink = url ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>` : title;
+        const descHtml = descr ? `<div class="rss-desc">${descr}</div>` : '';
+        const metaHtml = (url || date) ? `<div class="rss-meta">${url ? `<a href="${url}" target="_blank" rel="noopener noreferrer">Read more</a>` : ''}${date ? (url ? ` · ${date}` : date) : ''}</div>` : '';
+        return `<div class="rss-item">${imgTag}<div class="rss-body"><div class="rss-title">${titleLink}</div>${descHtml}${metaHtml}</div></div>`;
+      }).join('\n');
+      return `## Essential Results\n\n${cards}`;
+    }
+
+    // Cream recent posts rendering
+    if (toolName === "cream.fetch") {
+      const strip = (s) => String(s || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      if (typeof toolResult === 'string') return toolResult.trim();
+      const posts = toolResult?.posts || toolResult?.items || toolResult;
+      const arr = Array.isArray(posts) ? posts : [];
+      if (!arr.length) return 'No recent posts available.';
+      const md = arr.slice(0, 5).map(p => {
+        const user = strip(p.full_name || p.user || p.author || '');
+        const text = strip(p.chat || p.message || p.text || p.content || p.description || '');
+        const date = strip(p.created_at || p.createdAt || p.timestamp || p.time || p.date || '');
+        let line = `- ${user ? user + ' — ' : ''}${text}`;
+        if (date) line += `\n${date}`;
+        return line;
+      }).join('\n\n');
+      return `## Recent Posts\n\n${md}`;
+    }
+
     if (toolName === "jit") {
       // Handle JIT tool results directly without LLM synthesis
       console.log('🎨 JIT Synthesizer called with toolResult:', toolResult);
@@ -368,6 +411,46 @@ Or if you want to make it executable:
       // Handle success/error structure
       if (toolResult.success === false) {
         return `❌ **JIT Error:** ${toolResult.error || 'Unknown error occurred'}`;
+      }
+
+      // Executive deterministic result formatting
+      if (toolResult.type === 'executive_result' && toolResult.domain === 'INVESTMENT') {
+        const inp = toolResult.inputs || {};
+        const res = toolResult.results || {};
+        let output = `💼 **Investment Analysis (Deterministic)**\n\n`;
+        if (inp.amount != null) output += `• **Amount:** ${typeof inp.amount === 'number' ? inp.amount.toLocaleString() : inp.amount}\n`;
+        output += `• **Upside:** ${((inp.upside || 0) * 100).toFixed(2)}%  • **Downside:** ${((inp.downside || 0) * 100).toFixed(2)}%  • **Years:** ${inp.years || 1}\n`;
+        output += `• **Probability (upside):** ${((inp.probability || 0.5) * 100).toFixed(0)}%\n\n`;
+        if (res.upValue != null) output += `• **Upside Path:** ${typeof res.upValue === 'number' ? res.upValue.toLocaleString() : res.upValue}\n`;
+        if (res.downValue != null) output += `• **Downside Path:** ${typeof res.downValue === 'number' ? res.downValue.toLocaleString() : res.downValue}\n`;
+        if (res.expected != null) output += `• **Expected Value:** ${typeof res.expected === 'number' ? res.expected.toLocaleString() : res.expected}\n`;
+        if (res.roiPercent != null) output += `• **ROI:** ${typeof res.roiPercent === 'number' ? res.roiPercent.toFixed(2) : res.roiPercent}%\n\n`;
+        if (toolResult.explanation) {
+          output += `📝 ${toolResult.explanation}`;
+        }
+        return output.trim();
+      }
+
+      // Other executive deterministic domains (generic rendering)
+      if (toolResult.type === 'executive_result' && toolResult.domain && toolResult.domain !== 'INVESTMENT') {
+        const inp = toolResult.inputs || {};
+        const res = toolResult.results || {};
+        let output = `💼 **${toolResult.domain.replace(/_/g,' ')} Analysis (Deterministic)**\n\n`;
+        const list = (obj, title) => {
+          const keys = Object.keys(obj || {});
+          if (!keys.length) return '';
+          let s = `**${title}:**\n`;
+          for (const k of keys) {
+            const v = obj[k];
+            const val = typeof v === 'number' ? (Number.isInteger(v) ? v.toLocaleString() : Number(v).toLocaleString(undefined, { maximumFractionDigits: 4 })) : String(v);
+            s += `• ${k}: ${val}\n`;
+          }
+          return s + '\n';
+        };
+        output += list(inp, 'Inputs');
+        output += list(res, 'Results');
+        if (toolResult.explanation) output += `📝 ${toolResult.explanation}`;
+        return output.trim();
       }
 
       // Calculator results

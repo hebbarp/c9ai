@@ -1,0 +1,115 @@
+{
+  "id": "data-detective",
+  "name": "Data Detective Deep Dive",
+  "description": "Analytical immersion for data exploration and insights",
+  "vibe": {
+    "energy": "focused-analytical",
+    "mood": "curious-systematic",
+    "duration": "2-3hours",
+    "bestTime": [
+      "09:00",
+      "14:00"
+    ],
+    "tags": [
+      "analytical",
+      "data",
+      "deep-work",
+      "insights"
+    ]
+  },
+  "flow": [
+    {
+      "step": "data-discovery",
+      "description": "Locate and assess data sources",
+      "tools": [
+        "file.scan",
+        "api.explore",
+        "database.connect"
+      ],
+      "vibe": "investigate",
+      "estimatedTime": "20-30min"
+    },
+    {
+      "step": "data-cleaning",
+      "description": "Clean and prepare data for analysis",
+      "tools": [
+        "pandas.clean",
+        "openrefine.process",
+        "sql.transform"
+      ],
+      "vibe": "systematic",
+      "estimatedTime": "45-60min"
+    },
+    {
+      "step": "exploratory-analysis",
+      "description": "Discover patterns and relationships",
+      "tools": [
+        "jupyter.notebook",
+        "matplotlib.plot",
+        "seaborn.viz"
+      ],
+      "vibe": "explore",
+      "estimatedTime": "60-90min"
+    },
+    {
+      "step": "insight-synthesis",
+      "description": "Transform findings into actionable insights",
+      "tools": [
+        "ai.summarize",
+        "report.generate",
+        "presentation.create"
+      ],
+      "vibe": "synthesize",
+      "estimatedTime": "30-45min"
+    }
+  ],
+  "adaptations": {
+    "quick-scan": {
+      "description": "Rapid data overview for initial assessment",
+      "modifications": [
+        "automated profiling",
+        "summary statistics only",
+        "key findings highlight"
+      ]
+    },
+    "collaborative": {
+      "description": "Team-focused analysis with sharing",
+      "modifications": [
+        "shared notebooks",
+        "collaborative annotations",
+        "team presentation"
+      ]
+    },
+    "production-ready": {
+      "description": "Analysis ready for production deployment",
+      "modifications": [
+        "automated pipeline",
+        "testing suite",
+        "monitoring setup"
+      ]
+    }
+  },
+  "triggers": {
+    "time": [
+      "morning",
+      "afternoon"
+    ],
+    "energy": [
+      "high",
+      "focused"
+    ],
+    "context": [
+      "quiet-space",
+      "dual-monitor"
+    ]
+  },
+  "credits": {
+    "estimated": 25,
+    "breakdown": {
+      "pandas.clean": 0,
+      "jupyter.notebook": 0,
+      "ai.summarize": 15,
+      "report.generate": 10
+    }
+  }
+}

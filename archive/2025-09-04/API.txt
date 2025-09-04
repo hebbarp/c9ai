@@ -1,0 +1,39 @@
+Internal Apis
+
+1. Rss feeds api 
+url - https://knoblycream.com/api/articles.php?rss_id=8 
+method - GET
+
+2. Fetch recent cream posts 
+url - https://knoblycream.com/api/stream.php
+method - GET
+
+3. Mailer api
+url - https://knoblycream.com/api/mail.php
+method - POST
+Need to add Authorization in headers Authorization - Bearer {API-Key}
+{
+    "action": "send",
+    "from_email": "",
+    "from_name": "",
+    "to_email": "",
+    "to_name": "",
+    "subject": "",
+    "body": ""
+}
+
+4. Post to cream api
+url - https://knoblycream.com/api/posts.php
+method - POST
+Need to add Authorization in headers Authorization - Bearer {API-Key} or add in url ?accesskey={API-Key}
+form data 
+content - ""
+visibility - "private/public"
+media[] - files uploaded 
+
+
+
+External Apis
+
+$youtubeApiKey = 'AIzaSyBEnBr6YRKeAm9OuOZkidA7OJnrZjg4rAM'; // Your YouTube Data API Key
+        $searchUrl = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" . urlencode($query) . "&type=video&key=" . $youtubeApiKey . "&maxResults=1";

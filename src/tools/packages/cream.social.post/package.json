@@ -1,0 +1,11 @@
+{
+  "name": "cream.social.post",
+  "version": "1.0.0",
+  "description": "Post content to social media platforms via Cream API",
+  "main": "index.js",
+  "category": "social",
+  "author": "Cream Team",
+  "dependencies": [
+    "cream.auth"
+  ]
+}

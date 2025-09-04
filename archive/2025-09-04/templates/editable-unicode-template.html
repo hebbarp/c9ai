@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}} - Editable</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: "Noto Sans Kannada", Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            line-height: 1.6;
+        }
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            font-size: 18px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            text-rendering: optimizeLegibility;
+            min-height: 200px;
+            border: 2px dashed transparent;
+            transition: border-color 0.3s ease;
+        }
+        .content:hover {
+            border-color: #667eea;
+        }
+        .content:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+        .kannada {
+            font-feature-settings: "liga" 1, "clig" 1;
+        }
+        .toolbar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .status {
+            margin-left: auto;
+            padding: 8px 15px;
+            background: #e8f5e8;
+            border-radius: 5px;
+            color: #2d5a2d;
+            font-size: 14px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        .edit-hint {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{TITLE}}</h1>
+    
+    <div class="edit-hint">
+        <strong>✏️ This content is editable!</strong> Click anywhere in the text below to edit. 
+        Changes will be automatically saved back to Squeak.
+    </div>
+    
+    <div class="toolbar">
+        <button class="btn" onclick="saveToSqueak()">💾 Save to Squeak</button>
+        <button class="btn" onclick="reloadFromSqueak()">🔄 Reload</button>
+        <button class="btn" onclick="copyToClipboard()">📋 Copy</button>
+        <div class="status" id="status">Ready to edit</div>
+    </div>
+    
+    <div class="content kannada" contenteditable="true" id="editableContent">{{CONTENT}}</div>
+    
+    <div class="footer">
+        <small>Generated from C9AI Squeak • Perfect Unicode Rendering • Live Editing</small>
+    </div>
+
+    <script>
+        const content = document.getElementById('editableContent');
+        const status = document.getElementById('status');
+        let saveTimeout;
+
+        // Auto-save when content changes
+        content.addEventListener('input', function() {
+            clearTimeout(saveTimeout);
+            status.textContent = 'Editing...';
+            status.style.background = '#fff3cd';
+            
+            // Debounced save after 2 seconds of no typing
+            saveTimeout = setTimeout(() => {
+                saveToSqueak(true); // auto-save mode
+            }, 2000);
+        });
+
+        // Manual save function
+        function saveToSqueak(isAutoSave = false) {
+            const text = content.innerText;
+            
+            // Try to POST to Squeak HTTP server
+            fetch('http://localhost:7777/update-content', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: text,
+                    timestamp: new Date().toISOString(),
+                    auto: isAutoSave
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    status.textContent = isAutoSave ? 'Auto-saved' : 'Saved to Squeak!';
+                    status.style.background = '#e8f5e8';
+                } else {
+                    throw new Error('Save failed');
+                }
+            })
+            .catch(error => {
+                status.textContent = 'Save failed - Squeak server not running?';
+                status.style.background = '#f8d7da';
+                console.log('Save error:', error);
+            });
+        }
+
+        // Reload content from Squeak
+        function reloadFromSqueak() {
+            fetch('http://localhost:7777/get-content')
+                .then(response => response.json())
+                .then(data => {
+                    content.innerText = data.content;
+                    status.textContent = 'Reloaded from Squeak';
+                    status.style.background = '#e8f5e8';
+                })
+                .catch(error => {
+                    status.textContent = 'Reload failed';
+                    status.style.background = '#f8d7da';
+                });
+        }
+
+        // Copy to clipboard
+        function copyToClipboard() {
+            navigator.clipboard.writeText(content.innerText).then(() => {
+                status.textContent = 'Copied to clipboard!';
+                status.style.background = '#e8f5e8';
+            });
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        saveToSqueak();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        reloadFromSqueak();
+                        break;
+                }
+            }
+        });
+
+        // Initial status
+        console.log('Interactive Unicode editor loaded');
+        console.log('Squeak server should be running on http://localhost:7777');
+    </script>
+</body>
+</html>

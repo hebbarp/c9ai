@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Executive Calculator - Transparent AI Computation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2196f3 0%, #21cbf3 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+        
+        .input-section {
+            padding: 40px;
+            border-right: 1px solid #eee;
+        }
+        
+        .process-section {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        
+        .query-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .query-input:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1976d2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .examples {
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .examples h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+        
+        .example-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .example-item:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+        
+        .process-display {
+            height: 500px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: #e0e0e0;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .log-start { background: rgba(33, 150, 243, 0.2); color: #64b5f6; }
+        .log-phase { background: rgba(156, 39, 176, 0.2); color: #ba68c8; font-weight: bold; }
+        .log-status { color: #81c784; }
+        .log-ai { background: rgba(255, 193, 7, 0.2); color: #ffd54f; }
+        .log-debug { color: #90a4ae; font-size: 12px; }
+        .log-success { background: rgba(76, 175, 80, 0.2); color: #a5d6a7; font-weight: bold; }
+        .log-warning { background: rgba(255, 152, 0, 0.2); color: #ffb74d; }
+        .log-error { background: rgba(244, 67, 54, 0.2); color: #e57373; font-weight: bold; }
+        
+        .result-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            border: 2px solid #4caf50;
+        }
+        
+        .result-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2e7d32;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .result-meta {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .abort-notice {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .progress-indicator {
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2196f3, #21cbf3);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .phase-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .phase-step {
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .phase-step.active {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .phase-step.completed {
+            background: #4caf50;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧮 Enhanced Executive Calculator</h1>
+            <p>Transparent AI-Powered Mathematical Computation</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <textarea 
+                    class="query-input" 
+                    id="queryInput"
+                    placeholder="Ask any mathematical question in plain English..."
+                    rows="3"
+                ></textarea>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" id="calculateBtn">
+                        🚀 Calculate
+                    </button>
+                    <button class="btn btn-danger" id="stopBtn" disabled>
+                        ⏹️ Stop (ESC)
+                    </button>
+                </div>
+                
+                <div class="examples">
+                    <h3>💡 Try These Examples:</h3>
+                    <div class="example-item" data-query="calculate prime numbers up to 100">
+                        🔢 Generate prime numbers up to 100
+                    </div>
+                    <div class="example-item" data-query="find the 15th fibonacci number">
+                        🌀 Find the 15th Fibonacci number
+                    </div>
+                    <div class="example-item" data-query="what's 10 factorial">
+                        📊 Calculate 10 factorial
+                    </div>
+                    <div class="example-item" data-query="compound interest: 50000 rupees from 1995 at 5.6% annually">
+                        💰 Compound interest calculation
+                    </div>
+                    <div class="example-item" data-query="ROI if invested 200000 and got back 350000">
+                        📈 ROI calculation
+                    </div>
+                    <div class="example-item" data-query="break even: fixed costs 50000, variable cost 25, price 75">
+                        ⚖️ Break-even analysis
+                    </div>
+                </div>
+            </div>
+            
+            <div class="process-section">
+                <div class="progress-indicator">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="phase-indicator">
+                        <div class="phase-step" id="phase1">Analysis</div>
+                        <div class="phase-step" id="phase2">Validation</div>
+                        <div class="phase-step" id="phase3">Generation</div>
+                        <div class="phase-step" id="phase4">Execution</div>
+                    </div>
+                </div>
+                
+                <div class="process-display" id="processDisplay">
+                    <div class="log-entry log-status">
+                        🎯 Enhanced Calculator Ready
+                    </div>
+                    <div class="log-entry log-debug">
+                        • Shows transparent computation process
+                    </div>
+                    <div class="log-entry log-debug">
+                        • Generates code for missing functions
+                    </div>
+                    <div class="log-entry log-debug">
+                        • Press ESC or click Stop to abort any time
+                    </div>
+                </div>
+                
+                <div class="result-section" id="resultSection" style="display: none;">
+                    <div class="result-value" id="resultValue"></div>
+                    <div class="result-meta" id="resultMeta"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class EnhancedCalculatorUI {
+            constructor() {
+                this.processor = null;
+                this.isProcessing = false;
+                this.currentPhase = 0;
+                this.phases = ['Analysis', 'Validation', 'Generation', 'Execution'];
+                
+                this.initElements();
+                this.initEventListeners();
+                this.initKeyboardShortcuts();
+            }
+            
+            initElements() {
+                this.queryInput = document.getElementById('queryInput');
+                this.calculateBtn = document.getElementById('calculateBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.processDisplay = document.getElementById('processDisplay');
+                this.resultSection = document.getElementById('resultSection');
+                this.resultValue = document.getElementById('resultValue');
+                this.resultMeta = document.getElementById('resultMeta');
+                this.progressFill = document.getElementById('progressFill');
+            }
+            
+            initEventListeners() {
+                this.calculateBtn.addEventListener('click', () => this.startCalculation());
+                this.stopBtn.addEventListener('click', () => this.stopCalculation());
+                
+                // Example clicks
+                document.querySelectorAll('.example-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        this.queryInput.value = item.dataset.query;
+                        this.queryInput.focus();
+                    });
+                });
+            }
+            
+            initKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.isProcessing) {
+                        e.preventDefault();
+                        this.stopCalculation();
+                    }
+                    
+                    if ((e.key === 'Enter' && (e.ctrlKey || e.metaKey)) && !this.isProcessing) {
+                        e.preventDefault();
+                        this.startCalculation();
+                    }
+                });
+            }
+            
+            async startCalculation() {
+                const query = this.queryInput.value.trim();
+                if (!query) return;
+                
+                this.isProcessing = true;
+                this.calculateBtn.disabled = true;
+                this.stopBtn.disabled = false;
+                this.resultSection.style.display = 'none';
+                this.currentPhase = 0;
+                
+                this.clearDisplay();
+                this.updateProgress(0);
+                this.resetPhases();
+                
+                this.addLog('start', `🔍 Processing: "${query}"`);
+                
+                try {
+                    // Simulate the enhanced math processor
+                    await this.simulateEnhancedProcessing(query);
+                    
+                } catch (error) {
+                    if (error.message !== 'Aborted') {
+                        this.addLog('error', `❌ Error: ${error.message}`);
+                    }
+                } finally {
+                    this.isProcessing = false;
+                    this.calculateBtn.disabled = false;
+                    this.stopBtn.disabled = true;
+                }
+            }
+            
+            stopCalculation() {
+                if (this.processor) {
+                    this.processor.abort();
+                }
+                
+                this.addLog('error', '❌ Operation aborted by user');
+                this.showAbortNotice();
+                this.isProcessing = false;
+                this.calculateBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                this.updateProgress(0);
+                this.resetPhases();
+            }
+            
+            async simulateEnhancedProcessing(query) {
+                // Phase 1: Analysis
+                this.setActivePhase(0);
+                this.addLog('phase', 'Phase 1: Natural Language Analysis');
+                await this.delay(500);
+                
+                this.addLog('status', '🧠 Converting natural language to mathematical expression...');
+                this.addLog('ai', '🤖 Using openai for conversion...');
+                await this.delay(1000);
+                
+                // Detect if it's a complex function
+                const needsDynamicCode = /prime|fibonacci|factorial/i.test(query);
+                
+                if (needsDynamicCode) {
+                    this.addLog('debug', '🧠 Raw AI response: "@calc prime(100)"');
+                    this.addLog('debug', '📐 Cleaned result: "@calc prime(100)"');
+                    this.addLog('success', '✅ Converted to: @calc prime(100)');
+                } else {
+                    this.addLog('success', '✅ Converted to: @calc compound(50000, 0.056, 30)');
+                }
+                
+                this.completePhase(0);
+                this.updateProgress(25);
+                
+                // Phase 2: Validation
+                this.setActivePhase(1);
+                this.addLog('phase', 'Phase 2: Function Validation');
+                await this.delay(300);
+                
+                if (needsDynamicCode) {
+                    this.addLog('warning', '⚠️ Missing functions: [prime]');
+                    
+                    // Ask for permission
+                    await this.delay(500);
+                    const permission = await this.askUserPermission("Function 'prime' not found. Generate and execute custom code?");
+                    
+                    if (!permission) {
+                        this.addLog('status', '❌ User declined code generation');
+                        return;
+                    }
+                    
+                    this.completePhase(1);
+                    this.updateProgress(50);
+                    
+                    // Phase 3: Generation
+                    this.setActivePhase(2);
+                    this.addLog('phase', 'Phase 3: Dynamic Function Generation');
+                    this.addLog('status', '🛠️ Function \\'prime\\' not found. Generating custom implementation...');
+                    this.addLog('ai', '🤖 Using openai to generate prime function...');
+                    await this.delay(2000);
+                    
+                    this.addLog('debug', `💻 Generated code:
+function prime(n) {
+    const sieve = new Array(n + 1).fill(true);
+    sieve[0] = sieve[1] = false;
+    
+    for (let i = 2; i * i <= n; i++) {
+        if (sieve[i]) {
+            for (let j = i * i; j <= n; j += i) {
+                sieve[j] = false;
+            }
+        }
+    }
+    
+    return Array.from({length: n + 1}, (_, i) => i).filter(i => sieve[i]);
+}`);
+                    
+                    this.completePhase(2);
+                    this.updateProgress(75);
+                    
+                    // Phase 4: Execution
+                    this.setActivePhase(3);
+                    this.addLog('phase', 'Phase 4: Dynamic Execution');
+                    this.addLog('status', '🔨 Creating dynamic calculation program...');
+                    await this.delay(500);
+                    
+                    this.addLog('status', '💾 Writing dynamic program to disk...');
+                    await this.delay(300);
+                    
+                    this.addLog('status', '🚀 Executing dynamic calculation...');
+                    await this.delay(1500);
+                    
+                    const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+                    
+                    this.addLog('success', '✅ Calculation completed successfully');
+                    this.addLog('success', '🎉 Dynamic calculation completed!');
+                    
+                    this.showResult(`${primes.length} prime numbers`, {
+                        method: 'dynamic',
+                        functions: ['prime'],
+                        result: primes,
+                        query: query
+                    });
+                    
+                } else {
+                    this.addLog('success', '✅ All functions available: [compound]');
+                    this.completePhase(1);
+                    this.updateProgress(50);
+                    
+                    // Phase 3: Standard Calculation
+                    this.setActivePhase(3);
+                    this.addLog('phase', 'Phase 3: Standard Calculation');
+                    this.addLog('status', '🔢 Executing with built-in functions...');
+                    await this.delay(1000);
+                    
+                    const result = 256382.01;
+                    this.addLog('success', `✅ Result: ${result.toLocaleString()}`);
+                    
+                    this.showResult(`₹${result.toLocaleString('en-IN')}`, {
+                        method: 'standard',
+                        functions: ['compound'],
+                        result: result,
+                        query: query
+                    });
+                }
+                
+                this.completePhase(3);
+                this.updateProgress(100);
+            }
+            
+            async askUserPermission(message) {
+                this.addLog('warning', `🤔 User prompt: ${message}`);
+                await this.delay(100);
+                
+                // Simulate user clicking "Yes" after a short delay
+                await this.delay(1000);
+                this.addLog('success', '✅ User approved dynamic code generation');
+                return true;
+            }
+            
+            setActivePhase(index) {
+                document.querySelectorAll('.phase-step').forEach((step, i) => {
+                    step.classList.remove('active');
+                    if (i === index) {
+                        step.classList.add('active');
+                    }
+                });
+            }
+            
+            completePhase(index) {
+                const step = document.querySelector(`#phase${index + 1}`);
+                if (step) {
+                    step.classList.remove('active');
+                    step.classList.add('completed');
+                }
+            }
+            
+            resetPhases() {
+                document.querySelectorAll('.phase-step').forEach(step => {
+                    step.classList.remove('active', 'completed');
+                });
+            }
+            
+            updateProgress(percent) {
+                this.progressFill.style.width = `${percent}%`;
+            }
+            
+            addLog(type, message) {
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-${type}`;
+                entry.textContent = message;
+                
+                this.processDisplay.appendChild(entry);
+                this.processDisplay.scrollTop = this.processDisplay.scrollHeight;
+            }
+            
+            clearDisplay() {
+                this.processDisplay.innerHTML = '';
+            }
+            
+            showResult(value, meta) {
+                this.resultValue.textContent = value;
+                this.resultMeta.textContent = `Method: ${meta.method} | Functions: ${meta.functions.join(', ')}`;
+                this.resultSection.style.display = 'block';
+            }
+            
+            showAbortNotice() {
+                const notice = document.createElement('div');
+                notice.className = 'abort-notice';
+                notice.textContent = '⏹️ Calculation Aborted';
+                document.body.appendChild(notice);
+                
+                setTimeout(() => {
+                    document.body.removeChild(notice);
+                }, 3000);
+            }
+            
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+        
+        // Initialize the UI
+        document.addEventListener('DOMContentLoaded', () => {
+            new EnhancedCalculatorUI();
+        });
+    </script>
+</body>
+</html>

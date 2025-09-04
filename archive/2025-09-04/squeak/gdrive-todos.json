@@ -1,0 +1,231 @@
+{
+  "success": true,
+  "source": "simulation",
+  "files_processed": 2,
+  "files": [
+    {
+      "filename": "Project_Todos.md",
+      "size": 450,
+      "todos_found": 12
+    },
+    {
+      "filename": "Weekly_Goals.txt",
+      "size": 380,
+      "todos_found": 3
+    }
+  ],
+  "total_todos": 15,
+  "executable_count": 11,
+  "todos": [
+    {
+      "id": "gdrive-Project_Todos.md-1",
+      "source": "google_drive",
+      "filename": "Project_Todos.md",
+      "title": "Update README documentation",
+      "type": "checkbox",
+      "executable": [],
+      "created_at": "2025-08-28T12:19:27.778Z"
+    },
+    {
+      "id": "gdrive-Project_Todos.md-2",
+      "source": "google_drive",
+      "filename": "Project_Todos.md",
+      "title": "Fix authentication bug in login system",
+      "type": "checkbox",
+      "executable": [],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Project_Todos.md-3",
+      "source": "google_drive",
+      "filename": "Project_Todos.md",
+      "title": "@calc 125 * 0.15 (calculate tax)",
+      "type": "checkbox",
+      "executable": [
+        {
+          "type": "sigil",
+          "sigil": "calc",
+          "args": "125 * 0.15 (calculate tax)",
+          "source": "task_text"
+        }
+      ],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Project_Todos.md-4",
+      "source": "google_drive",
+      "filename": "Project_Todos.md",
+      "title": "Deploy to production server",
+      "type": "checkbox",
+      "executable": [],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Project_Todos.md-5",
+      "source": "google_drive",
+      "filename": "Project_Todos.md",
+      "title": "@analyze sales_data.csv",
+      "type": "checkbox",
+      "executable": [
+        {
+          "type": "sigil",
+          "sigil": "analyze",
+          "args": "sales_data.csv",
+          "source": "task_text"
+        }
+      ],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Project_Todos.md-6",
+      "source": "google_drive",
+      "filename": "Project_Todos.md",
+      "title": "@system (check system status)",
+      "type": "checkbox",
+      "executable": [
+        {
+          "type": "sigil",
+          "sigil": "system",
+          "args": "(check system status)",
+          "source": "task_text"
+        }
+      ],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Project_Todos.md-7",
+      "source": "google_drive",
+      "filename": "Project_Todos.md",
+      "title": "Generate monthly report",
+      "type": "checkbox",
+      "executable": [],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Project_Todos.md-code-1",
+      "source": "google_drive",
+      "filename": "Project_Todos.md",
+      "title": "Code block: npm run build...",
+      "type": "code_block",
+      "executable": [
+        {
+          "type": "shell",
+          "command": "npm run build\nnpm run test\ngit commit -am \"Update project\"",
+          "source": "code_block"
+        }
+      ],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Project_Todos.md-code-2",
+      "source": "google_drive",
+      "filename": "Project_Todos.md",
+      "title": "Code block: ls -la /var/log/...",
+      "type": "code_block",
+      "executable": [
+        {
+          "type": "shell",
+          "command": "ls -la /var/log/\ndf -h\nps aux | grep node",
+          "source": "code_block"
+        }
+      ],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Project_Todos.md-sigil-1",
+      "source": "google_drive",
+      "filename": "Project_Todos.md",
+      "title": "Sigil command: @calc 125 * 0.15 (calculate tax)",
+      "type": "sigil",
+      "executable": [
+        {
+          "type": "sigil",
+          "sigil": "calc",
+          "args": "125 * 0.15 (calculate tax)",
+          "source": "sigil_command"
+        }
+      ],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Project_Todos.md-sigil-2",
+      "source": "google_drive",
+      "filename": "Project_Todos.md",
+      "title": "Sigil command: @analyze sales_data.csv",
+      "type": "sigil",
+      "executable": [
+        {
+          "type": "sigil",
+          "sigil": "analyze",
+          "args": "sales_data.csv",
+          "source": "sigil_command"
+        }
+      ],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Project_Todos.md-sigil-3",
+      "source": "google_drive",
+      "filename": "Project_Todos.md",
+      "title": "Sigil command: @system (check system status)",
+      "type": "sigil",
+      "executable": [
+        {
+          "type": "sigil",
+          "sigil": "system",
+          "args": "(check system status)",
+          "source": "sigil_command"
+        }
+      ],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Weekly_Goals.txt-sigil-1",
+      "source": "google_drive",
+      "filename": "Weekly_Goals.txt",
+      "title": "Sigil command: @count important_files.txt",
+      "type": "sigil",
+      "executable": [
+        {
+          "type": "sigil",
+          "sigil": "count",
+          "args": "important_files.txt",
+          "source": "sigil_command"
+        }
+      ],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Weekly_Goals.txt-sigil-2",
+      "source": "google_drive",
+      "filename": "Weekly_Goals.txt",
+      "title": "Sigil command: @search \"rclone google drive setup\"",
+      "type": "sigil",
+      "executable": [
+        {
+          "type": "sigil",
+          "sigil": "search",
+          "args": "\"rclone google drive setup\"",
+          "source": "sigil_command"
+        }
+      ],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    },
+    {
+      "id": "gdrive-Weekly_Goals.txt-sigil-3",
+      "source": "google_drive",
+      "filename": "Weekly_Goals.txt",
+      "title": "Sigil command: @email team@company.com \"Weekly Update\" \"Progress report\"",
+      "type": "sigil",
+      "executable": [
+        {
+          "type": "sigil",
+          "sigil": "email",
+          "args": "team@company.com \"Weekly Update\" \"Progress report\"",
+          "source": "sigil_command"
+        }
+      ],
+      "created_at": "2025-08-28T12:19:27.779Z"
+    }
+  ]
+}

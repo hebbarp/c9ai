@@ -123,6 +123,22 @@ async function chat(
 
   if (!res.ok) {
     const body = await res.text().catch(() => '');
+    if (res.status === 404) {
+      // Most common cause: configured model isn't installed locally.
+      // Surface the actual installed list + the exact :switch command,
+      // instead of a raw HTTP 404.
+      const installed = await listInstalledOllamaModels();
+      let msg = `\n[ollama: model '${resolved.model}' not found at ${settings.url}]\n`;
+      if (installed.length === 0) {
+        msg += `No models installed. Run \`ollama pull <name>\` (e.g. llama3.2), then \`switch ollama <name>\`.\n`;
+      } else if (installed.length === 1) {
+        msg += `You have one model installed: ${installed[0]}.\nRun \`switch ollama ${installed[0]}\` to use it.\n`;
+      } else {
+        msg += `Installed: ${installed.join(', ')}.\nRun \`switch ollama <name>\` to pick one.\n`;
+      }
+      onChunk(msg);
+      return { exitCode: 404 };
+    }
     onChunk(`\n[ollama HTTP ${res.status}: ${body || res.statusText}]\n`);
     return { exitCode: res.status };
   }

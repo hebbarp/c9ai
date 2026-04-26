@@ -20,12 +20,15 @@ Alpha. Phase 0 = restore v1 shape.
 | Ink TUI shell | ✅ |
 | Built-in commands (help, switch, todos, resume, clear, exit, tools, config) | ✅ |
 | Cross-session conversation memory (`~/.c9ai/sessions/*.jsonl` + `resume`/`clear`) | ✅ |
-| Personal AI: `profile.md`, `scope.json`, `fs.glob`/`fs.grep` (autoresearch) | ✅ |
+| Prompt history (↑/↓ arrows, persisted in `~/.c9ai/history.json`) | ✅ |
+| Personal AI: `profile.md`, `scope.json`, scope-aware agent prompt | ✅ |
+| Scope-content awareness (agent prompt lists files in `scope.roots` with snippets) | ✅ |
+| Autoresearch (`research <topic-or-file>` → memo in `outputs/` + ledger) | ✅ |
 | Claude provider (Anthropic SDK, streaming + cache) | ✅ |
 | Gemini provider (CLI subprocess) | ✅ |
-| Ollama provider (HTTP, streaming) | ✅ |
+| Ollama provider (HTTP, streaming, friendly 404 with installed-models list) | ✅ |
 | `!shell` runner | ✅ |
-| GitHub Issues backlog via `gh` CLI | ✅ |
+| GitHub Issues backlog via `gh` CLI (`todos list/add`) | ✅ |
 | Tools: `fs.*`, `date.now`, `env.{cwd,platform}`, `shell.run` (with destructive-pattern blocklist) + `~/.c9ai/tools-registry.json` | ✅ |
 | Sigil dispatch (`@<tool>`) | ✅ |
 | Aliases (`~/.c9ai/aliases.json`) | ✅ |
@@ -33,7 +36,7 @@ Alpha. Phase 0 = restore v1 shape.
 | Autonomous loop wired to TUI (`agent <goal>`) | ✅ |
 | Skills system (manifests, install/share) | deferred |
 | Artifacts ledger | deferred |
-| Matsya registry | deferred |
+| Matsya queue worker | on `matsya-integration` branch (Phase 1+2a complete, 2b deferred) |
 
 ## Develop
 
@@ -71,9 +74,10 @@ src/
 │   └── types.ts
 ├── agent/
 │   ├── guards.ts          (max-iter, wall-clock, stall detection)
-│   ├── prompt.ts          (system-prompt builder; ~/.c9ai/agent-prompt.md override)
+│   ├── prompt.ts          (system-prompt builder + scope-content listing)
 │   ├── extract.ts         (parse @tool sigil calls from model output)
 │   └── loop.ts            (autonomous chat+tool loop, emits AgentEvent stream)
+├── research.ts            ← autoresearch: program → bounded run → memo + ledger
 ├── aliases.ts             ← ~/.c9ai/aliases.json → tool dispatch
 ├── shell.ts               ← ! handler, cd
 └── autonomous.ts          ← agent loop scaffold (uses guards)
@@ -100,13 +104,25 @@ GEMINI_BIN               Gemini CLI binary (default 'gemini' on PATH)
 C9AI_MAX_ITER            Agent max iterations (default 25)
 C9AI_MAX_WALL_SEC        Agent wall-clock cap in seconds (default 600)
 C9AI_STALL_REPEATS       Same-action repeats before agent stops (default 3)
+C9AI_SCOPE_LIST_MAX_FILES  Files listed from scope.roots in system prompt (default 100)
+C9AI_SCOPE_LIST_MAX_DEPTH  Max depth when walking scope roots (default 3)
 ```
 
 For Ollama specifically: c9ai never assumes a particular model is installed. With no `OLLAMA_MODEL` env or `ollamaModel` in config, it lists `/api/tags` and either uses the only installed model or asks you to pick (`switch ollama list`, then `switch ollama <name>`).
+
+### Autoresearch
+
+```
+research <topic-or-file>
+```
+
+If the argument is an existing markdown file, it's read as the program (brief / bounds / evaluator). Otherwise a brief is synthesized from the topic string. The agent runs one bounded iteration, writes the memo to `outputs/autoresearch-<slug>-<runId>.md`, and appends a record to `~/.c9ai/brain/autoresearch/runs.jsonl` with verdict (keep / discard / needs-review / crash).
+
+Drop new content into a folder listed in `~/.c9ai/scope.json` and the next `agent` or `research` run sees it automatically — the system prompt lists scoped files with size + first heading, capped via `C9AI_SCOPE_LIST_MAX_*`.
 
 ### Extension points (wired now, implemented later)
 
 - **Skills** — load from `~/.c9ai/skills/*/skill.json`, register sigils into the router (will subsume `tools-registry.json`)
 - **Artifacts** — every interaction logged in `~/.c9ai/logs/` becomes an artifact entry
 - **Registry** — `c9ai skills install <id>` pulls from the Matsya skill registry
-- **Autonomous loop** — `Guards` already in `src/agent/guards.ts`; needs joint chat+tool execution to actually iterate
+- **Matsya queue worker** — on `matsya-integration` branch (HTTP client + manual queue commands + polling lifecycle); merges back when Matsya UI surfaces local-targeted items

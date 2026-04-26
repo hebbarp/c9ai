@@ -11,7 +11,7 @@ import { isProviderName } from './core/config.js';
 import { printBanner } from './tui/printBanner.js';
 import { configureOllama } from './providers/ollama.js';
 
-const VERSION = '4.0.0-alpha.0';
+const VERSION = '4.0.0-alpha.1';
 
 const cli = meow(
   `

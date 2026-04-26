@@ -39,6 +39,10 @@ export function routeInput(raw: string, opts: RouterOptions): RoutedAction {
     return { kind: 'agent', goal: rest.join(' ').trim() };
   }
 
+  if (headLower === 'research') {
+    return { kind: 'research', input: rest.join(' ').trim() };
+  }
+
   if (headLower in PROVIDER_KEYWORDS) {
     const provider = PROVIDER_KEYWORDS[headLower]!;
     return { kind: 'chat', provider, prompt: rest.join(' ') };

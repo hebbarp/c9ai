@@ -22,6 +22,7 @@ Input shapes:
   claude|gemini|ollama <prompt>   one-shot chat to a specific provider
   @claude | @gemini | @ollama     same as above (sigil form)
   agent <goal>                    autonomous loop: model uses tools until done
+  research <topic-or-file>        bounded autoresearch iteration → memo in outputs/
   @<tool> <args>                  run a registered tool (see "tools")
   !<shell command>                run a shell command (cd is handled)
   <anything else>                 chat with the default model
@@ -45,6 +46,7 @@ Env knobs:
   GEMINI_BIN (default 'gemini')
   C9AI_MAX_ITER (default 25), C9AI_MAX_WALL_SEC (default 600), C9AI_STALL_REPEATS (default 3)
   C9AI_SHELL_TIMEOUT_SEC (default 120), C9AI_ALLOW_DESTRUCTIVE (set to 1 to bypass shell.run safety)
+  C9AI_SCOPE_LIST_MAX_FILES (default 100), C9AI_SCOPE_LIST_MAX_DEPTH (default 3)
 `;
 
 export const helpCommand: Command = {

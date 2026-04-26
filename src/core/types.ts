@@ -43,7 +43,8 @@ export type RoutedAction =
   | { kind: 'sigil'; sigil: string; args: string }
   | { kind: 'command'; name: string; args: string[] }
   | { kind: 'chat'; provider: ProviderName; prompt: string }
-  | { kind: 'agent'; goal: string };
+  | { kind: 'agent'; goal: string }
+  | { kind: 'research'; input: string };
 
 export interface CommandContext {
   config: AppConfig;

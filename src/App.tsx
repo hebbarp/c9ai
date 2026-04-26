@@ -16,6 +16,7 @@ import { buildToolRegistry } from './tools/registry.js';
 import { loadAliases } from './aliases.js';
 import { configureOllama } from './providers/ollama.js';
 import { runAgent } from './agent/loop.js';
+import { runResearch } from './research.js';
 import { loadHistory, saveHistory, pushHistory } from './history.js';
 import {
   appendTurn,
@@ -523,6 +524,117 @@ export function App({ initialConfig }: AppProps) {
             scope: scopeRef.current,
             profile: profileRef.current,
           });
+          abortControllerRef.current = null;
+          setBusy(false);
+          return;
+        }
+        case 'research': {
+          if (!action.input) {
+            pushMessage({
+              kind: 'system',
+              text: 'usage: research <topic-or-file>  — bounded autoresearch iteration; writes a memo to outputs/',
+            });
+            return;
+          }
+          const provider = getProvider(config.defaultModel);
+          const ok = await provider.available();
+          if (!ok) {
+            pushMessage({
+              kind: 'error',
+              text: `${provider.name} not available (${provider.bin})`,
+            });
+            return;
+          }
+          if (tools.size === 0) {
+            pushMessage({
+              kind: 'error',
+              text: 'no tools registered — research has nothing to call',
+            });
+            return;
+          }
+          setBusy(true);
+          setBusyLabel(`research: ${provider.name} (Esc to cancel)`);
+          profileRef.current = await loadProfile();
+          scopeRef.current = await loadScope();
+          let inThought = false;
+          let inToolOutput = false;
+          const ctrl = new AbortController();
+          abortControllerRef.current = ctrl;
+          try {
+            const result = await runResearch({
+              input: action.input,
+              cwd: process.cwd(),
+              provider,
+              tools,
+              scope: scopeRef.current,
+              profile: profileRef.current,
+              signal: ctrl.signal,
+              confirm: requestConfirm,
+              onEvent: evt => {
+                switch (evt.type) {
+                  case 'start':
+                    pushMessage({
+                      kind: 'system',
+                      text: `research start (${evt.provider}) — input: ${action.input}`,
+                    });
+                    break;
+                  case 'thought':
+                    if (!inThought) {
+                      if (inToolOutput) endStream();
+                      beginStream('provider');
+                      inThought = true;
+                      inToolOutput = false;
+                    }
+                    appendStream(evt.chunk);
+                    break;
+                  case 'turn-end':
+                    if (inThought) {
+                      endStream();
+                      inThought = false;
+                    }
+                    break;
+                  case 'tool-call':
+                    pushMessage({
+                      kind: 'tool',
+                      text: `${evt.name} ${JSON.stringify(evt.args)}`,
+                    });
+                    break;
+                  case 'tool-output':
+                    if (!inToolOutput) {
+                      beginStream('tool');
+                      inToolOutput = true;
+                    }
+                    appendStream(evt.chunk);
+                    break;
+                  case 'tool-result':
+                    if (inToolOutput) {
+                      endStream();
+                      inToolOutput = false;
+                    }
+                    if (!evt.ok && evt.error) {
+                      pushMessage({ kind: 'error', text: `tool: ${evt.error}` });
+                    }
+                    break;
+                  case 'finish':
+                    // Defer the final summary line — we want to print verdict + path
+                    // after the memo is parsed, not the raw agent finish reason.
+                    break;
+                }
+              },
+            });
+            pushMessage({
+              kind: 'system',
+              text:
+                `research finish: verdict=${result.verdict} ` +
+                `(iter=${result.iterations}, ${Math.round(result.elapsedMs / 1000)}s)\n` +
+                `memo: ${result.outputPath}`,
+            });
+          } catch (err) {
+            pushMessage({
+              kind: 'error',
+              text: `research failed: ${err instanceof Error ? err.message : String(err)}`,
+            });
+          }
           abortControllerRef.current = null;
           setBusy(false);
           return;

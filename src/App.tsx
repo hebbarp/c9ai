@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Static, Text, useApp, useInput, useStdout } from 'ink';
 import { MessageView } from './tui/MessageView.js';
 import { Prompt } from './tui/Prompt.js';
+import { formatToolCall, createThoughtFilter, type ThoughtFilter } from './tui/format.js';
 import type { AppConfig, ChatMessage, Message } from './core/types.js';
 import type { Tool, ConfirmRequest, ConfirmResponse } from './tools/types.js';
 import type { AliasMap } from './aliases.js';
@@ -34,6 +35,33 @@ function nextId(): string {
   return `${Date.now()}-${lineSeq}`;
 }
 
+// Picked once when chat starts; gives the busy line a tiny bit of character.
+// Kept stable for the whole turn — the elapsed counter does the moving.
+const THINKING_VERBS = [
+  'thinking',
+  'crunching',
+  'pondering',
+  'brewing',
+  'cooking',
+  'plotting',
+  'mulling',
+  'spelunking',
+  'untangling',
+  'newspapering',
+];
+function pickVerb(): string {
+  return THINKING_VERBS[Math.floor(Math.random() * THINKING_VERBS.length)]!;
+}
+
+// Gentle reassurance once the wait gets long. Threshold ladders prevent the
+// user from wondering whether the spinner is stuck.
+function elapsedHint(seconds: number): string {
+  if (seconds >= 120) return ' · still going';
+  if (seconds >= 45) return ' · still working';
+  if (seconds >= 15) return ' · thinking more';
+  return '';
+}
+
 export interface AppProps {
   initialConfig: AppConfig;
 }
@@ -64,6 +92,20 @@ export function App({ initialConfig }: AppProps) {
   const abortControllerRef = useRef<AbortController | null>(null);
   const [busy, setBusy] = useState(false);
   const [busyLabel, setBusyLabel] = useState('');
+  // Live elapsed-seconds counter while busy. Ticks at 1s; resets on idle.
+  const [busyElapsed, setBusyElapsed] = useState(0);
+  useEffect(() => {
+    if (!busy) {
+      setBusyElapsed(0);
+      return;
+    }
+    const start = Date.now();
+    setBusyElapsed(0);
+    const timer = setInterval(() => {
+      setBusyElapsed(Math.floor((Date.now() - start) / 1000));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [busy]);
   // Session allowlist: pattern names the user has approved for this run.
   // Cleared on app exit; persistent allowlist is a future feature.
   const sessionAllowedRef = useRef<Set<string>>(new Set());
@@ -356,11 +398,16 @@ export function App({ initialConfig }: AppProps) {
           setTimeout(() => exit(), 50);
           return;
         case 'shell': {
+          const startedAt = Date.now();
           setBusy(true);
           setBusyLabel(`shell: ${action.command}`);
           beginStream('shell');
           await runShell(action.command, chunk => appendStream(chunk));
           endStream();
+          const elapsedS = (Date.now() - startedAt) / 1000;
+          if (elapsedS >= 1) {
+            pushMessage({ kind: 'system', text: `(${elapsedS.toFixed(1)}s)` });
+          }
           setBusy(false);
           return;
         }
@@ -383,6 +430,7 @@ export function App({ initialConfig }: AppProps) {
           });
           const args: Record<string, unknown> = { ...(alias?.extra ?? {}), ...parsed };
 
+          const startedAt = Date.now();
           setBusy(true);
           setBusyLabel(`tool: ${tool.name} (Esc to cancel)`);
           beginStream('tool');
@@ -397,6 +445,10 @@ export function App({ initialConfig }: AppProps) {
               emit: chunk => appendStream(chunk),
             });
             endStream();
+            const elapsedS = (Date.now() - startedAt) / 1000;
+            if (elapsedS >= 1) {
+              pushMessage({ kind: 'system', text: `(${elapsedS.toFixed(1)}s)` });
+            }
             if (!result.ok && result.error) {
               pushMessage({ kind: 'error', text: `${tool.name}: ${result.error}` });
             }
@@ -461,6 +513,7 @@ export function App({ initialConfig }: AppProps) {
           scopeRef.current = await loadScope();
           let inThought = false;
           let inToolOutput = false;
+          let thoughtFilter: ThoughtFilter | null = null;
           const ctrl = new AbortController();
           abortControllerRef.current = ctrl;
           await runAgent(provider, action.goal, tools, evt => {
@@ -471,25 +524,39 @@ export function App({ initialConfig }: AppProps) {
                   text: `agent start (${evt.provider}) — goal: ${evt.goal}`,
                 });
                 break;
-              case 'thought':
+              case 'thought': {
                 if (!inThought) {
                   if (inToolOutput) endStream();
-                  beginStream('provider');
                   inThought = true;
                   inToolOutput = false;
+                  thoughtFilter = createThoughtFilter();
                 }
-                appendStream(evt.chunk);
+                const cleaned = thoughtFilter!.filter(evt.chunk);
+                if (cleaned) {
+                  if (!streamingRef.current) beginStream('provider');
+                  appendStream(cleaned);
+                }
                 break;
-              case 'turn-end':
+              }
+              case 'turn-end': {
                 if (inThought) {
-                  endStream();
+                  if (thoughtFilter) {
+                    const tail = thoughtFilter.flush();
+                    if (tail) {
+                      if (!streamingRef.current) beginStream('provider');
+                      appendStream(tail);
+                    }
+                  }
+                  thoughtFilter = null;
+                  if (streamingRef.current) endStream();
                   inThought = false;
                 }
                 break;
+              }
               case 'tool-call':
                 pushMessage({
                   kind: 'tool',
-                  text: `${evt.name} ${JSON.stringify(evt.args)}`,
+                  text: formatToolCall(evt.name, evt.args),
                 });
                 break;
               case 'tool-output':
@@ -558,6 +625,7 @@ export function App({ initialConfig }: AppProps) {
           scopeRef.current = await loadScope();
           let inThought = false;
           let inToolOutput = false;
+          let thoughtFilter: ThoughtFilter | null = null;
           const ctrl = new AbortController();
           abortControllerRef.current = ctrl;
           try {
@@ -578,25 +646,39 @@ export function App({ initialConfig }: AppProps) {
                       text: `research start (${evt.provider}) — input: ${action.input}`,
                     });
                     break;
-                  case 'thought':
+                  case 'thought': {
                     if (!inThought) {
                       if (inToolOutput) endStream();
-                      beginStream('provider');
                       inThought = true;
                       inToolOutput = false;
+                      thoughtFilter = createThoughtFilter();
                     }
-                    appendStream(evt.chunk);
+                    const cleaned = thoughtFilter!.filter(evt.chunk);
+                    if (cleaned) {
+                      if (!streamingRef.current) beginStream('provider');
+                      appendStream(cleaned);
+                    }
                     break;
-                  case 'turn-end':
+                  }
+                  case 'turn-end': {
                     if (inThought) {
-                      endStream();
+                      if (thoughtFilter) {
+                        const tail = thoughtFilter.flush();
+                        if (tail) {
+                          if (!streamingRef.current) beginStream('provider');
+                          appendStream(tail);
+                        }
+                      }
+                      thoughtFilter = null;
+                      if (streamingRef.current) endStream();
                       inThought = false;
                     }
                     break;
+                  }
                   case 'tool-call':
                     pushMessage({
                       kind: 'tool',
-                      text: `${evt.name} ${JSON.stringify(evt.args)}`,
+                      text: formatToolCall(evt.name, evt.args),
                     });
                     break;
                   case 'tool-output':
@@ -679,8 +761,9 @@ export function App({ initialConfig }: AppProps) {
             }
           }
           conversation.push({ role: 'user', content: action.prompt });
+          const startedAt = Date.now();
           setBusy(true);
-          setBusyLabel(`${provider.name} thinking (Esc to cancel)`);
+          setBusyLabel(`${provider.name} ${pickVerb()} (Esc to cancel)`);
           beginStream('provider');
           logEvent('provider_call', {
             provider: provider.name,
@@ -695,8 +778,14 @@ export function App({ initialConfig }: AppProps) {
               ctrl.signal
             );
             endStream();
+            const elapsedS = (Date.now() - startedAt) / 1000;
             if (result.aborted) {
-              pushMessage({ kind: 'system', text: '(cancelled)' });
+              pushMessage({
+                kind: 'system',
+                text: `(cancelled after ${elapsedS.toFixed(1)}s)`,
+              });
+            } else if (elapsedS >= 1) {
+              pushMessage({ kind: 'system', text: `(${elapsedS.toFixed(1)}s)` });
             }
           } finally {
             abortControllerRef.current = null;
@@ -746,7 +835,12 @@ export function App({ initialConfig }: AppProps) {
       <Box flexDirection="column" marginTop={1}>
         {busy && (
           <Box paddingX={1}>
-            <Text color="yellow">… {busyLabel}</Text>
+            <Text color="yellow">
+              … {busyLabel}
+              {busyElapsed > 0
+                ? ` — ${busyElapsed}s${elapsedHint(busyElapsed)}`
+                : ''}
+            </Text>
           </Box>
         )}
         {confirmReq && (

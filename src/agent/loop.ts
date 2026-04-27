@@ -39,6 +39,27 @@ function clip(s: string, max: number): string {
   return s.slice(0, max) + `\n…[truncated ${s.length - max} chars]`;
 }
 
+/**
+ * Strip context-injection sigils from the goal and report which were seen.
+ * Default agent runs are lean — `@scope` opts the cwd content listing in,
+ * `@profile` opts the user profile in. Both add prefill cost that hurts
+ * small/local models, so we don't include them unless asked.
+ */
+function parseContextSigils(goal: string): {
+  cleanGoal: string;
+  includeScope: boolean;
+  includeProfile: boolean;
+} {
+  const includeScope = /(^|\s)@scope\b/.test(goal);
+  const includeProfile = /(^|\s)@profile\b/.test(goal);
+  const cleanGoal = goal
+    .replace(/(^|\s)@scope\b/g, ' ')
+    .replace(/(^|\s)@profile\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return { cleanGoal, includeScope, includeProfile };
+}
+
 export async function runAgent(
   provider: Provider,
   goal: string,
@@ -50,17 +71,30 @@ export async function runAgent(
   const signal = opts.signal;
   const scope = opts.scope ?? { roots: [] };
   const guards = new Guards(opts);
-  const systemPrompt = await buildAgentPrompt(goal, tools, opts.profile ?? null, scope);
+
+  // Default-lean prompt: scope listing and profile are opt-in via @scope
+  // and @profile sigils in the goal text. Tools still receive the user's
+  // full `scope` for read perms regardless of whether scope is *listed* in
+  // the prompt — opt-in only controls what the model sees up-front.
+  const { cleanGoal, includeScope, includeProfile } = parseContextSigils(goal);
+  const promptProfile = includeProfile ? opts.profile ?? null : null;
+  const promptScope = includeScope ? { roots: [cwd] } : { roots: [] };
+  const systemPrompt = await buildAgentPrompt(
+    cleanGoal,
+    tools,
+    promptProfile,
+    promptScope
+  );
 
   // System role is now real (providers know how to translate it). The
   // goal goes as the first user message so every provider has a user
   // turn to respond to (Ollama in particular needs this).
   const conversation: ChatMessage[] = [
     { role: 'system', content: systemPrompt },
-    { role: 'user', content: goal },
+    { role: 'user', content: cleanGoal },
   ];
 
-  emit({ type: 'start', goal, provider: provider.name });
+  emit({ type: 'start', goal: cleanGoal, provider: provider.name });
 
   const finishAborted = () => {
     const snap = guards.snapshot();

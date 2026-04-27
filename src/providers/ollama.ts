@@ -107,6 +107,9 @@ async function chat(
         // Ollama supports role: 'system' natively, just pass everything through.
         messages: messages.map(m => ({ role: m.role, content: m.content })),
         stream: true,
+        // Keep the model warm for half an hour. The default 5m unloads
+        // between user pauses and every next call cold-starts (10–30s).
+        keep_alive: '30m',
       }),
       ...(signal ? { signal } : {}),
     });

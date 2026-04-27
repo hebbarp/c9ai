@@ -134,15 +134,15 @@ async function buildScopeContentBlock(roots: string[]): Promise<string> {
   }
   if (allFiles.length === 0) {
     return (
-      `## Scoped folders\nThe user has opted these folders into searchable scope:\n` +
+      `## Working directory\nYou are operating in:\n` +
       roots.map(r => `- ${r}`).join('\n') +
       `\n(no files found within ${SCOPE_LIST_MAX_DEPTH} levels)\n\n`
     );
   }
   const lines: string[] = [];
-  lines.push(`## What's in your scoped folders`);
+  lines.push(`## What's in your working directory`);
   lines.push(
-    `The user has opted these folders into scope. The list below is what's actually in them right now (capped at ${SCOPE_LIST_MAX_FILES} files, depth ${SCOPE_LIST_MAX_DEPTH}). Use @fs.read on any file when its content matters; use @fs.grep across roots for keyword search.`
+    `The list below is what's in the folder you're working in right now (capped at ${SCOPE_LIST_MAX_FILES} files, depth ${SCOPE_LIST_MAX_DEPTH}). Use @fs.read on any file when its content matters; use @fs.grep for keyword search.`
   );
   lines.push('');
   for (let i = 0; i < roots.length; i++) {

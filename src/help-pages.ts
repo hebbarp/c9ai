@@ -207,11 +207,15 @@ DESCRIPTION
   emits the literal token <<DONE>> on its own line, or when a guard
   trips (max iterations, wall-clock, repeated stall).
 
-  The system prompt for every run includes:
-   - your profile (~/.c9ai/profile.md), if present
-   - a list of registered tools with their argument shapes
-   - the contents of your scoped folders (~/.c9ai/scope.json) — file
-     paths with size + first markdown heading or first non-blank line
+  The system prompt is LEAN by default — just the tool list. Add these
+  sigils anywhere in the goal to opt extra context in:
+
+   @profile   include your profile (~/.c9ai/profile.md)
+   @scope     list files in the current working directory
+
+  Both are opt-in because they add prefill cost that hurts small/local
+  models. Tools still get full scope.roots for read permissions either
+  way — opt-in only controls what the model sees up-front.
 
   Cancel mid-run with Esc.
 
@@ -222,8 +226,8 @@ GUARDS
 
 EXAMPLES
   agent write today's date to today.txt
-  agent summarize the markdown files under ./docs in 5 bullets
-  agent find all TODO comments in src and group by file
+  agent @scope summarize the markdown files in 5 bullets
+  agent @scope @profile find work that matches my goals
 
 SEE ALSO
   research, scope, profile, tools, sigil

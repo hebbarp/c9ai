@@ -27,23 +27,22 @@ export async function loadScope(): Promise<Scope> {
 
 /**
  * Resolve `input` (a relative or absolute path) against `cwd`, then verify
- * the resolved path is inside `cwd` OR inside one of `scope.roots`. Returns
- * the absolute path on success; throws with an actionable message otherwise.
+ * the resolved path stays inside `cwd`. Returns the absolute path on success;
+ * throws with an actionable message otherwise.
  *
- * This is the single sandbox check used by all fs.* tools. Outside the
- * scope an agent loop cannot read, write, list, glob, or grep — even if
- * the user's prompt asks it to.
+ * This is the single sandbox check used by all fs.* tools. Outside cwd,
+ * an agent loop cannot read, write, list, glob, or grep.
  */
-export function resolveInScope(input: string, cwd: string, scope: Scope): string {
+export function resolveInScope(input: string, cwd: string, _scope: Scope): string {
   const target = path.resolve(cwd, input);
-  const allowedRoots = [path.resolve(cwd), ...scope.roots];
+  const allowedRoots = [path.resolve(cwd)];
   for (const root of allowedRoots) {
     if (isInside(target, root)) return target;
   }
   throw new Error(
     `path is not in scope: ${input}\n` +
       `allowed roots: ${allowedRoots.join(', ')}\n` +
-      `add a folder to ~/.c9ai/scope.json to widen access.`
+      `use !cd <dir> to change the current working directory.`
   );
 }
 
@@ -54,10 +53,9 @@ export function isInside(target: string, root: string): boolean {
 }
 
 /**
- * Returns the list of roots the agent should consider for full-corpus
- * searches (glob/grep with no path argument). When the user has scoped
- * folders we use those; otherwise we fall back to cwd.
+ * Returns the roots the agent should consider for searches. Searches are
+ * intentionally bounded to cwd for speed.
  */
-export function searchRoots(cwd: string, scope: Scope): string[] {
-  return scope.roots.length > 0 ? scope.roots : [path.resolve(cwd)];
+export function searchRoots(cwd: string, _scope: Scope): string[] {
+  return [path.resolve(cwd)];
 }

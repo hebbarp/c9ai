@@ -23,7 +23,7 @@ export interface AgentOptions extends GuardOptions {
   cwd?: string;
   signal?: AbortSignal;
   confirm?: (req: ConfirmRequest) => Promise<ConfirmResponse>;
-  /** User-scoped folders the agent's fs tools may read from. */
+  /** Optional roots for prompt context; fs tools remain cwd-bound. */
   scope?: { roots: string[] };
   /**
    * Optional user profile injected into the agent's system prompt as

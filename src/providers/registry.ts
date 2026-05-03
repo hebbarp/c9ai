@@ -3,11 +3,25 @@ import type { Provider } from './types.js';
 import { claudeProvider } from './claude.js';
 import { geminiProvider } from './gemini.js';
 import { ollamaProvider } from './ollama.js';
+import { soulProvider } from './soul.js';
+import {
+  deepseekProvider,
+  gptProvider,
+  kimiProvider,
+  openaiProvider,
+  openrouterProvider,
+} from './openai-compatible.js';
 
 const providers: Record<ProviderName, Provider> = {
   claude: claudeProvider,
   gemini: geminiProvider,
   ollama: ollamaProvider,
+  soul: soulProvider,
+  openai: openaiProvider,
+  gpt: gptProvider,
+  kimi: kimiProvider,
+  deepseek: deepseekProvider,
+  openrouter: openrouterProvider,
 };
 
 export function getProvider(name: ProviderName): Provider {

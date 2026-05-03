@@ -82,12 +82,12 @@ async function* walk(
 const fsGlob: Tool = {
   name: 'fs.glob',
   description:
-    'Find files matching a glob pattern (e.g. **/*.md). Searches the user-scoped folders, or cwd if no scope set. ' +
+    'Find files matching a glob pattern (e.g. **/*.md). Searches the current working directory. ' +
     'Skips node_modules, .git, dist, etc.',
   positional: 'pattern',
   args: [
     { name: 'pattern', description: 'glob, e.g. **/*.md or src/**/*.ts', required: true },
-    { name: 'root', description: 'restrict to one scoped root (optional)', required: false },
+    { name: 'root', description: 'restrict to a directory under cwd (optional)', required: false },
   ],
   run: async (args, ctx: ToolContext): Promise<ToolResult> => {
     const pattern = typeof args.pattern === 'string' ? args.pattern : '';
@@ -239,13 +239,13 @@ async function jsGrepSearch(
 const fsGrep: Tool = {
   name: 'fs.grep',
   description:
-    'Search file contents for a regex across the scoped folders. Uses ripgrep (rg) when available, ' +
+    'Search file contents for a regex across the current working directory. Uses ripgrep (rg) when available, ' +
     'falls back to a JS regex walker. Auto-skips node_modules / .git / dist / build.',
   positional: 'pattern',
   args: [
     { name: 'pattern', description: 'regex pattern to search for', required: true },
     { name: 'glob', description: 'restrict to files matching this glob (e.g. **/*.md)', required: false },
-    { name: 'root', description: 'restrict to one scoped root (optional)', required: false },
+    { name: 'root', description: 'restrict to a directory under cwd (optional)', required: false },
   ],
   run: async (args, ctx: ToolContext): Promise<ToolResult> => {
     const pattern = typeof args.pattern === 'string' ? args.pattern : '';

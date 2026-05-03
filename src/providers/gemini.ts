@@ -11,7 +11,13 @@ function getBin(): string {
 
 async function available(): Promise<boolean> {
   return new Promise(resolve => {
-    const child = spawn(getBin(), ['--version'], { shell: true });
+    let child: ReturnType<typeof spawn>;
+    try {
+      child = spawn(getBin(), ['--version'], { shell: true });
+    } catch {
+      resolve(false);
+      return;
+    }
     child.on('error', () => resolve(false));
     child.on('exit', code => resolve(code === 0));
   });

@@ -9,6 +9,13 @@ const PROVIDER_KEYWORDS: Record<string, ProviderName> = {
   claude: 'claude',
   gemini: 'gemini',
   ollama: 'ollama',
+  soul: 'soul',
+  chaitanya: 'soul',
+  openai: 'openai',
+  gpt: 'gpt',
+  kimi: 'kimi',
+  deepseek: 'deepseek',
+  openrouter: 'openrouter',
 };
 
 export function routeInput(raw: string, opts: RouterOptions): RoutedAction {
@@ -43,8 +50,15 @@ export function routeInput(raw: string, opts: RouterOptions): RoutedAction {
     return { kind: 'research', input: rest.join(' ').trim() };
   }
 
+  if (headLower === 'models' && (rest[0] ?? '').toLowerCase() === 'review') {
+    return { kind: 'model-review', name: rest[1] ?? '', runId: rest[2] };
+  }
+
   if (headLower in PROVIDER_KEYWORDS) {
     const provider = PROVIDER_KEYWORDS[headLower]!;
+    if ((rest[0] ?? '').toLowerCase() === 'agent') {
+      return { kind: 'agent', provider, goal: rest.slice(1).join(' ').trim() };
+    }
     return { kind: 'chat', provider, prompt: rest.join(' ') };
   }
 

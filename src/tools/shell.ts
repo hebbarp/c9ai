@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import type { Tool, ToolContext, ToolResult } from './types.js';
 
 /**
@@ -85,7 +85,13 @@ export function runShellCommand(
       return;
     }
 
-    const child = spawn(cmd, { shell: true, cwd: opts.cwd });
+    let child: ChildProcessWithoutNullStreams;
+    try {
+      child = spawn(cmd, { shell: true, cwd: opts.cwd });
+    } catch (err) {
+      resolve({ ok: false, error: err instanceof Error ? err.message : String(err) });
+      return;
+    }
     const timeoutMs = opts.timeoutMs ?? shellTimeoutMs();
     let timedOut = false;
     let aborted = false;

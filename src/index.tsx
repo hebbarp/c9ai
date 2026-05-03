@@ -11,7 +11,7 @@ import { isProviderName } from './core/config.js';
 import { printBanner } from './tui/printBanner.js';
 import { configureOllama } from './providers/ollama.js';
 
-const VERSION = '4.0.0-alpha.1';
+const VERSION = '4.0.0-alpha.2';
 
 const cli = meow(
   `
@@ -20,6 +20,11 @@ const cli = meow(
     $ c9ai claude "<prompt>"        one-shot to Claude
     $ c9ai gemini "<prompt>"        one-shot to Gemini
     $ c9ai ollama "<prompt>"        one-shot to local Ollama
+    $ c9ai soul "<prompt>"          one-shot to Soul overlay
+    $ c9ai openai "<prompt>"        one-shot to OpenAI HTTP
+    $ c9ai kimi "<prompt>"          one-shot to Kimi
+    $ c9ai deepseek "<prompt>"      one-shot to DeepSeek
+    $ c9ai openrouter "<prompt>"    one-shot to OpenRouter
 
   Options
     --version                       show version
@@ -51,6 +56,7 @@ async function runOneShot(model: string, prompt: string): Promise<number> {
 
 async function main(): Promise<void> {
   const [first, ...rest] = cli.input;
+  const modelArg = first === 'chaitanya' ? 'soul' : first;
   const config = await loadConfig();
 
   if (config.ollamaModel || config.ollamaUrl) {
@@ -60,13 +66,13 @@ async function main(): Promise<void> {
     });
   }
 
-  if (first && (first === 'claude' || first === 'gemini' || first === 'ollama')) {
+  if (modelArg && isProviderName(modelArg)) {
     const prompt = rest.join(' ').trim();
     if (!prompt) {
       process.stderr.write(`usage: c9ai ${first} "<prompt>"\n`);
       process.exit(2);
     }
-    const code = await runOneShot(first, prompt);
+    const code = await runOneShot(modelArg, prompt);
     process.exit(code);
   }
 

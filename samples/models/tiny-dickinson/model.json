@@ -1,0 +1,12 @@
+{
+  "name": "tiny-dickinson",
+  "displayName": "Tiny Dickinson",
+  "type": "small-language-model",
+  "runtime": "ollama",
+  "ollamaModel": "c9ai-tiny-dickinson:latest",
+  "baseModel": "qwen2.5:1.5b",
+  "huggingfaceModel": "Qwen/Qwen2.5-1.5B-Instruct",
+  "language": "en",
+  "description": "Starter Small Language Foundry project for learning corpus, prompt, eval, and local model registration.",
+  "createdAt": "2026-04-29T00:00:00.000Z"
+}

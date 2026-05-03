@@ -103,7 +103,7 @@ async function resolveProgram(input: string, cwd: string): Promise<ProgramInput>
   const briefMarkdown =
     `# ${trimmed}\n\n` +
     `## Brief\n${trimmed}\n\n` +
-    `## Bounds\n- Use only the tools registered in this session.\n- Cite any files you read by path.\n- Stay within the user's scoped folders for evidence.\n\n` +
+    `## Bounds\n- Use only the tools registered in this session.\n- Cite any files you read by path.\n- Stay within the current working directory for evidence.\n\n` +
     `## Evaluator\n- Strongest evidence wins.\n- Note contradictions explicitly.\n- Mark gaps as "unknown" rather than inventing answers.\n`;
   return { source: 'topic', briefMarkdown, slug: safeSlug(trimmed) };
 }
@@ -115,7 +115,7 @@ function buildIterationPrompt(program: ProgramInput, runId: string, outputRel: s
     `Output path (where YOU should write the memo): ${outputRel}\n\n` +
     `Rules:\n` +
     `- Treat the brief below as the program. Stay within its stated bounds.\n` +
-    `- Use tools to gather evidence: @fs.read for known paths, @fs.grep / @fs.glob for keyword search across scoped folders. Cite files by path.\n` +
+    `- Use tools to gather evidence: @fs.read for known paths, @fs.grep / @fs.glob for keyword search across the current working directory. Cite files by path.\n` +
     `- Use @fs.write to save the final memo to ${outputRel}.\n` +
     `- The memo MUST end with a "## Verdict" section containing exactly one of: keep, discard, needs-review.\n` +
     `- After the memo is written, emit ${DONE_SENTINEL} on its own line.\n\n` +

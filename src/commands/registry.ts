@@ -7,6 +7,10 @@ import { analyticsCommand } from './analytics.js';
 import { toolsCommand } from './tools.js';
 import { resumeCommand } from './resume.js';
 import { clearCommand } from './clear.js';
+import { saveCommand } from './save.js';
+import { matsyaCommand } from './matsya.js';
+import { modelsCommand } from './models.js';
+import { pampaCommand } from './pampa.js';
 
 export function buildCommandRegistry(): Map<string, Command> {
   const list: Command[] = [
@@ -17,7 +21,11 @@ export function buildCommandRegistry(): Map<string, Command> {
     analyticsCommand,
     toolsCommand,
     resumeCommand,
+    saveCommand,
     clearCommand,
+    matsyaCommand,
+    modelsCommand,
+    pampaCommand,
   ];
   const map = new Map<string, Command>();
   for (const c of list) map.set(c.name, c);

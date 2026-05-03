@@ -8,6 +8,7 @@ export const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json');
 export const LOGS_DIR = path.join(CONFIG_DIR, 'logs');
 export const SKILLS_DIR = path.join(CONFIG_DIR, 'skills');
 export const ARTIFACTS_DIR = path.join(CONFIG_DIR, 'artifacts');
+export const MODELS_DIR = path.join(CONFIG_DIR, 'models');
 
 export const ALIASES_PATH = path.join(CONFIG_DIR, 'aliases.json');
 export const TOOLS_REGISTRY_PATH = path.join(CONFIG_DIR, 'tools-registry.json');
@@ -25,6 +26,7 @@ export async function ensureDirs(): Promise<void> {
   await fs.mkdir(LOGS_DIR, { recursive: true });
   await fs.mkdir(SKILLS_DIR, { recursive: true });
   await fs.mkdir(ARTIFACTS_DIR, { recursive: true });
+  await fs.mkdir(MODELS_DIR, { recursive: true });
 }
 
 export async function loadConfig(): Promise<AppConfig> {
@@ -45,5 +47,15 @@ export async function saveConfig(next: AppConfig): Promise<void> {
 }
 
 export function isProviderName(value: string): value is ProviderName {
-  return value === 'claude' || value === 'gemini' || value === 'ollama';
+  return (
+    value === 'claude' ||
+    value === 'gemini' ||
+    value === 'ollama' ||
+    value === 'soul' ||
+    value === 'openai' ||
+    value === 'gpt' ||
+    value === 'kimi' ||
+    value === 'deepseek' ||
+    value === 'openrouter'
+  );
 }

@@ -32,7 +32,7 @@ const SCOPE_LIST_IGNORE = new Set([
 
 interface ScopeFile {
   rel: string; // path relative to its root
-  rootIndex: number; // index into scope.roots
+  rootIndex: number; // index into listed roots
   size: number;
   mtimeMs: number;
   snippet: string; // first markdown heading or first non-blank line
@@ -213,7 +213,7 @@ You then continue. One tool call per turn.
 When the goal is achieved (or you cannot make progress), emit the literal token ${DONE_SENTINEL} on its own line. Do not emit a tool call after ${DONE_SENTINEL}.
 
 ## On answering questions about the user
-If the user asks anything personal — about their work, files, projects, recent activity — prefer using @fs.glob and @fs.grep over their scoped folders before answering. Cite the files you read.
+If the user asks anything personal — about their work, files, projects, recent activity — prefer using @fs.glob and @fs.grep in the current working directory before answering. Cite the files you read.
 
 The goal you've been asked to pursue will arrive in the next user message.
 `;

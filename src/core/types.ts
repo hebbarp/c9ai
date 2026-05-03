@@ -1,4 +1,13 @@
-export type ProviderName = 'claude' | 'gemini' | 'ollama';
+export type ProviderName =
+  | 'claude'
+  | 'gemini'
+  | 'ollama'
+  | 'soul'
+  | 'openai'
+  | 'gpt'
+  | 'kimi'
+  | 'deepseek'
+  | 'openrouter';
 
 export interface AppConfig {
   defaultModel: ProviderName;
@@ -42,8 +51,9 @@ export type RoutedAction =
   | { kind: 'shell'; command: string }
   | { kind: 'sigil'; sigil: string; args: string }
   | { kind: 'command'; name: string; args: string[] }
+  | { kind: 'model-review'; name: string; runId?: string }
   | { kind: 'chat'; provider: ProviderName; prompt: string }
-  | { kind: 'agent'; goal: string }
+  | { kind: 'agent'; goal: string; provider?: ProviderName }
   | { kind: 'research'; input: string };
 
 export interface CommandContext {
@@ -57,6 +67,11 @@ export interface CommandContext {
    * Optional because not every host (e.g. one-shot CLI) supports it.
    */
   replaceHistory?: (messages: Message[]) => Promise<void>;
+  /**
+   * Export the current visible transcript to a readable file. Unlike the
+   * resumable session JSONL, this may include system/tool/error lines.
+   */
+  exportHistory?: (outputPath?: string) => Promise<{ path: string; count: number }>;
 }
 
 export interface Command {

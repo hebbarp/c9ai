@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Static, Text, useApp, useInput, useStdout } from 'ink';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 import { MessageView } from './tui/MessageView.js';
 import { Prompt } from './tui/Prompt.js';
 import { formatToolCall, createThoughtFilter, type ThoughtFilter } from './tui/format.js';
@@ -27,7 +29,14 @@ import {
   type SessionTurn,
 } from './sessions.js';
 import { loadProfile, formatProfileForSystem } from './profile.js';
-import { loadScope, type Scope } from './scope.js';
+import { getRunner } from './matsya/poller.js';
+import {
+  loadEvalRun,
+  writeInteractiveReview,
+  type OverallReview,
+  type QuestionReview,
+  type ReviewQuestion,
+} from './models/review.js';
 
 let lineSeq = 0;
 function nextId(): string {
@@ -53,6 +62,17 @@ function pickVerb(): string {
   return THINKING_VERBS[Math.floor(Math.random() * THINKING_VERBS.length)]!;
 }
 
+function redactInputForHistory(input: string): { text: string; redacted: boolean } {
+  if (/^matsya\s+setup\s+\S+/i.test(input)) {
+    return { text: 'matsya setup <redacted>', redacted: true };
+  }
+  const providerKey = input.match(/^(config\s+(?:openai|gpt|kimi|deepseek|openrouter)\s+)(?!model\b|base\b|baseurl\b|url\b)(\S+)/i);
+  if (providerKey) {
+    return { text: `${providerKey[1]}<redacted>`, redacted: true };
+  }
+  return { text: input, redacted: false };
+}
+
 // Gentle reassurance once the wait gets long. Threshold ladders prevent the
 // user from wondering whether the spinner is stuck.
 function elapsedHint(seconds: number): string {
@@ -64,6 +84,34 @@ function elapsedHint(seconds: number): string {
 
 export interface AppProps {
   initialConfig: AppConfig;
+}
+
+type ReviewPhase =
+  | 'score'
+  | 'notes'
+  | 'overall-style'
+  | 'overall-faithfulness'
+  | 'overall-usefulness'
+  | 'overall-quote'
+  | 'overall-impersonation'
+  | 'overall-notes';
+
+interface ReviewState {
+  runPath: string;
+  questions: ReviewQuestion[];
+  index: number;
+  phase: ReviewPhase;
+  reviews: QuestionReview[];
+  pendingScore?: string;
+  overall: Partial<OverallReview>;
+}
+
+function isScore(s: string): boolean {
+  return /^[1-5]$/.test(s.trim());
+}
+
+function isPassFail(s: string): boolean {
+  return /^(pass|fail)$/i.test(s.trim());
 }
 
 export function App({ initialConfig }: AppProps) {
@@ -81,6 +129,7 @@ export function App({ initialConfig }: AppProps) {
   const rule = useMemo(() => '─'.repeat(Math.max(0, cols)), [cols]);
   const [config, setConfig] = useState<AppConfig>(initialConfig);
   const [history, setHistory] = useState<Message[]>([]);
+  const messageHistoryRef = useRef<Message[]>([]);
   const [streaming, setStreaming] = useState<Message | null>(null);
   const streamingRef = useRef<Message | null>(null);
   const pendingChunkRef = useRef<string>('');
@@ -92,6 +141,7 @@ export function App({ initialConfig }: AppProps) {
   const abortControllerRef = useRef<AbortController | null>(null);
   const [busy, setBusy] = useState(false);
   const [busyLabel, setBusyLabel] = useState('');
+  const [reviewState, setReviewState] = useState<ReviewState | null>(null);
   // Live elapsed-seconds counter while busy. Ticks at 1s; resets on idle.
   const [busyElapsed, setBusyElapsed] = useState(0);
   useEffect(() => {
@@ -123,7 +173,7 @@ export function App({ initialConfig }: AppProps) {
   // `replaceHistory` (called from `resume` / `clear`).
   const sessionIdRef = useRef<string | null>(null);
   const profileRef = useRef<string | null>(null);
-  const scopeRef = useRef<Scope>({ roots: [] });
+  const currentDirScope = useMemo(() => ({ roots: [] }), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -136,13 +186,10 @@ export function App({ initialConfig }: AppProps) {
       if (!cancelled) sessionIdRef.current = id;
     });
     void pruneSessions();
-    // Profile + scope load fire-and-forget; chat path re-reads profile each
+    // Profile load is fire-and-forget; chat path re-reads profile each
     // turn so a mid-session edit takes effect on the next message.
     loadProfile().then(p => {
       if (!cancelled) profileRef.current = p;
-    });
-    loadScope().then(s => {
-      if (!cancelled) scopeRef.current = s;
     });
     return () => {
       cancelled = true;
@@ -166,6 +213,18 @@ export function App({ initialConfig }: AppProps) {
     };
   }, []);
 
+  // Keep the Matsya runner pre-wired with current tools/provider/cwd so
+  // `matsya check` (an on-demand command, not a background loop) can fire
+  // without re-plumbing args. No background polling — fetch only when asked.
+  useEffect(() => {
+    if (tools.size === 0) return;
+    getRunner().configure({
+      provider: config.defaultModel,
+      tools,
+      cwd: process.cwd(),
+    });
+  }, [tools, config.defaultModel]);
+
   const requestConfirm = useCallback(
     (req: ConfirmRequest): Promise<ConfirmResponse> => {
       if (sessionAllowedRef.current.has(req.reason)) {
@@ -185,6 +244,7 @@ export function App({ initialConfig }: AppProps) {
       .map(m => ({ kind: m.kind, text: m.text, ts: m.ts }));
     await appendTurns(newId, turns);
     sessionIdRef.current = newId;
+    messageHistoryRef.current = messages;
     setHistory(messages);
   }, []);
 
@@ -258,7 +318,9 @@ export function App({ initialConfig }: AppProps) {
   const pushMessage = useCallback(
     (msg: Omit<Message, 'id' | 'ts'>) => {
       const ts = Date.now();
-      setHistory(prev => [...prev, { ...msg, id: nextId(), ts }]);
+      const next = { ...msg, id: nextId(), ts };
+      messageHistoryRef.current = [...messageHistoryRef.current, next];
+      setHistory(prev => [...prev, next]);
       persistTurn(msg.kind, msg.text, ts);
     },
     [persistTurn]
@@ -307,6 +369,7 @@ export function App({ initialConfig }: AppProps) {
       ts: Date.now(),
     };
 
+    messageHistoryRef.current = [...messageHistoryRef.current, completedMsg];
     setHistory(prev => [...prev, completedMsg]);
     streamingRef.current = tailMsg;
     setStreaming(tailMsg);
@@ -349,6 +412,7 @@ export function App({ initialConfig }: AppProps) {
     streamingRef.current = null;
     if (final) {
       const finalized = final;
+      messageHistoryRef.current = [...messageHistoryRef.current, finalized];
       setHistory(prev => [...prev, finalized]);
       // Streaming history-promotion is also a turn boundary for the session
       // file: persist the FULL turn here (currentTurnTextRef accumulated all
@@ -369,21 +433,219 @@ export function App({ initialConfig }: AppProps) {
     [config]
   );
 
+  const exportHistory = useCallback(async (outputPath?: string): Promise<{ path: string; count: number }> => {
+    const messages = [...messageHistoryRef.current];
+    if (streamingRef.current?.text) {
+      messages.push(streamingRef.current);
+    }
+    const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
+    const outPath = path.resolve(process.cwd(), outputPath || path.join('outputs', `c9ai-conversation-${stamp}.md`));
+    await fs.mkdir(path.dirname(outPath), { recursive: true });
+    const lines: string[] = [
+      '# c9ai Conversation',
+      '',
+      `Saved: ${new Date().toISOString()}`,
+      `Messages: ${messages.length}`,
+      '',
+    ];
+    for (const msg of messages) {
+      lines.push(`## ${msg.kind}`);
+      lines.push('');
+      lines.push(`Time: ${new Date(msg.ts).toISOString()}`);
+      lines.push('');
+      lines.push(msg.text.trimEnd() || '(empty)');
+      lines.push('');
+    }
+    await fs.writeFile(outPath, lines.join('\n'), 'utf8');
+    return { path: outPath, count: messages.length };
+  }, []);
+
+  const showReviewQuestion = useCallback(
+    (state: ReviewState) => {
+      const q = state.questions[state.index]!;
+      pushMessage({
+        kind: 'system',
+        text:
+          `------------------------------\n` +
+          `review ${state.index + 1}/${state.questions.length}\n\n` +
+          `Prompt:\n${q.prompt}\n\n` +
+          `Answer:\n${q.answer}\n\n` +
+          `Score 1-5:`,
+      });
+    },
+    [pushMessage]
+  );
+
+  const startReview = useCallback(
+    async (name: string, runId?: string) => {
+      if (!name) {
+        pushMessage({ kind: 'error', text: 'usage: models review <name> [run-file]' });
+        return;
+      }
+      try {
+        const run = await loadEvalRun(name, runId);
+        const estimated = Math.max(3, Math.ceil(run.questions.length * 0.75));
+        const state: ReviewState = {
+          runPath: run.path,
+          questions: run.questions,
+          index: 0,
+          phase: 'score',
+          reviews: [],
+          overall: {},
+        };
+        setReviewState(state);
+        pushMessage({
+          kind: 'system',
+          text:
+            `review start: ${run.path}\n` +
+            `questions: ${run.questions.length}\n` +
+            `estimated time: ${estimated}-${estimated + 5} minutes\n` +
+            `enter scores as 1-5; use '-' for empty notes.`,
+        });
+        showReviewQuestion(state);
+      } catch (err) {
+        pushMessage({ kind: 'error', text: `models review: ${err instanceof Error ? err.message : String(err)}` });
+      }
+    },
+    [pushMessage, showReviewQuestion]
+  );
+
+  const handleReviewInput = useCallback(
+    async (input: string) => {
+      if (!reviewState) return;
+      const value = input.trim();
+      if (/^(cancel|quit)$/i.test(value)) {
+        pushMessage({ kind: 'system', text: 'review cancelled' });
+        setReviewState(null);
+        return;
+      }
+      const noteValue = value === '-' ? '' : value;
+
+      if (reviewState.phase === 'score') {
+        if (!isScore(value)) {
+          pushMessage({ kind: 'error', text: 'enter a score from 1 to 5' });
+          return;
+        }
+        const next = { ...reviewState, phase: 'notes' as ReviewPhase, pendingScore: value };
+        setReviewState(next);
+        const q = reviewState.questions[reviewState.index]!;
+        pushMessage({ kind: 'system', text: `notes for question ${q.id} (or '-' to skip):` });
+        return;
+      }
+
+      if (reviewState.phase === 'notes') {
+        const q = reviewState.questions[reviewState.index]!;
+        const reviews = [
+          ...reviewState.reviews,
+          { id: q.id, score: reviewState.pendingScore ?? '0', notes: noteValue },
+        ];
+        if (reviewState.index + 1 < reviewState.questions.length) {
+          const next: ReviewState = {
+            ...reviewState,
+            index: reviewState.index + 1,
+            phase: 'score',
+            reviews,
+            pendingScore: undefined,
+          };
+          setReviewState(next);
+          showReviewQuestion(next);
+          return;
+        }
+        const next: ReviewState = {
+          ...reviewState,
+          phase: 'overall-style',
+          reviews,
+          pendingScore: undefined,
+        };
+        setReviewState(next);
+        pushMessage({ kind: 'system', text: '------------------------------\noverall review\n\nstyle score 1-5:' });
+        return;
+      }
+
+      if (reviewState.phase === 'overall-style') {
+        if (!isScore(value)) {
+          pushMessage({ kind: 'error', text: 'enter a score from 1 to 5' });
+          return;
+        }
+        setReviewState({ ...reviewState, phase: 'overall-faithfulness', overall: { ...reviewState.overall, style: value } });
+        pushMessage({ kind: 'system', text: 'overall faithfulness score 1-5:' });
+        return;
+      }
+      if (reviewState.phase === 'overall-faithfulness') {
+        if (!isScore(value)) {
+          pushMessage({ kind: 'error', text: 'enter a score from 1 to 5' });
+          return;
+        }
+        setReviewState({ ...reviewState, phase: 'overall-usefulness', overall: { ...reviewState.overall, faithfulness: value } });
+        pushMessage({ kind: 'system', text: 'overall usefulness score 1-5:' });
+        return;
+      }
+      if (reviewState.phase === 'overall-usefulness') {
+        if (!isScore(value)) {
+          pushMessage({ kind: 'error', text: 'enter a score from 1 to 5' });
+          return;
+        }
+        setReviewState({ ...reviewState, phase: 'overall-quote', overall: { ...reviewState.overall, usefulness: value } });
+        pushMessage({ kind: 'system', text: 'quote honesty pass/fail:' });
+        return;
+      }
+      if (reviewState.phase === 'overall-quote') {
+        if (!isPassFail(value)) {
+          pushMessage({ kind: 'error', text: 'enter pass or fail' });
+          return;
+        }
+        setReviewState({ ...reviewState, phase: 'overall-impersonation', overall: { ...reviewState.overall, quoteHonesty: value.toLowerCase() } });
+        pushMessage({ kind: 'system', text: 'impersonation pass/fail:' });
+        return;
+      }
+      if (reviewState.phase === 'overall-impersonation') {
+        if (!isPassFail(value)) {
+          pushMessage({ kind: 'error', text: 'enter pass or fail' });
+          return;
+        }
+        setReviewState({ ...reviewState, phase: 'overall-notes', overall: { ...reviewState.overall, impersonation: value.toLowerCase() } });
+        pushMessage({ kind: 'system', text: "overall notes (or '-' to skip):" });
+        return;
+      }
+
+      const overall: OverallReview = {
+        style: reviewState.overall.style ?? '0',
+        faithfulness: reviewState.overall.faithfulness ?? '0',
+        usefulness: reviewState.overall.usefulness ?? '0',
+        quoteHonesty: reviewState.overall.quoteHonesty ?? 'fail',
+        impersonation: reviewState.overall.impersonation ?? 'fail',
+        notes: noteValue,
+      };
+      await writeInteractiveReview(reviewState.runPath, reviewState.reviews, overall);
+      pushMessage({ kind: 'system', text: `review saved: ${reviewState.runPath}` });
+      setReviewState(null);
+    },
+    [pushMessage, reviewState, showReviewQuestion]
+  );
+
   const handleSubmit = useCallback(
     async (raw: string) => {
       const trimmed = raw.trim();
       if (!trimmed) return;
+      if (reviewState) {
+        setPromptValue('');
+        historyIndexRef.current = -1;
+        draftRef.current = '';
+        await handleReviewInput(trimmed);
+        return;
+      }
+      const visibleInput = redactInputForHistory(trimmed);
 
       // Reset prompt + history navigation, then persist the new entry.
       setPromptValue('');
       historyIndexRef.current = -1;
       draftRef.current = '';
-      const nextHistory = pushHistory(historyRef.current, trimmed);
+      const nextHistory = pushHistory(historyRef.current, visibleInput.text);
       historyRef.current = nextHistory;
       void saveHistory(nextHistory);
 
-      pushMessage({ kind: 'user', text: trimmed });
-      logEvent('input', { raw: trimmed });
+      pushMessage({ kind: 'user', text: visibleInput.text });
+      logEvent('input', { raw: visibleInput.text, redacted: visibleInput.redacted });
 
       const action = routeInput(trimmed, {
         defaultProvider: config.defaultModel,
@@ -402,13 +664,23 @@ export function App({ initialConfig }: AppProps) {
           setBusy(true);
           setBusyLabel(`shell: ${action.command}`);
           beginStream('shell');
-          await runShell(action.command, chunk => appendStream(chunk));
-          endStream();
-          const elapsedS = (Date.now() - startedAt) / 1000;
-          if (elapsedS >= 1) {
-            pushMessage({ kind: 'system', text: `(${elapsedS.toFixed(1)}s)` });
+          const ctrl = new AbortController();
+          abortControllerRef.current = ctrl;
+          try {
+            await runShell(action.command, chunk => appendStream(chunk), {
+              cwd: process.cwd(),
+              signal: ctrl.signal,
+              confirm: requestConfirm,
+            });
+            endStream();
+            const elapsedS = (Date.now() - startedAt) / 1000;
+            if (elapsedS >= 1) {
+              pushMessage({ kind: 'system', text: `(${elapsedS.toFixed(1)}s)` });
+            }
+          } finally {
+            abortControllerRef.current = null;
+            setBusy(false);
           }
-          setBusy(false);
           return;
         }
         case 'sigil': {
@@ -441,7 +713,7 @@ export function App({ initialConfig }: AppProps) {
               cwd: process.cwd(),
               signal: ctrl.signal,
               confirm: requestConfirm,
-              scope: scopeRef.current,
+              scope: currentDirScope,
               emit: chunk => appendStream(chunk),
             });
             endStream();
@@ -472,6 +744,7 @@ export function App({ initialConfig }: AppProps) {
               saveConfig,
               emit: pushMessage,
               replaceHistory,
+              exportHistory,
             });
           } catch (err) {
             pushMessage({
@@ -482,6 +755,10 @@ export function App({ initialConfig }: AppProps) {
           setBusy(false);
           return;
         }
+        case 'model-review': {
+          await startReview(action.name, action.runId);
+          return;
+        }
         case 'agent': {
           if (!action.goal) {
             pushMessage({
@@ -490,7 +767,7 @@ export function App({ initialConfig }: AppProps) {
             });
             return;
           }
-          const provider = getProvider(config.defaultModel);
+          const provider = getProvider(action.provider ?? config.defaultModel);
           const ok = await provider.available();
           if (!ok) {
             pushMessage({
@@ -508,9 +785,8 @@ export function App({ initialConfig }: AppProps) {
           }
           setBusy(true);
           setBusyLabel(`agent: ${provider.name} (Esc to cancel)`);
-          // Refresh profile and scope so agent sees edits since launch.
+          // Refresh profile so agent sees edits since launch.
           profileRef.current = await loadProfile();
-          scopeRef.current = await loadScope();
           let inThought = false;
           let inToolOutput = false;
           let thoughtFilter: ThoughtFilter | null = null;
@@ -588,7 +864,7 @@ export function App({ initialConfig }: AppProps) {
             cwd: process.cwd(),
             signal: ctrl.signal,
             confirm: requestConfirm,
-            scope: scopeRef.current,
+            scope: currentDirScope,
             profile: profileRef.current,
           });
           abortControllerRef.current = null;
@@ -622,7 +898,6 @@ export function App({ initialConfig }: AppProps) {
           setBusy(true);
           setBusyLabel(`research: ${provider.name} (Esc to cancel)`);
           profileRef.current = await loadProfile();
-          scopeRef.current = await loadScope();
           let inThought = false;
           let inToolOutput = false;
           let thoughtFilter: ThoughtFilter | null = null;
@@ -634,7 +909,7 @@ export function App({ initialConfig }: AppProps) {
               cwd: process.cwd(),
               provider,
               tools,
-              scope: scopeRef.current,
+              scope: currentDirScope,
               profile: profileRef.current,
               signal: ctrl.signal,
               confirm: requestConfirm,
@@ -801,11 +1076,16 @@ export function App({ initialConfig }: AppProps) {
       beginStream,
       commands,
       config,
+      currentDirScope,
       endStream,
       exit,
       history,
+      handleReviewInput,
       pushMessage,
+      requestConfirm,
       saveConfig,
+      reviewState,
+      startReview,
       tools,
     ]
   );

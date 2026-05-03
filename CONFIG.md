@@ -10,6 +10,19 @@ Every external dependency is overridable. Precedence: **env var > `~/.c9ai/confi
 |---|---|---|
 | `ANTHROPIC_API_KEY` | — | Required for Claude. Set in shell or in a `.env` Claude reads. |
 | `CLAUDE_MODEL` | `claude-opus-4-7` | Claude model ID. Override if Anthropic deprecates the default. |
+| `OPENAI_API_KEY` | — | Required for `switch openai` / `switch gpt`. |
+| `OPENAI_MODEL` | `gpt-4o` | OpenAI model ID. |
+| `KIMI_API_KEY` | - | Required for `switch kimi`. |
+| `KIMI_MODEL` | `moonshot-v1-128k` | Kimi / Moonshot model ID. |
+| `KIMI_BASE_URL` | `https://api.moonshot.cn/v1` | Override for Kimi-compatible endpoints. |
+| `DEEPSEEK_API_KEY` | - | Required for `switch deepseek`. |
+| `DEEPSEEK_MODEL` | `deepseek-chat` | DeepSeek model ID. |
+| `DEEPSEEK_BASE_URL` | `https://api.deepseek.com/v1` | Override for DeepSeek-compatible endpoints. |
+| `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Override for OpenAI-compatible endpoints. |
+| `OPENROUTER_API_KEY` | — | Required for `switch openrouter`. |
+| `OPENROUTER_MODEL` | `openai/gpt-4o` | OpenRouter model slug. |
+| `OPENROUTER_BASE_URL` | `https://openrouter.ai/api/v1` | Override for OpenRouter-compatible endpoints. |
+| `SOUL_PROVIDER` | *(auto)* | Optional backing provider for Soul mode. |
 | `OLLAMA_URL` | `http://localhost:11434` | Point at a remote Ollama box if needed. |
 | `OLLAMA_MODEL` | *(auto-detect)* | If unset, c9ai lists `/api/tags` and uses the only installed model, or asks you to pick. |
 | `GEMINI_BIN` | `gemini` | Path to the Gemini CLI. Override if not on `PATH`. |
@@ -68,7 +81,7 @@ Persisted preferences set via the `switch` command (or by hand).
 
 ```json
 {
-  "defaultModel": "claude" | "gemini" | "ollama",
+  "defaultModel": "claude" | "gemini" | "ollama" | "soul" | "openai" | "gpt" | "kimi" | "deepseek" | "openrouter",
   "ollamaModel": "<name>",
   "ollamaUrl": "http://...",
   "lastUpdated": "<iso>"
@@ -80,9 +93,48 @@ Persisted preferences set via the `switch` command (or by hand).
 ```
 switch claude
 switch gemini
+switch soul
+switch openai
+switch openai list            — show models from /v1/models
+switch kimi
+switch kimi list              — show models from /v1/models
+switch deepseek
+switch deepseek list          — show models from /v1/models
+switch openrouter
+switch openrouter list        — show models from /v1/models
 switch ollama                 — set provider, leave model auto-detect
 switch ollama <model>         — also pin a specific model
 switch ollama list            — show installed models (read-only)
+```
+
+Hosted-provider setup from inside c9ai:
+
+```
+config openai <api-key>
+config kimi <api-key>
+config deepseek <api-key>
+config openrouter <api-key>
+config openai model gpt-4o
+config kimi model moonshot-v1-128k
+config deepseek model deepseek-chat
+config openrouter model openai/gpt-4o
+```
+
+Small Language Foundry model projects:
+
+```
+models samples
+models init tiny-dickinson
+models status tiny-dickinson
+models doctor tiny-dickinson
+models corpus tiny-dickinson add ./corpus
+models corpus tiny-dickinson list
+models pairs tiny-dickinson audit
+models eval tiny-dickinson
+models export tiny-dickinson
+models list
+models inspect tiny-dickinson
+models switch tiny-dickinson
 ```
 
 ## Optional user files in `~/.c9ai/`

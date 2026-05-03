@@ -6,3 +6,6 @@ dist/
 .env.local
 .claude/
 scratch/
+external/
+outputs/
+rd_ladder.py

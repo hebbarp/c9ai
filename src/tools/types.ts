@@ -19,9 +19,7 @@ export interface ToolContext {
    */
   confirm?: (req: ConfirmRequest) => Promise<ConfirmResponse>;
   /**
-   * Folders the user has explicitly opted in to via `~/.c9ai/scope.json`.
-   * fs.* tools refuse to operate outside `cwd ∪ scope.roots`. Empty roots
-   * means "cwd only" — same default as before scope existed.
+   * Reserved for prompt context. fs.* tools are bounded to `cwd` for speed.
    */
   scope?: { roots: string[] };
 }

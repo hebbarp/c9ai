@@ -1,14 +1,22 @@
-import { spawn } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
+import { gateShellCommand, runShellCommand } from './tools/shell.js';
+import type { ConfirmRequest, ConfirmResponse } from './tools/types.js';
 
 export interface ShellRunResult {
   exitCode: number;
 }
 
+export interface ShellRunOptions {
+  cwd?: string;
+  signal?: AbortSignal;
+  confirm?: (req: ConfirmRequest) => Promise<ConfirmResponse>;
+}
+
 export async function runShell(
   command: string,
-  onChunk: (chunk: string) => void
+  onChunk: (chunk: string) => void,
+  opts: ShellRunOptions = {}
 ): Promise<ShellRunResult> {
   const trimmed = command.trim();
   if (!trimmed) return { exitCode: 0 };
@@ -26,16 +34,25 @@ export async function runShell(
     }
   }
 
-  return new Promise(resolve => {
-    const child = spawn(trimmed, { shell: true });
-    child.stdout.setEncoding('utf8');
-    child.stderr.setEncoding('utf8');
-    child.stdout.on('data', (d: string) => onChunk(d));
-    child.stderr.on('data', (d: string) => onChunk(d));
-    child.on('error', err => {
-      onChunk(`shell spawn error: ${err.message}\n`);
-      resolve({ exitCode: -1 });
-    });
-    child.on('exit', code => resolve({ exitCode: code ?? -1 }));
+  const cwd = opts.cwd ?? process.cwd();
+  const gateError = await gateShellCommand(trimmed, {
+    cwd,
+    signal: opts.signal,
+    confirm: opts.confirm,
+    emit: onChunk,
   });
+  if (gateError) {
+    onChunk(gateError + '\n');
+    return { exitCode: 1 };
+  }
+
+  const result = await runShellCommand(trimmed, {
+    cwd,
+    signal: opts.signal,
+    emit: onChunk,
+  });
+  if (!result.ok && result.error) {
+    onChunk(result.error + '\n');
+  }
+  return { exitCode: result.ok ? 0 : 1 };
 }

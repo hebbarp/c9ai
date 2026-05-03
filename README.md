@@ -18,15 +18,18 @@ Alpha. Phase 0 = restore v1 shape.
 | Layer | Status |
 |---|---|
 | Ink TUI shell | ✅ |
-| Built-in commands (help, switch, todos, resume, clear, exit, tools, config) | ✅ |
+| Built-in commands (help, switch, todos, resume, save, clear, exit, tools, config) | ✅ |
 | Cross-session conversation memory (`~/.c9ai/sessions/*.jsonl` + `resume`/`clear`) | ✅ |
 | Prompt history (↑/↓ arrows, persisted in `~/.c9ai/history.json`) | ✅ |
-| Personal AI: `profile.md`, `scope.json`, scope-aware agent prompt | ✅ |
-| Scope-content awareness (agent prompt lists files in `scope.roots` with snippets) | ✅ |
+| Personal AI: `profile.md`, current-directory scope-aware agent prompt | ✅ |
+| Scope-content awareness (`agent @scope` lists current-directory files with snippets) | ✅ |
 | Autoresearch (`research <topic-or-file>` → memo in `outputs/` + ledger) | ✅ |
 | Claude provider (Anthropic SDK, streaming + cache) | ✅ |
 | Gemini provider (CLI subprocess) | ✅ |
 | Ollama provider (HTTP, streaming, friendly 404 with installed-models list) | ✅ |
+| OpenAI-compatible providers (`openai`, `gpt`, `kimi`, `deepseek`, `openrouter`) | ✅ |
+| Small Language Foundry model workflow (`models init/list/inspect/status/doctor/corpus/pairs/build/eval/review/compare/export/switch`) | ✅ |
+| Small Language Foundry LoRA training recipe (`models train` + GGUF/Ollama packaging path) | ✅ |
 | `!shell` runner | ✅ |
 | GitHub Issues backlog via `gh` CLI (`todos list/add`) | ✅ |
 | Tools: `fs.*`, `date.now`, `env.{cwd,platform}`, `shell.run` (with destructive-pattern blocklist) + `~/.c9ai/tools-registry.json` | ✅ |
@@ -66,6 +69,7 @@ src/
 │   ├── claude.ts          (Anthropic SDK, streaming, prompt caching)
 │   ├── gemini.ts          (CLI subprocess)
 │   ├── ollama.ts          (HTTP streaming, configurable model + URL)
+│   ├── openai-compatible.ts (OpenAI / Kimi / DeepSeek / OpenRouter HTTP streaming)
 │   └── registry.ts
 ├── tools/                 ← @sigil-dispatched tools
 │   ├── fs.ts              (fs.read/write/list, path-sandboxed to cwd)
@@ -98,15 +102,77 @@ logs/                  one JSONL file per session
 ```
 ANTHROPIC_API_KEY        Claude credential
 CLAUDE_MODEL             Claude model ID (default claude-opus-4-7)
+OPENAI_API_KEY           OpenAI credential
+OPENAI_MODEL             OpenAI model ID (default gpt-4o)
+OPENAI_BASE_URL          OpenAI-compatible base URL override
+KIMI_API_KEY             Kimi credential
+KIMI_MODEL               Kimi model ID (default moonshot-v1-128k)
+KIMI_BASE_URL            Kimi-compatible base URL override
+DEEPSEEK_API_KEY         DeepSeek credential
+DEEPSEEK_MODEL           DeepSeek model ID (default deepseek-chat)
+DEEPSEEK_BASE_URL        DeepSeek-compatible base URL override
+OPENROUTER_API_KEY       OpenRouter credential
+OPENROUTER_MODEL         OpenRouter model ID (default openai/gpt-4o)
+OPENROUTER_BASE_URL      OpenRouter-compatible base URL override
 OLLAMA_URL               Ollama server (default http://localhost:11434)
 OLLAMA_MODEL             Ollama model; if unset, c9ai auto-detects from /api/tags
 GEMINI_BIN               Gemini CLI binary (default 'gemini' on PATH)
 C9AI_MAX_ITER            Agent max iterations (default 25)
 C9AI_MAX_WALL_SEC        Agent wall-clock cap in seconds (default 600)
 C9AI_STALL_REPEATS       Same-action repeats before agent stops (default 3)
-C9AI_SCOPE_LIST_MAX_FILES  Files listed from scope.roots in system prompt (default 100)
-C9AI_SCOPE_LIST_MAX_DEPTH  Max depth when walking scope roots (default 3)
+C9AI_SCOPE_LIST_MAX_FILES  Current-directory files listed in system prompt (default 100)
+C9AI_SCOPE_LIST_MAX_DEPTH  Max depth when walking current directory (default 3)
 ```
+
+Inside c9ai, hosted-provider keys can be saved without editing environment files:
+
+```
+config openai <api-key>
+config kimi <api-key>
+config deepseek <api-key>
+config openrouter <api-key>
+config openai model gpt-4o
+config kimi model moonshot-v1-128k
+config deepseek model deepseek-chat
+config openrouter model openai/gpt-4o
+```
+
+### Small Language Foundry
+
+Guide: [`docs/create-your-models.md`](docs/create-your-models.md)
+
+```
+models samples
+models init tiny-dickinson
+models status tiny-dickinson
+models doctor tiny-dickinson
+models corpus tiny-dickinson add ./my-public-domain-poems
+models corpus tiny-dickinson list
+
+# Generate (prompt, completion) training pairs from corpus
+models pairs tiny-dickinson generate
+models pairs tiny-dickinson audit
+models pairs tiny-dickinson list
+
+# Bake system prompt + pairs into a runnable Ollama tag (few-shot)
+models build tiny-dickinson --create
+
+# Optional: train a LoRA adapter, then package it for Ollama
+models train tiny-dickinson
+models package tiny-dickinson
+models package tiny-dickinson --versioned --test "Who are you?"
+models package tiny-dickinson --promote
+
+models eval tiny-dickinson
+models evals-list tiny-dickinson
+models review tiny-dickinson
+models compare tiny-dickinson
+models export tiny-dickinson
+models inspect tiny-dickinson
+switch tiny-dickinson
+```
+
+Model projects live under `~/.c9ai/models/<name>/` with `model.json`, `prompts/`, `corpus/`, `pairs/`, `build/Modelfile`, `train/` (scaffolded recipe), `eval/`, and notes. The first bundled sample is `tiny-dickinson`; the `build` recipe (Modelfile + few-shot) runs end-to-end out of the box. The `train` recipe (real LoRA fine-tuning) writes the dataset, Python trainer, and requirements; after training, convert the PEFT adapter to GGUF with llama.cpp and register it with Ollama using `ADAPTER`. The full packaging walkthrough is in `docs/create-your-models.md`.
 
 For Ollama specifically: c9ai never assumes a particular model is installed. With no `OLLAMA_MODEL` env or `ollamaModel` in config, it lists `/api/tags` and either uses the only installed model or asks you to pick (`switch ollama list`, then `switch ollama <name>`).
 
@@ -118,7 +184,7 @@ research <topic-or-file>
 
 If the argument is an existing markdown file, it's read as the program (brief / bounds / evaluator). Otherwise a brief is synthesized from the topic string. The agent runs one bounded iteration, writes the memo to `outputs/autoresearch-<slug>-<runId>.md`, and appends a record to `~/.c9ai/brain/autoresearch/runs.jsonl` with verdict (keep / discard / needs-review / crash).
 
-Drop new content into a folder listed in `~/.c9ai/scope.json` and the next `agent` or `research` run sees it automatically — the system prompt lists scoped files with size + first heading, capped via `C9AI_SCOPE_LIST_MAX_*`.
+`agent`, `research`, and `fs.*` tools are bounded to the current working directory. Use `!cd <dir>` before a run to change that boundary. Add `@scope` to an agent goal when you want the prompt to list current-directory files with size + first heading, capped via `C9AI_SCOPE_LIST_MAX_*`.
 
 ### Extension points (wired now, implemented later)
 

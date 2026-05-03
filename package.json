@@ -1,13 +1,15 @@
 {
   "name": "c9ai",
-  "version": "4.0.0-alpha.1",
-  "description": "Local-first AI CLI — TUI shell, autonomous agent, autoresearch, scope-aware context, multi-provider (Claude / Gemini / Ollama)",
+  "version": "4.0.0-alpha.2",
+  "description": "Local-first AI CLI — TUI shell, autonomous agent, autoresearch, Small Language Foundry, multi-provider (Claude / Gemini / Ollama / OpenAI-compatible)",
   "type": "module",
   "bin": {
     "c9ai": "dist/index.js"
   },
   "files": [
     "dist",
+    "docs/create-your-models.md",
+    "samples",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
@@ -20,7 +22,13 @@
     "clean": "rimraf dist",
     "prepublishOnly": "npm run clean && npm run build",
     "release:alpha": "npm publish --tag alpha --access public",
-    "release:latest": "npm publish --access public"
+    "release:latest": "npm publish --access public",
+    "pampa:audit": "node scripts/pampa-corpus-audit.mjs",
+    "pampa:extract": "node scripts/pampa-corpus-extract.mjs",
+    "pampa:annotate": "python scripts/pampa_annotate.py",
+    "pampa:prepare": "python scripts/pampa_prepare_training_corpus.py",
+    "pampa:tokenizer-bench": "python scripts/pampa_tokenizer_bench.py",
+    "pampa:train-tiny": "python scripts/pampa_train_tiny_lm.py"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",

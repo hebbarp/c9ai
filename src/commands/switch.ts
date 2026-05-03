@@ -5,12 +5,19 @@ import {
   getOllamaSettings,
   listInstalledOllamaModels,
 } from '../providers/ollama.js';
+import {
+  isOpenAICompatibleProviderName,
+  listOpenAICompatibleModels,
+  listOpenAICompatibleProviderNames,
+} from '../providers/openai-compatible.js';
+import { loadModel } from '../models/registry.js';
 
 export const switchCommand: Command = {
   name: 'switch',
-  description: 'Change default AI model (claude|gemini|ollama [<model>] | ollama list)',
+  description: 'Change default AI model (claude|gemini|ollama|soul|openai|gpt|kimi|deepseek|openrouter)',
   run: async (args, ctx) => {
-    const target = (args[0] ?? '').toLowerCase();
+    const rawTarget = (args[0] ?? '').toLowerCase();
+    const target = rawTarget === 'chaitanya' ? 'soul' : rawTarget;
     if (!target) {
       const ol = getOllamaSettings();
       ctx.emit({
@@ -19,8 +26,9 @@ export const switchCommand: Command = {
           `current model: ${ctx.config.defaultModel}\n` +
           `ollama model:  ${ctx.config.ollamaModel ?? ol.model ?? '(auto-detect)'}\n` +
           `ollama url:    ${ctx.config.ollamaUrl ?? ol.url}\n` +
-          `usage: switch <claude|gemini|ollama [<model>]>\n` +
-          `       switch ollama list   — show installed ollama models`,
+          `usage: switch <claude|gemini|ollama|soul|openai|gpt|kimi|deepseek|openrouter>\n` +
+          `       switch ollama <model>\n` +
+          `       switch <ollama|${listOpenAICompatibleProviderNames().join('|')}> list`,
       });
       return;
     }
@@ -45,7 +53,33 @@ export const switchCommand: Command = {
       return;
     }
 
+    if (isOpenAICompatibleProviderName(target) && (args[1] ?? '').toLowerCase() === 'list') {
+      const result = await listOpenAICompatibleModels(target);
+      if (!result.ok) {
+        ctx.emit({ kind: 'error', text: `${target}: ${result.error}` });
+        return;
+      }
+      if (result.models.length === 0) {
+        ctx.emit({ kind: 'system', text: `${target}: no models returned` });
+        return;
+      }
+      ctx.emit({
+        kind: 'system',
+        text:
+          `${target} models (${result.models.length}):\n` +
+          result.models.map(m => `  ${m}`).join('\n'),
+      });
+      return;
+    }
+
     if (!isProviderName(target)) {
+      const model = await loadModel(target);
+      if (model) {
+        configureOllama({ model: model.spec.ollamaModel });
+        await ctx.saveConfig({ defaultModel: 'ollama', ollamaModel: model.spec.ollamaModel });
+        ctx.emit({ kind: 'system', text: `switched to ${model.spec.name} (${model.spec.ollamaModel})` });
+        return;
+      }
       ctx.emit({ kind: 'error', text: `unknown model: ${target}` });
       return;
     }

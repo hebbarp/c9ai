@@ -4,6 +4,17 @@ All notable changes to c9ai v4 are listed here.
 Format roughly follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0-alpha.2] - 2026-05-03
+
+### Added
+- **Small Language Foundry (`models ...`)** - model project commands for bundled samples, project init/list/inspect/status/doctor, corpus import, pair generation/audit, Ollama Modelfile builds, eval runs, interactive review, compare, export, and switching to a model project.
+- **LoRA training and packaging recipe** - `models train` scaffolds a PEFT/TRL fine-tune recipe from generated pairs with train/validation split, metadata, configurable LoRA hyperparameters, and persisted metrics; `models package` converts trained adapters to GGUF and creates/promotes Ollama tags with package metadata, hashes, versioned tags, and optional smoke test.
+- **OpenAI-compatible providers** - `openai`, `gpt`, `kimi`, `deepseek`, and `openrouter` provider support, including config helpers and model listing.
+- **Bundled sample model project** - `samples/models/tiny-dickinson` ships as the starter Small Language Foundry project.
+
+### Changed
+- README and help pages now document the Small Language Foundry workflow and current-directory scope behavior.
+
 ## [4.0.0-alpha.1] — 2026-04-26
 
 ### Added

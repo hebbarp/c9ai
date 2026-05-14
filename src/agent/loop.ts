@@ -30,6 +30,11 @@ export interface AgentOptions extends GuardOptions {
    * background. Refreshed by the host on each agent invocation.
    */
   profile?: string | null;
+  /**
+   * Prior conversation history to include before the agent's current goal.
+   * Useful for chatting about a direction before delegating to the agent.
+   */
+  history?: ChatMessage[];
 }
 
 const OBSERVATION_CAP = 8000;
@@ -86,13 +91,19 @@ export async function runAgent(
     promptScope
   );
 
-  // System role is now real (providers know how to translate it). The
-  // goal goes as the first user message so every provider has a user
-  // turn to respond to (Ollama in particular needs this).
+  // System role is now real (providers know how to translate it).
   const conversation: ChatMessage[] = [
     { role: 'system', content: systemPrompt },
-    { role: 'user', content: cleanGoal },
   ];
+
+  // Include prior history if provided.
+  if (opts.history && opts.history.length > 0) {
+    conversation.push(...opts.history);
+  }
+
+  // The goal goes as the last user message so every provider has a user
+  // turn to respond to (Ollama in particular needs this).
+  conversation.push({ role: 'user', content: cleanGoal });
 
   emit({ type: 'start', goal: cleanGoal, provider: provider.name });
 

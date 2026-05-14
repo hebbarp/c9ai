@@ -13,6 +13,7 @@ export interface AppConfig {
   defaultModel: ProviderName;
   ollamaModel?: string;
   ollamaUrl?: string;
+  agentMode?: boolean;
   lastUpdated: string;
 }
 

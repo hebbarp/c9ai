@@ -1,6 +1,6 @@
 {
   "name": "c9ai",
-  "version": "4.0.0-alpha.2",
+  "version": "4.0.0-alpha.3",
   "description": "Local-first AI CLI — TUI shell, autonomous agent, autoresearch, Small Language Foundry, multi-provider (Claude / Gemini / Ollama / OpenAI-compatible)",
   "type": "module",
   "bin": {

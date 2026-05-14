@@ -48,6 +48,7 @@ Input shapes:
   openai|gpt|kimi|deepseek|openrouter <prompt>
                                   one-shot OpenAI-compatible chat
   @claude | @gemini | @ollama     provider sigil form
+  agent                           toggle persistent agent mode (prompts become goals)
   agent <goal>                    autonomous loop: model uses tools until done
   soul agent <goal>               autonomous loop with Soul posture
   research <topic-or-file>        bounded autoresearch iteration → memo in outputs/

@@ -460,6 +460,26 @@ export function App({ initialConfig }: AppProps) {
     return { path: outPath, count: messages.length };
   }, []);
 
+  /**
+   * Flatten the TUI message history into a clean ChatMessage array for LLM
+   * consumption. Merges consecutive same-role turns into a single turn
+   * (separated by newlines) since most providers reject same-role runs.
+   */
+  const buildConversation = useCallback((messages: Message[]): ChatMessage[] => {
+    const conversation: ChatMessage[] = [];
+    for (const m of messages) {
+      if (m.kind !== 'user' && m.kind !== 'provider') continue;
+      const role: 'user' | 'assistant' = m.kind === 'user' ? 'user' : 'assistant';
+      const last = conversation[conversation.length - 1];
+      if (last && last.role === role) {
+        last.content = `${last.content}\n${m.text}`;
+      } else {
+        conversation.push({ role, content: m.text });
+      }
+    }
+    return conversation;
+  }, []);
+
   const showReviewQuestion = useCallback(
     (state: ReviewState) => {
       const q = state.questions[state.index]!;
@@ -647,10 +667,17 @@ export function App({ initialConfig }: AppProps) {
       pushMessage({ kind: 'user', text: visibleInput.text });
       logEvent('input', { raw: visibleInput.text, redacted: visibleInput.redacted });
 
-      const action = routeInput(trimmed, {
+      let action = routeInput(trimmed, {
         defaultProvider: config.defaultModel,
         commands,
       });
+
+      // If we are in agentMode, any standard chat prompt is promoted to an
+      // agent goal. sigils, shell commands, and explicit c9ai commands
+      // (!cd, switch, config, etc) still take precedence.
+      if (action.kind === 'chat' && config.agentMode) {
+        action = { kind: 'agent', provider: action.provider, goal: action.prompt };
+      }
 
       switch (action.kind) {
         case 'empty':
@@ -761,9 +788,11 @@ export function App({ initialConfig }: AppProps) {
         }
         case 'agent': {
           if (!action.goal) {
+            const nextMode = !config.agentMode;
+            await saveConfig({ agentMode: nextMode });
             pushMessage({
               kind: 'system',
-              text: 'usage: agent <goal>  — runs autonomous loop with tools',
+              text: `agent mode: ${nextMode ? 'ON' : 'OFF'}\n(standard prompts will now run as autonomous goals)`,
             });
             return;
           }
@@ -785,8 +814,24 @@ export function App({ initialConfig }: AppProps) {
           }
           setBusy(true);
           setBusyLabel(`agent: ${provider.name} (Esc to cancel)`);
+
+          // Safety: If in persistent agentMode, ask for confirmation before
+          // letting the model loose on the autonomous loop.
+          if (config.agentMode) {
+            const ok = await requestConfirm({
+              command: `agent goal: ${action.goal}`,
+              reason: 'agent.start',
+            });
+            if (ok !== 'allow' && ok !== 'allow-session') {
+              pushMessage({ kind: 'system', text: 'agent run cancelled' });
+              setBusy(false);
+              return;
+            }
+          }
+
           // Refresh profile so agent sees edits since launch.
           profileRef.current = await loadProfile();
+          const convHistory = buildConversation(messageHistoryRef.current);
           let inThought = false;
           let inToolOutput = false;
           let thoughtFilter: ThoughtFilter | null = null;
@@ -866,6 +911,7 @@ export function App({ initialConfig }: AppProps) {
             confirm: requestConfirm,
             scope: currentDirScope,
             profile: profileRef.current,
+            history: convHistory,
           });
           abortControllerRef.current = null;
           setBusy(false);
@@ -1017,24 +1063,11 @@ export function App({ initialConfig }: AppProps) {
           const profile = await loadProfile();
           profileRef.current = profile;
 
-          // Build the conversation: optional system prompt (profile), then
-          // prior user/provider turns from history merged across split-line
-          // entries (streaming line-promotion creates multiple consecutive
-          // `provider` entries — providers reject consecutive same-role).
           const conversation: ChatMessage[] = [];
           if (profile) {
             conversation.push({ role: 'system', content: formatProfileForSystem(profile) });
           }
-          for (const m of history) {
-            if (m.kind !== 'user' && m.kind !== 'provider') continue;
-            const role: 'user' | 'assistant' = m.kind === 'user' ? 'user' : 'assistant';
-            const last = conversation[conversation.length - 1];
-            if (last && last.role === role) {
-              last.content = `${last.content}\n${m.text}`;
-            } else {
-              conversation.push({ role, content: m.text });
-            }
-          }
+          conversation.push(...buildConversation(messageHistoryRef.current));
           conversation.push({ role: 'user', content: action.prompt });
           const startedAt = Date.now();
           setBusy(true);
@@ -1148,9 +1181,16 @@ export function App({ initialConfig }: AppProps) {
         </Box>
         <Text color="gray" dimColor>{rule}</Text>
         <Box paddingX={1} justifyContent="space-between">
-          <Text color="gray" dimColor>
-            help · agent · ! shell · @tool · exit
-          </Text>
+          <Box>
+            <Text color="gray" dimColor>
+              help · agent · ! shell · @tool · exit
+            </Text>
+            {config.agentMode && (
+              <Text color="yellow" bold>
+                {' '}· agent mode
+              </Text>
+            )}
+          </Box>
           <Text color="gray" dimColor>
             {config.defaultModel}
           </Text>

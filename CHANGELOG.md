@@ -4,6 +4,14 @@ All notable changes to c9ai v4 are listed here.
 Format roughly follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0-alpha.3] - 2026-05-14
+
+### Added
+- **Claude configuration support** - added `config claude <api-key>`, `config claude model <model>`, and `config claude base <url>` to the `config` command for easy credential management.
+- **Persistent Agent Mode** - added an `agentMode` toggle (type `agent` without arguments) that automatically promotes standard chat prompts to autonomous agent goals, with a status indicator in the TUI footer.
+- **History-aware agents** - the autonomous agent loop now inherits prior chat history context, enabling a seamless "chat first, then delegate" workflow.
+- **Agent start confirmation** - added a mandatory safety confirmation prompt before beginning an autonomous loop when `agentMode` is active to prevent accidental tool execution.
+
 ## [4.0.0-alpha.2] - 2026-05-03
 
 ### Added

@@ -7,9 +7,54 @@ This is a clean restoration of [c9ai v1](https://www.npmjs.com/package/c9ai/v/1.
 rewritten in TypeScript with [Ink](https://github.com/vadimdemedes/ink) for live streaming output,
 and scaffolded for future growth (skills, artifacts, Matsya registry).
 
-v2 (sigils, JIT, BASIC, executive forms) and v3 (Electron, builder, IDE) live in `D:\C9AI\c9ai-v3electron\`
-(archived, frozen at v3.1.3) and serve as a reference catalog of ideas to port back as **skills**
-later — not as the next codebase.
+v2 (sigils, JIT, BASIC, executive forms) and v3 (Electron desktop app) are archived and serve as a
+reference catalog of ideas to port back as **skills** later — not as the next codebase.
+
+## Install
+
+```bash
+npm install -g c9ai@alpha
+c9ai
+```
+
+Requires Node 18+.
+
+## Quickstart
+
+c9ai talks to whichever AI backends you have. Pick at least one:
+
+### Local model — no API key needed
+
+1. Install [Ollama](https://ollama.com) and pull a model:
+   ```bash
+   ollama pull llama3.2
+   ```
+2. Start `c9ai` and type:
+   ```
+   switch ollama
+   ```
+   With exactly one model installed it's auto-detected. Otherwise `switch ollama list` to see
+   what's installed, then `switch ollama <name>`.
+
+Other local OpenAI-compatible servers (LM Studio, llama.cpp server, vLLM) work too — point the
+base URL at them and no API key is required:
+
+```bash
+OPENAI_BASE_URL=http://localhost:1234/v1   # e.g. LM Studio
+```
+
+then `switch openai` inside c9ai.
+
+### Hosted providers
+
+- **Claude** — set `ANTHROPIC_API_KEY` (in your shell, a `.env` file in the directory you run
+  c9ai from, or `~/.c9ai/.env`), then `switch claude`. Or inside c9ai: `config claude <api-key>`.
+- **OpenAI / Kimi / DeepSeek / OpenRouter** — inside c9ai: `config openai <api-key>` (same for
+  `kimi`, `deepseek`, `openrouter`), then `switch <provider>`.
+- **Gemini** — install the [Gemini CLI](https://github.com/google-gemini/gemini-cli) so `gemini`
+  is on your PATH, then `switch gemini`.
+
+The default provider is `claude`; whatever you `switch` to persists in `~/.c9ai/config.json`.
 
 ## Status
 
@@ -116,6 +161,9 @@ OPENROUTER_MODEL         OpenRouter model ID (default openai/gpt-4o)
 OPENROUTER_BASE_URL      OpenRouter-compatible base URL override
 OLLAMA_URL               Ollama server (default http://localhost:11434)
 OLLAMA_MODEL             Ollama model; if unset, c9ai auto-detects from /api/tags
+
+# When a *_BASE_URL points at a local OpenAI-compatible server (LM Studio,
+# llama.cpp, vLLM), the matching *_API_KEY becomes optional.
 GEMINI_BIN               Gemini CLI binary (default 'gemini' on PATH)
 C9AI_MAX_ITER            Agent max iterations (default 25)
 C9AI_MAX_WALL_SEC        Agent wall-clock cap in seconds (default 600)

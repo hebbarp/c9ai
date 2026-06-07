@@ -4,6 +4,16 @@ All notable changes to c9ai v4 are listed here.
 Format roughly follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0-alpha.4] - 2026-06-07
+
+### Added
+- **Keyless local OpenAI-compatible servers** - when `OPENAI_BASE_URL` (or `KIMI_BASE_URL`, `DEEPSEEK_BASE_URL`, `OPENROUTER_BASE_URL`) points at a local server such as LM Studio, llama.cpp server, or vLLM, the matching `*_API_KEY` is now optional. Previously the provider refused to start without a key even though local servers don't need one.
+- **Install + Quickstart in README** - first-run path for npm users: install via `npm install -g c9ai@alpha`, connect a local model (Ollama or any OpenAI-compatible server) with no API key, or configure a hosted provider.
+
+### Fixed
+- The missing-`ANTHROPIC_API_KEY` error no longer references a developer-machine path; it now points to `.env` / `~/.c9ai/.env` and suggests `switch ollama` for keyless local use.
+- The banner version is read from `package.json` at runtime instead of a hardcoded constant that had drifted (showed alpha.2 while alpha.3 was installed).
+
 ## [4.0.0-alpha.3] - 2026-05-14
 
 ### Added

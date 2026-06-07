@@ -65,26 +65,36 @@ interface Settings {
   baseUrl: string;
   apiKey: string | undefined;
   model: string;
+  /** true when the base URL was overridden via env — local OpenAI-compatible
+   * servers (LM Studio, llama.cpp, vLLM, …) don't require an API key. */
+  baseUrlOverridden: boolean;
 }
 
 function settings(preset: Preset): Settings {
+  const baseUrlOverride = process.env[preset.baseUrlEnv];
   return {
-    baseUrl: (process.env[preset.baseUrlEnv] || preset.defaultBaseUrl).replace(/\/+$/, ''),
+    baseUrl: (baseUrlOverride || preset.defaultBaseUrl).replace(/\/+$/, ''),
     apiKey: process.env[preset.apiKeyEnv],
     model: process.env[preset.modelEnv] || preset.defaultModel,
+    baseUrlOverridden: Boolean(baseUrlOverride),
   };
+}
+
+/** A key is required only when talking to the preset's hosted default URL. */
+function hasCredentials(s: Settings): boolean {
+  return Boolean(s.apiKey) || s.baseUrlOverridden;
 }
 
 function toWireMessages(messages: ChatMessage[]): Array<{ role: string; content: string }> {
   return messages.map(m => ({ role: m.role, content: m.content }));
 }
 
-function headers(preset: Preset, apiKey: string): Record<string, string> {
+function headers(preset: Preset, apiKey: string | undefined): Record<string, string> {
   const h: Record<string, string> = {
-    Authorization: `Bearer ${apiKey}`,
     'Content-Type': 'application/json',
     Accept: 'text/event-stream',
   };
+  if (apiKey) h['Authorization'] = `Bearer ${apiKey}`;
   if (preset.name === 'openrouter') {
     h['HTTP-Referer'] = 'https://github.com/hebbarp/c9ai';
     h['X-Title'] = 'c9ai';
@@ -93,7 +103,7 @@ function headers(preset: Preset, apiKey: string): Record<string, string> {
 }
 
 async function availableFor(preset: Preset): Promise<boolean> {
-  return Boolean(settings(preset).apiKey);
+  return hasCredentials(settings(preset));
 }
 
 export function isOpenAICompatibleProviderName(value: string): value is OpenAICompatibleProviderName {
@@ -114,14 +124,16 @@ export async function listOpenAICompatibleModels(
 ): Promise<{ ok: true; models: string[] } | { ok: false; error: string }> {
   const preset = PRESETS[name];
   const s = settings(preset);
-  if (!s.apiKey) return { ok: false, error: `${preset.apiKeyEnv} is not set` };
+  if (!hasCredentials(s)) {
+    return { ok: false, error: `${preset.apiKeyEnv} is not set (or point ${preset.baseUrlEnv} at a local server)` };
+  }
 
   let res: Response;
   try {
     res = await fetch(`${s.baseUrl}/models`, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${s.apiKey}`,
+        ...(s.apiKey ? { Authorization: `Bearer ${s.apiKey}` } : {}),
         Accept: 'application/json',
       },
     });
@@ -176,8 +188,11 @@ async function chatFor(
   signal?: AbortSignal
 ): Promise<ChatResult> {
   const s = settings(preset);
-  if (!s.apiKey) {
-    onChunk(`no ${preset.apiKeyEnv} in environment\n`);
+  if (!hasCredentials(s)) {
+    onChunk(
+      `no ${preset.apiKeyEnv} in environment\n` +
+        `set it in your shell, a .env file, or ~/.c9ai/.env — or set ${preset.baseUrlEnv} to a local OpenAI-compatible server (LM Studio, llama.cpp, vLLM), which needs no key\n`
+    );
     return { exitCode: 127 };
   }
   if (messages.length === 0) {

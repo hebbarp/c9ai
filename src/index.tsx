@@ -4,6 +4,7 @@ import './core/env.js';
 import React from 'react';
 import { render } from 'ink';
 import meow from 'meow';
+import { createRequire } from 'node:module';
 import { App } from './App.js';
 import { loadConfig } from './core/config.js';
 import { getProvider } from './providers/registry.js';
@@ -11,7 +12,10 @@ import { isProviderName } from './core/config.js';
 import { printBanner } from './tui/printBanner.js';
 import { configureOllama } from './providers/ollama.js';
 
-const VERSION = '4.0.0-alpha.2';
+// Resolve the version from package.json (one level up from src/ in dev,
+// from dist/ in the published package) so the banner can never go stale.
+const require = createRequire(import.meta.url);
+const VERSION: string = (require('../package.json') as { version: string }).version;
 
 const cli = meow(
   `
@@ -74,6 +78,13 @@ async function main(): Promise<void> {
     }
     const code = await runOneShot(modelArg, prompt);
     process.exit(code);
+  }
+
+  // Unknown positional args: fail loudly instead of silently dropping them
+  // and launching the TUI (confusing for `c9ai lama3 "hi"` typos and scripts).
+  if (modelArg) {
+    process.stderr.write(`unknown provider: ${modelArg} (run \`c9ai --help\` for usage)\n`);
+    process.exit(2);
   }
 
   // Print the banner as plain ANSI text BEFORE Ink mounts.

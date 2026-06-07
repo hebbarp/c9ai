@@ -35,7 +35,8 @@ async function chat(
   if (!c) {
     onChunk(
       'no ANTHROPIC_API_KEY in environment\n' +
-        'set it in your shell or in D:\\C9AI\\.env, then restart c9ai\n'
+        'set it in your shell, in a .env file in this directory, or in ~/.c9ai/.env, then restart c9ai\n' +
+        'no API key? use a local model instead: `switch ollama`\n'
     );
     return { exitCode: 127 };
   }

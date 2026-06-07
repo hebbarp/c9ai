@@ -225,6 +225,21 @@ export async function getModelStatus(name: string): Promise<ModelStatus> {
   };
 }
 
+/**
+ * Where to find llama.cpp's convert_lora_to_gguf.py.
+ * Precedence: C9AI_LLAMA_CPP env (either the checkout dir or the script path
+ * itself) > ./external/llama.cpp relative to the current working directory.
+ */
+export function resolveLlamaCppConverter(): string {
+  const envPath = process.env.C9AI_LLAMA_CPP;
+  if (envPath) {
+    const resolved = path.resolve(envPath);
+    if (resolved.toLowerCase().endsWith('.py')) return resolved;
+    return path.join(resolved, 'convert_lora_to_gguf.py');
+  }
+  return path.resolve(process.cwd(), 'external', 'llama.cpp', 'convert_lora_to_gguf.py');
+}
+
 async function commandCheck(command: string, args: string[]): Promise<boolean> {
   return new Promise(resolve => {
     let child;
@@ -272,8 +287,14 @@ export async function doctorModel(name: string, providerAvailable: boolean): Pro
   push(status.adapterHash ? 'ok' : 'warn', 'adapter', status.adapterHash ? `sha256 ${shortHash(status.adapterHash)}` : 'no train/out adapter found');
   push(status.ggufHash ? 'ok' : 'warn', 'package', status.ggufHash ? `gguf sha256 ${shortHash(status.ggufHash)}` : 'no package GGUF found');
 
-  const converter = path.resolve(process.cwd(), 'external', 'llama.cpp', 'convert_lora_to_gguf.py');
-  push((await pathExists(converter)) ? 'ok' : 'warn', 'llama.cpp converter', (await pathExists(converter)) ? converter : 'missing external/llama.cpp converter');
+  const converter = resolveLlamaCppConverter();
+  push(
+    (await pathExists(converter)) ? 'ok' : 'warn',
+    'llama.cpp converter',
+    (await pathExists(converter))
+      ? converter
+      : `not found: ${converter} (clone llama.cpp there, or set C9AI_LLAMA_CPP)`
+  );
   push((await commandCheck('python', ['--version'])) ? 'ok' : 'warn', 'python', 'python --version');
   push((await commandCheck('nvidia-smi', ['--query-gpu=name', '--format=csv,noheader'])) ? 'ok' : 'warn', 'gpu', 'nvidia-smi');
 

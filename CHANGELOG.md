@@ -13,6 +13,9 @@ versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 - The missing-`ANTHROPIC_API_KEY` error no longer references a developer-machine path; it now points to `.env` / `~/.c9ai/.env` and suggests `switch ollama` for keyless local use.
 - The banner version is read from `package.json` at runtime instead of a hardcoded constant that had drifted (showed alpha.2 while alpha.3 was installed).
+- **`models package` works on macOS/Linux** - the default venv Python path was hardcoded to the Windows layout (`.venv\Scripts\python.exe`); it now resolves `.venv/bin/python` on non-Windows platforms.
+- **`C9AI_LLAMA_CPP` env knob** - `models package` and `models doctor` previously only looked for the llama.cpp converter at `./external/llama.cpp` relative to the directory c9ai was launched from; the checkout (or converter script) location is now overridable via env.
+- README no longer claims the `tiny-dickinson` sample runs end-to-end out of the box; the sample ships the project shape without corpus text (you add public-domain poems first).
 
 ## [4.0.0-alpha.3] - 2026-05-14
 

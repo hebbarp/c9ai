@@ -165,6 +165,8 @@ OLLAMA_MODEL             Ollama model; if unset, c9ai auto-detects from /api/tag
 # When a *_BASE_URL points at a local OpenAI-compatible server (LM Studio,
 # llama.cpp, vLLM), the matching *_API_KEY becomes optional.
 GEMINI_BIN               Gemini CLI binary (default 'gemini' on PATH)
+C9AI_LLAMA_CPP           llama.cpp checkout (or converter script path) for `models package`
+                         (default ./external/llama.cpp relative to cwd)
 C9AI_MAX_ITER            Agent max iterations (default 25)
 C9AI_MAX_WALL_SEC        Agent wall-clock cap in seconds (default 600)
 C9AI_STALL_REPEATS       Same-action repeats before agent stops (default 3)
@@ -220,7 +222,7 @@ models inspect tiny-dickinson
 switch tiny-dickinson
 ```
 
-Model projects live under `~/.c9ai/models/<name>/` with `model.json`, `prompts/`, `corpus/`, `pairs/`, `build/Modelfile`, `train/` (scaffolded recipe), `eval/`, and notes. The first bundled sample is `tiny-dickinson`; the `build` recipe (Modelfile + few-shot) runs end-to-end out of the box. The `train` recipe (real LoRA fine-tuning) writes the dataset, Python trainer, and requirements; after training, convert the PEFT adapter to GGUF with llama.cpp and register it with Ollama using `ADAPTER`. The full packaging walkthrough is in `docs/create-your-models.md`.
+Model projects live under `~/.c9ai/models/<name>/` with `model.json`, `prompts/`, `corpus/`, `pairs/`, `build/Modelfile`, `train/` (scaffolded recipe), `eval/`, and notes. The first bundled sample is `tiny-dickinson` — it ships the project shape (system prompt, eval questions, corpus guidelines) but no corpus text; add 20–50 public-domain poems per `corpus/README.md`, then `models pairs ... generate` and `models build ... --create` complete the few-shot loop. The `train` recipe (real LoRA fine-tuning) writes the dataset, Python trainer, and requirements; after training, convert the PEFT adapter to GGUF with llama.cpp and register it with Ollama using `ADAPTER`. The full packaging walkthrough is in `docs/create-your-models.md`.
 
 For Ollama specifically: c9ai never assumes a particular model is installed. With no `OLLAMA_MODEL` env or `ollamaModel` in config, it lists `/api/tags` and either uses the only installed model or asks you to pick (`switch ollama list`, then `switch ollama <name>`).
 

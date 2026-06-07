@@ -3,7 +3,7 @@ import { promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { loadModel, readSystemPrompt } from './registry.js';
-import { hashFiles, sha256File } from './status.js';
+import { hashFiles, resolveLlamaCppConverter, sha256File } from './status.js';
 
 export interface PackageLoraOptions {
   pythonBin?: string;
@@ -97,13 +97,11 @@ async function findHfSnapshot(huggingfaceModel: string): Promise<string | null> 
   return null;
 }
 
-function defaultConverterPath(): string {
-  return path.resolve(process.cwd(), 'external', 'llama.cpp', 'convert_lora_to_gguf.py');
-}
-
 function defaultPythonBin(modelDir: string): string {
-  const venvPython = path.join(modelDir, 'train', '.venv', 'Scripts', 'python.exe');
-  return venvPython;
+  // venv layout differs by platform: Scripts\python.exe on Windows, bin/python elsewhere.
+  return process.platform === 'win32'
+    ? path.join(modelDir, 'train', '.venv', 'Scripts', 'python.exe')
+    : path.join(modelDir, 'train', '.venv', 'bin', 'python');
 }
 
 async function runProcess(
@@ -183,7 +181,7 @@ export async function packageLoraModel(
     DEFAULT_HF;
   const baseModel = opts.baseModel ?? model.spec.baseModel ?? DEFAULT_BASE;
   const pythonBin = opts.pythonBin ?? defaultPythonBin(model.dir);
-  const converterPath = path.resolve(opts.converterPath ?? defaultConverterPath());
+  const converterPath = path.resolve(opts.converterPath ?? resolveLlamaCppConverter());
   const packageDir = path.resolve(opts.outDir ?? path.join(model.dir, 'package'));
   const outType = opts.outType ?? model.spec.packaging?.outType ?? 'f16';
   const runId = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
@@ -202,7 +200,7 @@ export async function packageLoraModel(
 
   if (!(await pathExists(converterPath))) {
     throw new Error(
-      `llama.cpp converter not found: ${converterPath}; clone https://github.com/ggml-org/llama.cpp to external/llama.cpp or pass --converter <path>`
+      `llama.cpp converter not found: ${converterPath}; clone https://github.com/ggml-org/llama.cpp to external/llama.cpp, set C9AI_LLAMA_CPP to your checkout, or pass --converter <path>`
     );
   }
   if (!(await pathExists(pythonBin))) {

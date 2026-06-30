@@ -4,6 +4,18 @@ All notable changes to c9ai v4 are listed here.
 Format roughly follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0-alpha.5] - 2026-06-30
+
+### Added
+- **Lab provider** - a self-hosted GPU node exposed as an OpenAI-compatible endpoint and gated by a Matsya API key. `switch lab` / `@lab` / `lab <prompt>` / `switch lab list` all work. It reuses `MATSYA_API_KEY` (no separate credential); `LAB_MODEL` defaults to `auto` (the node serves its loaded model) and `LAB_BASE_URL` repoints at another node. Providers now read as three tiers — local (`ollama`), lab, and cloud (`claude`/`gemini`/`openai`/`gpt`/`kimi`/`deepseek`/`openrouter`). Configurable via `config lab <key|model|base>`.
+- **First-run onboarding wizard** - on first launch c9ai walks Matsya → Claude → optional extra providers. Pasted keys never land in prompt history, the session file, or the event log. Completion is recorded as `onboardedAt` in `~/.c9ai/config.json` so it runs once.
+- **`skill` command** - author Bru skills for the Matsya marketplace: `skill new <id>` scaffolds a manifest, `skill validate <id|path>` runs a manifest + capability + static safety scan (pass / needs-review / fail), `skill list` shows local skills. Publish lands once the Matsya bru-store endpoint exists.
+- **`tunnels` command** - preview-share tunnel worker (`status` / `start` / `stop` / `once`) that drives `frpc` to expose a local port over the Matsya tunnel. frp is not bundled (Defender flags it as a PUA); install it or set `C9AI_FRPC_PATH`.
+- **Matsya queue worker (on-demand)** - the queue runner is ported and wired into the TUI. It is trigger-based (`matsya check`/`list`), not background polling. Confirm-tier commands in an unattended run now **page** the matsyaai.com mobile UI for allow/deny instead of auto-denying; fail-closed (no key / no listener / timeout → deny).
+
+### Changed
+- README documents the lab provider, the local/lab/cloud tiers, and the new onboarding/`skill`/`tunnels` surfaces; the status table reflects the ported Matsya queue worker.
+
 ## [4.0.0-alpha.4] - 2026-06-07
 
 ### Added

@@ -53,8 +53,13 @@ then `switch openai` inside c9ai.
   `kimi`, `deepseek`, `openrouter`), then `switch <provider>`.
 - **Gemini** — install the [Gemini CLI](https://github.com/google-gemini/gemini-cli) so `gemini`
   is on your PATH, then `switch gemini`.
+- **Lab** — a self-hosted GPU node exposing an OpenAI-compatible endpoint, gated by a Matsya API
+  key (it reuses `MATSYA_API_KEY` — no separate credential). `switch lab`. Override the node with
+  `LAB_BASE_URL` and pin a model with `LAB_MODEL` (default `auto`).
 
 The default provider is `claude`; whatever you `switch` to persists in `~/.c9ai/config.json`.
+Providers fall into three tiers: **local** (`ollama`), **lab** (a self-hosted GPU node), and
+**cloud** (`claude`, `gemini`, `openai`, `gpt`, `kimi`, `deepseek`, `openrouter`).
 
 ## Status
 
@@ -73,6 +78,10 @@ Alpha. Phase 0 = restore v1 shape.
 | Gemini provider (CLI subprocess) | ✅ |
 | Ollama provider (HTTP, streaming, friendly 404 with installed-models list) | ✅ |
 | OpenAI-compatible providers (`openai`, `gpt`, `kimi`, `deepseek`, `openrouter`) | ✅ |
+| Lab provider (self-hosted GPU node, OpenAI-compatible, Matsya-key gated) | ✅ |
+| First-run onboarding wizard (Matsya → Claude → optional providers) | ✅ |
+| `skill` command — author/validate Bru skills for the Matsya marketplace | ✅ |
+| `tunnels` command — preview-share tunnel worker (frpc-driven) | ✅ |
 | Small Language Foundry model workflow (`models init/list/inspect/status/doctor/corpus/pairs/build/eval/review/compare/export/switch`) | ✅ |
 | Small Language Foundry LoRA training recipe (`models train` + GGUF/Ollama packaging path) | ✅ |
 | `!shell` runner | ✅ |
@@ -82,9 +91,10 @@ Alpha. Phase 0 = restore v1 shape.
 | Aliases (`~/.c9ai/aliases.json`) | ✅ |
 | Autonomous loop guards (max-iter, wall-clock, stall) | ✅ |
 | Autonomous loop wired to TUI (`agent <goal>`) | ✅ |
-| Skills system (manifests, install/share) | deferred |
+| Skills authoring (`skill new/validate/list`) | ✅ |
+| Skills publish/install (marketplace round-trip) | deferred (awaits Matsya bru-store endpoint) |
 | Artifacts ledger | deferred |
-| Matsya queue worker | on `matsya-integration` branch (Phase 1+2a complete, 2b deferred) |
+| Matsya queue worker (on-demand runner + paging-confirm) | ✅ |
 
 ## Develop
 

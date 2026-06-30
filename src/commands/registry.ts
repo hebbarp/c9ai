@@ -9,7 +9,9 @@ import { resumeCommand } from './resume.js';
 import { clearCommand } from './clear.js';
 import { saveCommand } from './save.js';
 import { matsyaCommand } from './matsya.js';
+import { tunnelsCommand } from './tunnels.js';
 import { modelsCommand } from './models.js';
+import { skillCommand } from './skill.js';
 import { pampaCommand } from './pampa.js';
 
 export function buildCommandRegistry(): Map<string, Command> {
@@ -24,7 +26,9 @@ export function buildCommandRegistry(): Map<string, Command> {
     saveCommand,
     clearCommand,
     matsyaCommand,
+    tunnelsCommand,
     modelsCommand,
+    skillCommand,
     pampaCommand,
   ];
   const map = new Map<string, Command>();

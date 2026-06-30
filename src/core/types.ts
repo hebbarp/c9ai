@@ -15,6 +15,11 @@ export interface AppConfig {
   ollamaModel?: string;
   ollamaUrl?: string;
   agentMode?: boolean;
+  /**
+   * ISO timestamp of when the first-run setup wizard last completed (or was
+   * dismissed). Absent => never run => the TUI launches the wizard on mount.
+   */
+  onboardedAt?: string;
   lastUpdated: string;
 }
 

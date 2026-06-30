@@ -30,6 +30,14 @@ import {
 } from './sessions.js';
 import { loadProfile, formatProfileForSystem } from './profile.js';
 import { getRunner } from './matsya/poller.js';
+import { setUserEnvVar } from './core/envFile.js';
+import {
+  ONBOARD_KEY_PROVIDERS,
+  keyPrompt,
+  maskKey,
+  morePrompt,
+  type OnboardState,
+} from './tui/onboarding.js';
 import {
   loadEvalRun,
   writeInteractiveReview,
@@ -142,6 +150,7 @@ export function App({ initialConfig }: AppProps) {
   const [busy, setBusy] = useState(false);
   const [busyLabel, setBusyLabel] = useState('');
   const [reviewState, setReviewState] = useState<ReviewState | null>(null);
+  const [onboard, setOnboard] = useState<OnboardState | null>(null);
   // Live elapsed-seconds counter while busy. Ticks at 1s; resets on idle.
   const [busyElapsed, setBusyElapsed] = useState(0);
   useEffect(() => {
@@ -643,10 +652,161 @@ export function App({ initialConfig }: AppProps) {
     [pushMessage, reviewState, showReviewQuestion]
   );
 
+  // First-run setup wizard. Walks Matsya → Claude → optional extra providers,
+  // writing keys to ~/.c9ai/.env. Input is intercepted in handleSubmit before
+  // it reaches history/routing, so pasted secrets never get persisted.
+  const startOnboarding = useCallback(() => {
+    setOnboard({ step: 'matsya', configured: [] });
+    pushMessage({
+      kind: 'system',
+      text: [
+        '── Welcome to c9ai ──',
+        'Quick setup — press Enter to skip any step; type `cancel` to bail out.',
+        'Keys are stored in ~/.c9ai/.env. Re-run anytime with `setup`.',
+        '',
+        keyPrompt('Matsya', 'msk_…', process.env.MATSYA_API_KEY),
+      ].join('\n'),
+    });
+  }, [pushMessage]);
+
+  const finishOnboarding = useCallback(
+    async (configured: string[]) => {
+      const patch: Partial<AppConfig> = { onboardedAt: new Date().toISOString() };
+      // Claude is the default provider but needs a key. If the user skipped it
+      // yet set up a hosted alternative, point the default at that instead so
+      // the first chat works without a manual `switch`.
+      if (!process.env.ANTHROPIC_API_KEY) {
+        const fallback = (['openai', 'kimi', 'deepseek', 'openrouter'] as const).find(
+          p => process.env[ONBOARD_KEY_PROVIDERS[p]!.envKey]
+        );
+        if (fallback) patch.defaultModel = fallback;
+      }
+      await saveConfig(patch);
+      setOnboard(null);
+      const summary = configured.length
+        ? `Configured: ${configured.join(', ')}.`
+        : 'No keys set yet — add them later with `config <provider> <key>` or `matsya setup <key>`.';
+      pushMessage({
+        kind: 'system',
+        text: [
+          '✓ Setup complete.',
+          summary,
+          `Default model: ${patch.defaultModel ?? config.defaultModel}.`,
+          '',
+          'Type `help` to get started, or just start chatting. No API key? `switch ollama` for a local model.',
+        ].join('\n'),
+      });
+    },
+    [pushMessage, saveConfig, config.defaultModel]
+  );
+
+  const handleOnboardInput = useCallback(
+    async (raw: string) => {
+      if (!onboard) return;
+      const value = raw.trim();
+      const isSkip = value === '' || /^skip$/i.test(value);
+      if (/^(cancel|quit)$/i.test(value)) {
+        await saveConfig({ onboardedAt: new Date().toISOString() });
+        setOnboard(null);
+        pushMessage({ kind: 'system', text: 'Setup cancelled — run `setup` anytime to resume.' });
+        return;
+      }
+
+      switch (onboard.step) {
+        case 'matsya': {
+          const configured = [...onboard.configured];
+          if (!isSkip) {
+            await setUserEnvVar('MATSYA_API_KEY', value);
+            configured.push('Matsya');
+            pushMessage({ kind: 'system', text: `✓ Matsya key saved (${maskKey(value)}).` });
+          }
+          setOnboard({ step: 'claude', configured });
+          pushMessage({
+            kind: 'system',
+            text: keyPrompt('Anthropic (Claude)', 'sk-ant-…', process.env.ANTHROPIC_API_KEY),
+          });
+          return;
+        }
+        case 'claude': {
+          const configured = [...onboard.configured];
+          if (!isSkip) {
+            await setUserEnvVar('ANTHROPIC_API_KEY', value);
+            configured.push('Claude');
+            pushMessage({ kind: 'system', text: `✓ Claude key saved (${maskKey(value)}).` });
+          }
+          setOnboard({ step: 'more', configured });
+          pushMessage({ kind: 'system', text: morePrompt() });
+          return;
+        }
+        case 'more': {
+          if (isSkip || /^(done|finish|no|n)$/i.test(value)) {
+            await finishOnboarding(onboard.configured);
+            return;
+          }
+          const name = value.toLowerCase();
+          if (name === 'gemini') {
+            pushMessage({
+              kind: 'system',
+              text: 'Gemini uses the Gemini CLI — install it, then `switch gemini`. No key needed.\n\n' + morePrompt(),
+            });
+            return;
+          }
+          if (name === 'ollama') {
+            pushMessage({
+              kind: 'system',
+              text: 'Ollama runs locally — pull a model, then `switch ollama`. No key needed.\n\n' + morePrompt(),
+            });
+            return;
+          }
+          const prov = ONBOARD_KEY_PROVIDERS[name];
+          if (!prov) {
+            pushMessage({ kind: 'error', text: `Unknown provider: ${value}\n\n${morePrompt()}` });
+            return;
+          }
+          setOnboard({ ...onboard, step: 'more-key', pendingProvider: name });
+          pushMessage({ kind: 'system', text: keyPrompt(prov.label, prov.hint, process.env[prov.envKey]) });
+          return;
+        }
+        case 'more-key': {
+          const name = onboard.pendingProvider!;
+          const prov = ONBOARD_KEY_PROVIDERS[name]!;
+          const configured = [...onboard.configured];
+          if (!isSkip) {
+            await setUserEnvVar(prov.envKey, value);
+            configured.push(prov.label);
+            pushMessage({ kind: 'system', text: `✓ ${prov.label} key saved (${maskKey(value)}).` });
+          }
+          setOnboard({ step: 'more', configured });
+          pushMessage({ kind: 'system', text: morePrompt() });
+          return;
+        }
+      }
+    },
+    [onboard, pushMessage, saveConfig, finishOnboarding]
+  );
+
   const handleSubmit = useCallback(
     async (raw: string) => {
       const trimmed = raw.trim();
+      // Onboarding runs before the empty guard so a bare Enter means "skip".
+      // Intercepting here (and returning) keeps pasted keys out of prompt
+      // history, the session file, and the event log.
+      if (onboard) {
+        setPromptValue('');
+        historyIndexRef.current = -1;
+        draftRef.current = '';
+        await handleOnboardInput(raw);
+        return;
+      }
       if (!trimmed) return;
+      // Manual re-entry into the setup wizard.
+      if (!reviewState && /^(setup|welcome|onboard(ing)?)$/i.test(trimmed)) {
+        setPromptValue('');
+        historyIndexRef.current = -1;
+        draftRef.current = '';
+        startOnboarding();
+        return;
+      }
       if (reviewState) {
         setPromptValue('');
         historyIndexRef.current = -1;
@@ -1114,6 +1274,9 @@ export function App({ initialConfig }: AppProps) {
       exit,
       history,
       handleReviewInput,
+      onboard,
+      handleOnboardInput,
+      startOnboarding,
       pushMessage,
       requestConfirm,
       saveConfig,
@@ -1122,6 +1285,14 @@ export function App({ initialConfig }: AppProps) {
       tools,
     ]
   );
+
+  // First launch ever (no onboardedAt in config.json) → run the setup wizard.
+  useEffect(() => {
+    if (!initialConfig.onboardedAt) {
+      startOnboarding();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     logEvent('session_start', { model: config.defaultModel });

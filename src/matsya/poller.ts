@@ -7,11 +7,12 @@
  */
 
 import os from 'node:os';
-import type { Tool, ConfirmRequest, ConfirmResponse } from '../tools/types.js';
+import type { Tool } from '../tools/types.js';
 import type { ProviderName } from '../core/types.js';
 import { getProvider } from '../providers/registry.js';
 import { runAgent } from '../agent/loop.js';
 import { MatsyaAPI, loadMatsyaConfig, type QueueItem } from './api.js';
+import { createPagingConfirm } from './pager.js';
 
 export interface RunnerEvent {
   level: 'info' | 'warn' | 'error';
@@ -134,8 +135,14 @@ class MatsyaRunner {
       if (!goal) throw new Error('queue item has no instructions');
 
       const ctrl = new AbortController();
-      // Auto-deny on confirms — runner is unattended (slash command fire-and-forget).
-      const confirm = async (_req: ConfirmRequest): Promise<ConfirmResponse> => 'deny';
+      // Unattended runner: no keyboard for confirm-tier commands. Instead of
+      // auto-denying, page the Matsya phone UI and act on its allow/deny.
+      // Fail-closed (no key / no listeners / timeout → deny) lives in the helper.
+      const confirm = createPagingConfirm({
+        cwd: this.opts.cwd,
+        sessionId: `matsya-item-${item.id}`,
+        onEvent,
+      });
 
       await runAgent(
         provider,

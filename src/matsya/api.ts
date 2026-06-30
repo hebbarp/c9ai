@@ -31,6 +31,32 @@ export interface UpdateMetadata {
   console_output?: string;
 }
 
+/** A tunnel Matsya wants this worker to bring up (preview-share agent_poll). */
+export interface TunnelStart {
+  slug: string;
+  subdomain: string;
+  local_port: number;
+  server_addr: string;
+  server_port: number;
+  frp_token: string;
+  public_url: string;
+}
+
+export interface TunnelPoll {
+  start: TunnelStart[];   // shares pending a tunnel
+  stop: string[];         // slugs the user asked to stop
+}
+
+export type TunnelStatus = 'active' | 'error' | 'stopped' | 'heartbeat';
+
+export interface TunnelReport {
+  slug: string;
+  status: TunnelStatus;
+  worker_id?: string;
+  public_url?: string;
+  error?: string;
+}
+
 export function loadMatsyaConfig(): MatsyaConfig | null {
   const apiKey = process.env.MATSYA_API_KEY;
   if (!apiKey) return null;
@@ -55,7 +81,7 @@ function jsonHeaders(cfg: MatsyaConfig): Record<string, string> {
   };
 }
 
-async function fetchWithTimeout(
+export async function fetchWithTimeout(
   url: string,
   init: RequestInit,
   timeoutMs: number
@@ -165,6 +191,32 @@ export class MatsyaAPI {
       );
     } catch {
       // Comments are best-effort; don't break processing if Matsya is flaky.
+    }
+  }
+
+  /** Preview-share: tunnels to start (pending) and stop (stopping) for this worker's user. */
+  async agentPollTunnels(): Promise<TunnelPoll> {
+    const res = await fetchWithTimeout(
+      `${buildUrl(this.cfg, 'preview-share')}?action=agent_poll`,
+      { method: 'GET', headers: jsonHeaders(this.cfg) },
+      this.cfg.timeoutMs
+    );
+    if (!res.ok) throw new Error(`preview-share poll: HTTP ${res.status}`);
+    const data: any = await res.json();
+    if (data?.status !== 'success') throw new Error(data?.message || 'tunnel poll failed');
+    return { start: data.data?.start ?? [], stop: data.data?.stop ?? [] };
+  }
+
+  /** Preview-share: report a tunnel's outcome back to Matsya. */
+  async agentReportTunnel(report: TunnelReport): Promise<void> {
+    const res = await fetchWithTimeout(
+      `${buildUrl(this.cfg, 'preview-share')}?action=agent_report`,
+      { method: 'POST', headers: jsonHeaders(this.cfg), body: JSON.stringify(report) },
+      this.cfg.timeoutMs
+    );
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new Error(`preview-share report: HTTP ${res.status} ${body.slice(0, 200)}`);
     }
   }
 

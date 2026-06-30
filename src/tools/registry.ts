@@ -4,6 +4,7 @@ import { fsTools } from './fs.js';
 import { metaTools } from './meta.js';
 import { shellTools, runShellCommand, gateShellCommand } from './shell.js';
 import { searchTools } from './search.js';
+import { webTools } from './web.js';
 import type { Tool, ToolContext, ToolResult, ToolRegistryFile } from './types.js';
 
 function templateExpand(template: string, args: Record<string, unknown>): string {
@@ -53,7 +54,7 @@ async function loadJsonRegistry(): Promise<Tool[]> {
 }
 
 export async function buildToolRegistry(): Promise<Map<string, Tool>> {
-  const builtins: Tool[] = [...fsTools, ...metaTools, ...shellTools, ...searchTools];
+  const builtins: Tool[] = [...fsTools, ...metaTools, ...shellTools, ...searchTools, ...webTools];
   const userTools = await loadJsonRegistry();
   const map = new Map<string, Tool>();
   for (const t of [...builtins, ...userTools]) map.set(t.name, t);

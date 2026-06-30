@@ -4,6 +4,13 @@ All notable changes to c9ai v4 are listed here.
 Format roughly follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.1] - 2026-06-30
+
+### Added
+- **Web Search (`web.search`)** - Zero-configuration, high-performance web search using DuckDuckGo HTML scraping. No API keys required.
+- **Web Fetch (`web.fetch`)** - Plain-text web page content scraper with automatic HTML tag cleaning and token-safe character capping.
+- **Maya NewsFeed RAG (`maya.news`)** - Curated news retrieval client pointing to the public Knobly Cream Landing Page Concierge RAG API.
+
 ## [4.0.0] - 2026-06-30
 
 First stable v4 release. Drops the `alpha` prerelease line and publishes to the `latest` npm tag — `npm install c9ai` now installs v4 instead of the legacy 2.2.5. Note: `4.0.0-alpha.4` and `-alpha.5` were prepared but never published to npm (the registry's alpha line stopped at `alpha.3`); all of their changes are included here.

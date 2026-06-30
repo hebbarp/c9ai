@@ -7,7 +7,8 @@ export type ProviderName =
   | 'gpt'
   | 'kimi'
   | 'deepseek'
-  | 'openrouter';
+  | 'openrouter'
+  | 'lab';
 
 export interface AppConfig {
   defaultModel: ProviderName;

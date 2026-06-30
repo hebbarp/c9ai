@@ -7,6 +7,7 @@ import {
   deepseekProvider,
   gptProvider,
   kimiProvider,
+  labProvider,
   openaiProvider,
   openrouterProvider,
 } from './openai-compatible.js';
@@ -20,6 +21,7 @@ const BACKING: Provider[] = [
   kimiProvider,
   deepseekProvider,
   openrouterProvider,
+  labProvider,
 ];
 
 const SOUL_SYSTEM_PROMPT = `You are Soul, a contemplative companion in c9ai.

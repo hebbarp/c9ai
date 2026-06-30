@@ -2,7 +2,7 @@ import type { ChatMessage, ProviderName } from '../core/types.js';
 import type { ChatResult, Provider } from './types.js';
 
 interface Preset {
-  name: Extract<ProviderName, 'openai' | 'gpt' | 'kimi' | 'deepseek' | 'openrouter'>;
+  name: Extract<ProviderName, 'openai' | 'gpt' | 'kimi' | 'deepseek' | 'openrouter' | 'lab'>;
   label: string;
   defaultBaseUrl: string;
   defaultModel: string;
@@ -59,6 +59,19 @@ const PRESETS: Record<OpenAICompatibleProviderName, Preset> = {
     modelEnv: 'OPENROUTER_MODEL',
     baseUrlEnv: 'OPENROUTER_BASE_URL',
   },
+  // The Lab — Knobly's office GPU cluster. OpenAI-compatible shim gated by a
+  // Matsya API key (msk_…), so it reuses MATSYA_API_KEY rather than a key of
+  // its own. 'auto' lets the node serve whatever model it has loaded; override
+  // with LAB_MODEL. Point LAB_BASE_URL elsewhere to reach a different node.
+  lab: {
+    name: 'lab',
+    label: 'Lab',
+    defaultBaseUrl: 'https://lab.knobly.com/gpu/v1',
+    defaultModel: 'auto',
+    apiKeyEnv: 'MATSYA_API_KEY',
+    modelEnv: 'LAB_MODEL',
+    baseUrlEnv: 'LAB_BASE_URL',
+  },
 };
 
 interface Settings {
@@ -107,7 +120,7 @@ async function availableFor(preset: Preset): Promise<boolean> {
 }
 
 export function isOpenAICompatibleProviderName(value: string): value is OpenAICompatibleProviderName {
-  return value === 'openai' || value === 'gpt' || value === 'kimi' || value === 'deepseek' || value === 'openrouter';
+  return value === 'openai' || value === 'gpt' || value === 'kimi' || value === 'deepseek' || value === 'openrouter' || value === 'lab';
 }
 
 export function listOpenAICompatibleProviderNames(): OpenAICompatibleProviderName[] {
@@ -280,3 +293,4 @@ export const gptProvider = makeProvider(PRESETS.gpt);
 export const kimiProvider = makeProvider(PRESETS.kimi);
 export const deepseekProvider = makeProvider(PRESETS.deepseek);
 export const openrouterProvider = makeProvider(PRESETS.openrouter);
+export const labProvider = makeProvider(PRESETS.lab);

@@ -32,13 +32,17 @@ EXAMPLES
 
 SYNOPSIS
   switch
-  switch <claude|gemini|ollama|soul|openai|gpt|kimi|deepseek|openrouter>
+  switch <claude|gemini|ollama|soul|openai|gpt|kimi|deepseek|openrouter|lab>
   switch ollama <model-name>
   switch ollama list
   switch openai list
   switch kimi list
   switch deepseek list
   switch openrouter list
+  switch lab list
+
+  Tiers: local (ollama) · lab (office GPU) · cloud (claude, gemini,
+  openai, gpt, kimi, deepseek, openrouter).
 
 DESCRIPTION
   With no args, prints current default + ollama settings. With a
@@ -50,6 +54,12 @@ DESCRIPTION
   'switch ollama list' queries /api/tags and shows what's actually
   installed locally. Hosted presets (openai/gpt/kimi/deepseek/openrouter)
   query /v1/models when the corresponding API key is configured.
+
+  'lab' is the office GPU cluster (https://lab.knobly.com/gpu/v1),
+  an OpenAI-compatible endpoint gated by your Matsya API key. It
+  reuses MATSYA_API_KEY — no separate credential. Model defaults to
+  'auto' (the node serves whatever it has loaded); override with
+  LAB_MODEL, and point LAB_BASE_URL at another node if needed.
 
   Persistence: choices are saved to ~/.c9ai/config.json. Restart
   the TUI and the same default sticks.
@@ -444,14 +454,17 @@ SYNOPSIS
   config kimi <api-key>
   config deepseek <api-key>
   config openrouter <api-key>
+  config lab <api-key>            (writes MATSYA_API_KEY)
   config openai model <model>
   config kimi model <model>
   config deepseek model <model>
   config openrouter model <model>
+  config lab model <model>
   config openai base <url>
   config kimi base <url>
   config deepseek base <url>
   config openrouter base <url>
+  config lab base <url>
 
 DESCRIPTION
   Prints the path to ~/.c9ai/config.json plus the resolved values
@@ -479,7 +492,7 @@ DESCRIPTION
   Three sections:
 
    - Providers: the model backends in src/providers/ — claude,
-     gemini, ollama, openai, gpt, kimi, deepseek, openrouter.
+     gemini, ollama, openai, gpt, kimi, deepseek, openrouter, lab.
      Includes availability.
 
    - Tools: every '@name' the agent and the sigil dispatcher can
@@ -671,6 +684,7 @@ SYNOPSIS
   kimi <prompt>
   deepseek <prompt>
   openrouter <prompt>
+  lab <prompt>         (office GPU cluster)
   @claude <prompt>     (sigil form)
 
 DESCRIPTION

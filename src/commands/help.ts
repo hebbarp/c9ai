@@ -6,8 +6,9 @@ const HELP_TEXT = `c9ai commands:
   switch <provider>               change default model
   switch ollama <model>           also pin the ollama model
   switch ollama list              show installed ollama models
-  switch openai|kimi|deepseek|openrouter list
+  switch openai|kimi|deepseek|openrouter|lab list
                                   show hosted provider models
+                                  (tiers: local=ollama · lab=office GPU · cloud=rest)
   todos [list|add|sync]           manage GitHub Issues backlog
   resume [<n> | list]             resume a prior conversation (default: most recent)
   save [path]                     export current visible conversation to markdown
@@ -17,6 +18,7 @@ const HELP_TEXT = `c9ai commands:
   config kimi <key>               save Kimi API key
   config deepseek <key>           save DeepSeek API key
   config openrouter <key>         save OpenRouter API key
+  config lab <key>                save Matsya key for the Lab GPU
   models [list|samples]           manage Small Language Foundry projects
   pampa [status|sample]           generate from local Pampa tiny LM baseline
   models init <sample>            create a bundled sample model project
@@ -45,8 +47,8 @@ Keys:
 Input shapes:
   claude|gemini|ollama|soul <prompt>
                                   one-shot chat to a specific provider
-  openai|gpt|kimi|deepseek|openrouter <prompt>
-                                  one-shot OpenAI-compatible chat
+  openai|gpt|kimi|deepseek|openrouter|lab <prompt>
+                                  one-shot OpenAI-compatible chat (lab = office GPU)
   @claude | @gemini | @ollama     provider sigil form
   agent                           toggle persistent agent mode (prompts become goals)
   agent <goal>                    autonomous loop: model uses tools until done
@@ -75,6 +77,7 @@ Env knobs:
   KIMI_API_KEY, KIMI_MODEL, KIMI_BASE_URL
   DEEPSEEK_API_KEY, DEEPSEEK_MODEL, DEEPSEEK_BASE_URL
   OPENROUTER_API_KEY, OPENROUTER_MODEL, OPENROUTER_BASE_URL
+  MATSYA_API_KEY (Lab auth), LAB_MODEL (default 'auto'), LAB_BASE_URL (default https://lab.knobly.com/gpu/v1)
   OLLAMA_URL (default http://localhost:11434), OLLAMA_MODEL
   GEMINI_BIN (default 'gemini')
   C9AI_MAX_ITER (default 25), C9AI_MAX_WALL_SEC (default 600), C9AI_STALL_REPEATS (default 3)

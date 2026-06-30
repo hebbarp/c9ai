@@ -16,6 +16,7 @@ const PROVIDER_KEYWORDS: Record<string, ProviderName> = {
   kimi: 'kimi',
   deepseek: 'deepseek',
   openrouter: 'openrouter',
+  lab: 'lab',
 };
 
 export function routeInput(raw: string, opts: RouterOptions): RoutedAction {

@@ -14,7 +14,7 @@ import { loadModel } from '../models/registry.js';
 
 export const switchCommand: Command = {
   name: 'switch',
-  description: 'Change default AI model (claude|gemini|ollama|soul|openai|gpt|kimi|deepseek|openrouter)',
+  description: 'Change default AI model (claude|gemini|ollama|soul|openai|gpt|kimi|deepseek|openrouter|lab)',
   run: async (args, ctx) => {
     const rawTarget = (args[0] ?? '').toLowerCase();
     const target = rawTarget === 'chaitanya' ? 'soul' : rawTarget;
@@ -26,7 +26,8 @@ export const switchCommand: Command = {
           `current model: ${ctx.config.defaultModel}\n` +
           `ollama model:  ${ctx.config.ollamaModel ?? ol.model ?? '(auto-detect)'}\n` +
           `ollama url:    ${ctx.config.ollamaUrl ?? ol.url}\n` +
-          `usage: switch <claude|gemini|ollama|soul|openai|gpt|kimi|deepseek|openrouter>\n` +
+          `usage: switch <claude|gemini|ollama|soul|openai|gpt|kimi|deepseek|openrouter|lab>\n` +
+          `       local: ollama · lab: lab (office GPU) · cloud: claude|gemini|openai|gpt|kimi|deepseek|openrouter\n` +
           `       switch ollama <model>\n` +
           `       switch <ollama|${listOpenAICompatibleProviderNames().join('|')}> list`,
       });

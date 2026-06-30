@@ -8,6 +8,7 @@ import {
   deepseekProvider,
   gptProvider,
   kimiProvider,
+  labProvider,
   openaiProvider,
   openrouterProvider,
 } from './openai-compatible.js';
@@ -22,6 +23,7 @@ const providers: Record<ProviderName, Provider> = {
   kimi: kimiProvider,
   deepseek: deepseekProvider,
   openrouter: openrouterProvider,
+  lab: labProvider,
 };
 
 export function getProvider(name: ProviderName): Provider {

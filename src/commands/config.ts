@@ -2,7 +2,7 @@ import type { Command } from '../core/types.js';
 import { CONFIG_PATH } from '../core/config.js';
 import { setUserEnvVar, USER_ENV_PATH } from '../core/envFile.js';
 
-type HostedProvider = 'claude' | 'openai' | 'gpt' | 'kimi' | 'deepseek' | 'openrouter';
+type HostedProvider = 'claude' | 'openai' | 'gpt' | 'kimi' | 'deepseek' | 'openrouter' | 'lab';
 
 const PROVIDER_ENV: Record<HostedProvider, { key: string; model: string; baseUrl?: string }> = {
   claude: {
@@ -34,6 +34,12 @@ const PROVIDER_ENV: Record<HostedProvider, { key: string; model: string; baseUrl
     model: 'OPENROUTER_MODEL',
     baseUrl: 'OPENROUTER_BASE_URL',
   },
+  // Lab reuses the Matsya key for auth; `config lab <key>` writes MATSYA_API_KEY.
+  lab: {
+    key: 'MATSYA_API_KEY',
+    model: 'LAB_MODEL',
+    baseUrl: 'LAB_BASE_URL',
+  },
 };
 
 function maskSecret(value: string): string {
@@ -49,6 +55,7 @@ const USAGE = [
   '  config kimi <api-key>          save KIMI_API_KEY',
   '  config deepseek <api-key>      save DEEPSEEK_API_KEY',
   '  config openrouter <api-key>    save OPENROUTER_API_KEY',
+  '  config lab <api-key>           save MATSYA_API_KEY (Lab GPU auth)',
   '  config <host> model <model>    save model env var',
   '  config <host> base <url>       save base URL env var',
 ].join('\n');
@@ -126,6 +133,8 @@ export const configCommand: Command = {
       `dsModel:      ${process.env.DEEPSEEK_MODEL ?? '(default)'}`,
       `openrouter:   ${process.env.OPENROUTER_API_KEY ? 'key set' : 'not set'}`,
       `orModel:      ${process.env.OPENROUTER_MODEL ?? '(default)'}`,
+      `lab:          ${process.env.MATSYA_API_KEY ? 'key set' : 'not set'} @ ${process.env.LAB_BASE_URL ?? 'https://lab.knobly.com/gpu/v1'}`,
+      `labModel:     ${process.env.LAB_MODEL ?? 'auto'}`,
       `lastUpdated:  ${ctx.config.lastUpdated}`,
     ];
     ctx.emit({ kind: 'system', text: lines.join('\n') });

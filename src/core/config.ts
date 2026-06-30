@@ -56,6 +56,7 @@ export function isProviderName(value: string): value is ProviderName {
     value === 'gpt' ||
     value === 'kimi' ||
     value === 'deepseek' ||
-    value === 'openrouter'
+    value === 'openrouter' ||
+    value === 'lab'
   );
 }

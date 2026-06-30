@@ -4,7 +4,9 @@ All notable changes to c9ai v4 are listed here.
 Format roughly follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
-## [4.0.0-alpha.5] - 2026-06-30
+## [4.0.0] - 2026-06-30
+
+First stable v4 release. Drops the `alpha` prerelease line and publishes to the `latest` npm tag — `npm install c9ai` now installs v4 instead of the legacy 2.2.5. Note: `4.0.0-alpha.4` and `-alpha.5` were prepared but never published to npm (the registry's alpha line stopped at `alpha.3`); all of their changes are included here.
 
 ### Added
 - **Lab provider** - a self-hosted GPU node exposed as an OpenAI-compatible endpoint and gated by a Matsya API key. `switch lab` / `@lab` / `lab <prompt>` / `switch lab list` all work. It reuses `MATSYA_API_KEY` (no separate credential); `LAB_MODEL` defaults to `auto` (the node serves its loaded model) and `LAB_BASE_URL` repoints at another node. Providers now read as three tiers — local (`ollama`), lab, and cloud (`claude`/`gemini`/`openai`/`gpt`/`kimi`/`deepseek`/`openrouter`). Configurable via `config lab <key|model|base>`.

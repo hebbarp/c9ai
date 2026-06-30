@@ -89,7 +89,7 @@ export const todosCommand: Command = {
         return;
       }
       case 'sync': {
-        ctx.emit({ kind: 'system', text: 'sync: noop in alpha (todos are GitHub-backed already)' });
+        ctx.emit({ kind: 'system', text: 'sync: noop (todos are GitHub-backed already)' });
         return;
       }
       default:

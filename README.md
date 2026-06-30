@@ -13,7 +13,7 @@ reference catalog of ideas to port back as **skills** later — not as the next 
 ## Install
 
 ```bash
-npm install -g c9ai@alpha
+npm install -g c9ai
 c9ai
 ```
 
@@ -63,7 +63,7 @@ Providers fall into three tiers: **local** (`ollama`), **lab** (a self-hosted GP
 
 ## Status
 
-Alpha. Phase 0 = restore v1 shape.
+Stable (4.0.0). The v1 CLI shape is restored and extended; published to the `latest` npm tag.
 
 | Layer | Status |
 |---|---|

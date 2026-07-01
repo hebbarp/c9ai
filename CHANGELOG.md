@@ -4,6 +4,14 @@ All notable changes to c9ai v4 are listed here.
 Format roughly follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.2] - 2026-07-01
+
+### Added
+- **`help html`** - generates a self-contained, task-grouped HTML cheat-sheet at `~/.c9ai/help.html` and opens it in the default browser (offline, no assets). It leads with the five things people ask first — start a conversation, reach settings, connect to the Lab, check todos, get the coding agent to write a program — then groups the rest by task (providers local/lab/cloud, settings, agent, todos, tools, Foundry). Aliases: `help web`, `help open`. Cross-platform open (Windows/macOS/Linux) with the file path printed as a fallback.
+
+### Changed
+- **Decluttered in-TUI `help`** - the default `help` now prints a short, scannable, task-grouped summary instead of the full 90-line reference. `help full` shows the complete command reference; `help <topic>` still opens the man-page-style pages. Reduces the "too many signals" wall on first look.
+
 ## [4.0.1] - 2026-06-30
 
 ### Added

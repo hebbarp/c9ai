@@ -63,7 +63,8 @@ Providers fall into three tiers: **local** (`ollama`), **lab** (a self-hosted GP
 
 ## Status
 
-Stable (4.0.0). The v1 CLI shape is restored and extended; published to the `latest` npm tag.
+Stable. The v1 CLI shape is restored and extended; published to the `latest` npm tag.
+New here? Type `help` for a short task-grouped summary, or `help html` to open a visual cheat-sheet in your browser.
 
 | Layer | Status |
 |---|---|

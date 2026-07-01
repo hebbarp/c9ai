@@ -4,6 +4,10 @@ dist/
 .DS_Store
 .env
 .env.local
+.env.*
+.npmrc
+*.pem
+*.key
 .claude/
 scratch/
 external/

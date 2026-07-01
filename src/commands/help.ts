@@ -1,8 +1,91 @@
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
 import type { Command } from '../core/types.js';
 import { TOPIC_HELP, listTopics } from '../help-pages.js';
+import { CONFIG_DIR } from '../core/config.js';
+import { buildHelpHtml } from '../help-html.js';
 
-const HELP_TEXT = `c9ai commands:
-  help                            show this help
+const require = createRequire(import.meta.url);
+
+function appVersion(): string {
+  try {
+    return (require('../../package.json') as { version?: string }).version ?? '4.0.0';
+  } catch {
+    return '4.0.0';
+  }
+}
+
+/** Open a file with the OS default handler, detached so the TUI keeps running. */
+function openInBrowser(target: string): void {
+  const [cmd, args] =
+    process.platform === 'win32'
+      ? ['cmd', ['/c', 'start', '', target]]
+      : process.platform === 'darwin'
+        ? ['open', [target]]
+        : ['xdg-open', [target]];
+  try {
+    const child = spawn(cmd, args as string[], { detached: true, stdio: 'ignore' });
+    child.on('error', () => {});
+    child.unref();
+  } catch {
+    /* fall back to the printed path below */
+  }
+}
+
+/** Generate the HTML cheat-sheet, write it to ~/.c9ai, and open it. */
+async function openHtmlHelp(ctx: Parameters<Command['run']>[1]): Promise<void> {
+  const outPath = path.join(CONFIG_DIR, 'help.html');
+  try {
+    await fs.mkdir(CONFIG_DIR, { recursive: true });
+    await fs.writeFile(outPath, buildHelpHtml(appVersion()), 'utf8');
+  } catch (e) {
+    ctx.emit({ kind: 'error', text: `help: could not write ${outPath}: ${e instanceof Error ? e.message : String(e)}` });
+    return;
+  }
+  openInBrowser(outPath);
+  ctx.emit({ kind: 'system', text: `help: opened ${outPath} in your browser (open it manually if it didn't pop up)` });
+}
+
+const HELP_SHORT = `c9ai — quick help    ·    help html (visual page)  ·  help full (everything)  ·  help <topic> (detail)
+
+Talk to a model
+  <message>                   chat with the default model
+  claude|gemini|lab <msg>     one-shot to a specific provider
+  clear · resume · save       new session · reopen a past one · export transcript
+
+Providers   (local · lab · cloud)
+  switch ollama <name>        LOCAL model on your machine   (switch ollama list)
+  switch lab                  your office GPU               (switch lab list)
+  switch claude               CLOUD  (also gemini, openai, gpt, kimi, deepseek, openrouter)
+
+Settings & keys
+  config                      show what's configured
+  config <provider> <key>     save a key (claude, openai, lab, …)
+  setup                       re-run the guided first-run wizard
+
+Coding agent
+  agent <goal>                autonomous: writes files, runs shell, searches the web
+  agent                       toggle persistent agent mode (every message = a goal)
+  research <topic>            bounded research → cited memo in outputs/
+
+Todos, web & tools
+  todos list · todos add      GitHub-Issues backlog (needs gh signed in)
+  @web.search <query>         search the web
+  @fs.read <path> · !<cmd>    file tools · run a shell command
+  tools                       list every provider, tool, and alias
+
+Your own models
+  models list · pampa         Small Language Foundry (guide: docs/create-your-models.md)
+
+Keys:  ↑/↓ prompt history   ·   Esc cancel a run   ·   Ctrl+C quit
+`;
+
+const HELP_FULL = `c9ai commands:  (short version: help  ·  visual page: help html)
+  help                            show the short quick-help
+  help full                       show this full reference
+  help html                       open a scannable, task-grouped help page in your browser
   switch <provider>               change default model
   switch ollama <model>           also pin the ollama model
   switch ollama list              show installed ollama models
@@ -98,7 +181,15 @@ export const helpCommand: Command = {
   run: async (args, ctx) => {
     const topic = (args[0] ?? '').toLowerCase();
     if (!topic) {
-      ctx.emit({ kind: 'system', text: HELP_TEXT });
+      ctx.emit({ kind: 'system', text: HELP_SHORT });
+      return;
+    }
+    if (topic === 'full' || topic === 'all' || topic === 'everything') {
+      ctx.emit({ kind: 'system', text: HELP_FULL });
+      return;
+    }
+    if (topic === 'html' || topic === 'web' || topic === '--html' || topic === 'open') {
+      await openHtmlHelp(ctx);
       return;
     }
     if (topic === 'topics' || topic === 'list') {

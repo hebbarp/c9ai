@@ -5,6 +5,25 @@ export interface RouterOptions {
   commands: Map<string, Command>;
 }
 
+// Commands whose free-text arguments are pathological when the user is
+// actually talking to the model ("save it, run and open the file" must not
+// export the transcript to a file named "it, run and open the file").
+// Commands with structured subcommands (models, switch, todos...) validate
+// their own args and are not guarded.
+const SENTENCE_GUARDED_COMMANDS = new Set(['save', 'clear', 'help']);
+
+const SENTENCE_WORDS = new Set([
+  'it', 'the', 'this', 'that', 'and', 'then', 'me', 'my', 'your', 'you',
+  'a', 'an', 'please', 'them', 'everything', 'all',
+]);
+
+function looksLikeSentence(rest: string[]): boolean {
+  if (rest.length < 2) return false;
+  if (/[,;?!]/.test(rest.join(' '))) return true;
+  const fillers = rest.filter(w => SENTENCE_WORDS.has(w.toLowerCase())).length;
+  return fillers >= 2 || (fillers >= 1 && rest.length >= 4);
+}
+
 const PROVIDER_KEYWORDS: Record<string, ProviderName> = {
   claude: 'claude',
   gemini: 'gemini',
@@ -64,6 +83,9 @@ export function routeInput(raw: string, opts: RouterOptions): RoutedAction {
   }
 
   if (opts.commands.has(headLower)) {
+    if (SENTENCE_GUARDED_COMMANDS.has(headLower) && looksLikeSentence(rest)) {
+      return { kind: 'chat', provider: opts.defaultProvider, prompt: input };
+    }
     return { kind: 'command', name: headLower, args: rest };
   }
 

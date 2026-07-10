@@ -54,3 +54,52 @@ export function keyPrompt(label: string, hint: string, existing?: string): strin
 export function morePrompt(): string {
   return 'Set up another model provider? Type one of: openai · kimi · deepseek · openrouter · gemini · ollama — or press Enter to finish.';
 }
+
+/**
+ * Shape check for a pasted API key, so a mistyped command (e.g. `switch lab`)
+ * never gets silently saved as a credential and quietly breaks the CLI.
+ * Empty input is handled upstream as "skip/keep" and never reaches here.
+ */
+interface KeySpec {
+  prefixes: string[];
+  minLen: number;
+}
+
+const KEY_SPECS: Record<string, KeySpec> = {
+  matsya: { prefixes: ['msk_'], minLen: 24 },
+  claude: { prefixes: ['sk-ant-'], minLen: 40 },
+  openai: { prefixes: ['sk-'], minLen: 20 },
+  gpt: { prefixes: ['sk-'], minLen: 20 },
+  kimi: { prefixes: ['sk-'], minLen: 20 },
+  deepseek: { prefixes: ['sk-'], minLen: 20 },
+  openrouter: { prefixes: ['sk-or-', 'sk-'], minLen: 20 },
+};
+
+// c9ai verbs a user might fat-finger into a key prompt instead of a real key.
+const COMMAND_WORDS =
+  /^(switch|help|agent|config|setup|welcome|onboard|onboarding|exit|quit|cancel|clear|resume|save|models|pampa|tools|todos|research|analytics|matsya|tunnels|skill|lab|ollama|claude|gemini|soul|openai|gpt|kimi|deepseek|openrouter)\b/i;
+
+export function validateKey(kind: string, value: string): { ok: true } | { ok: false; reason: string } {
+  const v = value.trim();
+  if (/\s/.test(v)) {
+    return { ok: false, reason: "it has spaces in it — API keys don't. That looks like a command, not a key." };
+  }
+  if (v.startsWith('/')) {
+    return { ok: false, reason: 'it starts with "/" — that looks like a path or command, not an API key.' };
+  }
+  if (COMMAND_WORDS.test(v)) {
+    return { ok: false, reason: 'that looks like a c9ai command, not an API key.' };
+  }
+  const spec = KEY_SPECS[kind];
+  if (spec) {
+    if (v.length < spec.minLen) {
+      return { ok: false, reason: `it's too short for a ${kind} key (expected ${spec.prefixes[0]}… and ${spec.minLen}+ characters).` };
+    }
+    if (spec.prefixes.length > 0 && !spec.prefixes.some(p => v.startsWith(p))) {
+      return { ok: false, reason: `a ${kind} key should start with ${spec.prefixes.map(p => `"${p}"`).join(' or ')}.` };
+    }
+  } else if (v.length < 12) {
+    return { ok: false, reason: 'that looks too short to be an API key.' };
+  }
+  return { ok: true };
+}

@@ -36,6 +36,7 @@ import {
   keyPrompt,
   maskKey,
   morePrompt,
+  validateKey,
   type OnboardState,
 } from './tui/onboarding.js';
 import {
@@ -716,6 +717,14 @@ export function App({ initialConfig }: AppProps) {
         case 'matsya': {
           const configured = [...onboard.configured];
           if (!isSkip) {
+            const check = validateKey('matsya', value);
+            if (!check.ok) {
+              pushMessage({
+                kind: 'error',
+                text: `That doesn't look like a Matsya key — ${check.reason}\n\n${keyPrompt('Matsya', 'msk_…', process.env.MATSYA_API_KEY)}`,
+              });
+              return; // stay on this step; nothing saved
+            }
             await setUserEnvVar('MATSYA_API_KEY', value);
             configured.push('Matsya');
             pushMessage({ kind: 'system', text: `✓ Matsya key saved (${maskKey(value)}).` });
@@ -730,6 +739,14 @@ export function App({ initialConfig }: AppProps) {
         case 'claude': {
           const configured = [...onboard.configured];
           if (!isSkip) {
+            const check = validateKey('claude', value);
+            if (!check.ok) {
+              pushMessage({
+                kind: 'error',
+                text: `That doesn't look like a Claude key — ${check.reason}\n\n${keyPrompt('Anthropic (Claude)', 'sk-ant-…', process.env.ANTHROPIC_API_KEY)}`,
+              });
+              return; // stay on this step; nothing saved
+            }
             await setUserEnvVar('ANTHROPIC_API_KEY', value);
             configured.push('Claude');
             pushMessage({ kind: 'system', text: `✓ Claude key saved (${maskKey(value)}).` });
@@ -772,6 +789,14 @@ export function App({ initialConfig }: AppProps) {
           const prov = ONBOARD_KEY_PROVIDERS[name]!;
           const configured = [...onboard.configured];
           if (!isSkip) {
+            const check = validateKey(name, value);
+            if (!check.ok) {
+              pushMessage({
+                kind: 'error',
+                text: `That doesn't look like a ${prov.label} key — ${check.reason}\n\n${keyPrompt(prov.label, prov.hint, process.env[prov.envKey])}`,
+              });
+              return; // stay on this step; nothing saved
+            }
             await setUserEnvVar(prov.envKey, value);
             configured.push(prov.label);
             pushMessage({ kind: 'system', text: `✓ ${prov.label} key saved (${maskKey(value)}).` });

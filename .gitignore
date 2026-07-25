@@ -13,3 +13,18 @@ scratch/
 external/
 outputs/
 rd_ladder.py
+
+# local-only, not for the public repo
+GEMINI.md
+bin/
+site/
+docs/bfc-*
+docs/internet-of-nns*
+docs/peer-federation*
+docs/phase0-wire-contract.md
+docs/phase1-node-mvp.md
+docs/run-a-node.md
+docs/skills-marketplace.md
+docs/the-cohesive-story.md
+docs/bru-skill-spec.md
+docs/og-image.png

@@ -4,6 +4,18 @@ All notable changes to c9ai v4 are listed here.
 Format roughly follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.3] - 2026-07-25
+
+### Fixed
+- **Command router and onboarding no longer swallow natural language** - plain-English prompts that merely start with a command-like word are routed to the model instead of being misparsed as commands.
+
+### Removed
+- **Legacy `autonomous.ts` loop** - the pre-tool-wiring agent loop (no tool execution, DONE-sentinel re-prompting) is deleted; `agent/loop.ts` has been the real agent since 4.0.0 and nothing imported the old file.
+
+### Housekeeping
+- The from-scratch akshara transformer trainer/sampler (`scripts/pampa_train_transformer.py`, `scripts/pampa_generate_transformer.py`) is now tracked in the repo.
+- Local-only strategy docs, `site/`, `bin/`, and `GEMINI.md` are gitignored so they can't reach the public repo or the npm package.
+
 ## [4.0.2] - 2026-07-01
 
 ### Added

@@ -38,6 +38,10 @@ export interface Message {
   kind: MessageKind;
   text: string;
   ts: number;
+  /** Input that routed to a command (switch, config, shell…) rather than a
+   *  chat turn. Displayed like any user input, but must never be sent to a
+   *  provider as conversation history or persisted as a session turn. */
+  command?: boolean;
 }
 
 /**

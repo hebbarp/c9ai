@@ -4,6 +4,12 @@ All notable changes to c9ai v4 are listed here.
 Format roughly follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.4] - 2026-07-25
+
+### Fixed
+- **Command inputs no longer leak into chat context** - typing `switch lab` (or any command) was being stored as a user turn and sent to the model as conversation history on the next chat; a lab model once greeted a user asking about "Switch Lab" the company. Command inputs still show in the transcript but are now flagged and excluded from provider conversations and saved sessions.
+- **Current prompt was sent twice** - the chat and agent paths included the just-typed input via history *and* appended it again as the current turn, so models saw every prompt duplicated (with any `@provider` sigil prefix included in one copy).
+
 ## [4.0.3] - 2026-07-25
 
 ### Fixed

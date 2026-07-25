@@ -250,7 +250,7 @@ export function App({ initialConfig }: AppProps) {
   const replaceHistory = useCallback(async (messages: Message[]): Promise<void> => {
     const newId = await createSession();
     const turns: SessionTurn[] = messages
-      .filter((m): m is Message & { kind: 'user' | 'provider' } => m.kind === 'user' || m.kind === 'provider')
+      .filter((m): m is Message & { kind: 'user' | 'provider' } => (m.kind === 'user' || m.kind === 'provider') && !m.command)
       .map(m => ({ kind: m.kind, text: m.text, ts: m.ts }));
     await appendTurns(newId, turns);
     sessionIdRef.current = newId;
@@ -317,8 +317,9 @@ export function App({ initialConfig }: AppProps) {
     }
   });
 
-  const persistTurn = useCallback((kind: Message['kind'], text: string, ts: number) => {
+  const persistTurn = useCallback((kind: Message['kind'], text: string, ts: number, command?: boolean) => {
     if (kind !== 'user' && kind !== 'provider') return;
+    if (command) return;
     if (!text) return;
     const id = sessionIdRef.current;
     if (!id) return;
@@ -331,7 +332,7 @@ export function App({ initialConfig }: AppProps) {
       const next = { ...msg, id: nextId(), ts };
       messageHistoryRef.current = [...messageHistoryRef.current, next];
       setHistory(prev => [...prev, next]);
-      persistTurn(msg.kind, msg.text, ts);
+      persistTurn(msg.kind, msg.text, ts, msg.command);
     },
     [persistTurn]
   );
@@ -479,6 +480,7 @@ export function App({ initialConfig }: AppProps) {
     const conversation: ChatMessage[] = [];
     for (const m of messages) {
       if (m.kind !== 'user' && m.kind !== 'provider') continue;
+      if (m.command) continue;
       const role: 'user' | 'assistant' = m.kind === 'user' ? 'user' : 'assistant';
       const last = conversation[conversation.length - 1];
       if (last && last.role === role) {
@@ -849,13 +851,16 @@ export function App({ initialConfig }: AppProps) {
       historyRef.current = nextHistory;
       void saveHistory(nextHistory);
 
-      pushMessage({ kind: 'user', text: visibleInput.text });
-      logEvent('input', { raw: visibleInput.text, redacted: visibleInput.redacted });
-
       let action = routeInput(trimmed, {
         defaultProvider: config.defaultModel,
         commands,
       });
+
+      // Route before pushing so command inputs can be flagged: a `switch lab`
+      // shown in the transcript must never reach a provider as chat context.
+      const isChatInput = action.kind === 'chat' || action.kind === 'agent';
+      pushMessage({ kind: 'user', text: visibleInput.text, command: !isChatInput });
+      logEvent('input', { raw: visibleInput.text, redacted: visibleInput.redacted });
 
       // If we are in agentMode, any standard chat prompt is promoted to an
       // agent goal. sigils, shell commands, and explicit c9ai commands
@@ -1016,7 +1021,8 @@ export function App({ initialConfig }: AppProps) {
 
           // Refresh profile so agent sees edits since launch.
           profileRef.current = await loadProfile();
-          const convHistory = buildConversation(messageHistoryRef.current);
+          // Drop the just-pushed input — the goal reaches the agent separately.
+          const convHistory = buildConversation(messageHistoryRef.current.slice(0, -1));
           let inThought = false;
           let inToolOutput = false;
           let thoughtFilter: ThoughtFilter | null = null;
@@ -1252,7 +1258,10 @@ export function App({ initialConfig }: AppProps) {
           if (profile) {
             conversation.push({ role: 'system', content: formatProfileForSystem(profile) });
           }
-          conversation.push(...buildConversation(messageHistoryRef.current));
+          // The raw input was already pushed to history above — drop it here
+          // and send action.prompt instead (sigil prefixes like `@lab` stripped),
+          // so the current turn isn't included twice.
+          conversation.push(...buildConversation(messageHistoryRef.current.slice(0, -1)));
           conversation.push({ role: 'user', content: action.prompt });
           const startedAt = Date.now();
           setBusy(true);
